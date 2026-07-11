@@ -180,7 +180,7 @@ class TelePress_Command_Router {
 			);
 		}
 
-		return TelePress_Telegram_Response_Builder::success(
+		return TelePress_Telegram_Response_Builder::success_html(
 			$message,
 			array(
 				'command'      => '/start',
@@ -193,51 +193,52 @@ class TelePress_Command_Router {
 		$commands = array();
 
 		if ( empty( $identity['wp_user'] ) || ! $identity['wp_user'] instanceof WP_User ) {
-			$commands[] = __( 'Setup flow:', 'telepress' );
-			$commands[] = '/start';
-			$commands[] = '/chatid';
-			$commands[] = '/link CODE';
+			$commands[] = TelePress_Telegram_Response_Builder::bold( __( 'Setup Flow', 'telepress' ) );
+			$commands[] = TelePress_Telegram_Response_Builder::code( '/start' );
+			$commands[] = TelePress_Telegram_Response_Builder::code( '/chatid' );
+			$commands[] = TelePress_Telegram_Response_Builder::code( '/link CODE' );
 			$commands[] = '';
 		}
 
-		$commands[] = __( 'Available now:', 'telepress' );
-		$commands[] = '/start';
-		$commands[] = '/help';
-		$commands[] = '/menu';
-		$commands[] = '/site';
-		$commands[] = '/chatid';
-		$commands[] = '/link CODE';
+		$commands[] = TelePress_Telegram_Response_Builder::bold( __( 'Core Commands', 'telepress' ) );
+		$commands[] = TelePress_Telegram_Response_Builder::code( '/start' ) . ' ' . __( 'Onboarding', 'telepress' );
+		$commands[] = TelePress_Telegram_Response_Builder::code( '/help' ) . ' ' . __( 'Show commands', 'telepress' );
+		$commands[] = TelePress_Telegram_Response_Builder::code( '/menu' ) . ' ' . __( 'Open the command hub', 'telepress' );
+		$commands[] = TelePress_Telegram_Response_Builder::code( '/site' ) . ' ' . __( 'Show site overview', 'telepress' );
+		$commands[] = TelePress_Telegram_Response_Builder::code( '/chatid' ) . ' ' . __( 'Reveal the current chat ID', 'telepress' );
+		$commands[] = TelePress_Telegram_Response_Builder::code( '/link CODE' ) . ' ' . __( 'Link Telegram to WordPress', 'telepress' );
 
 		if ( ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ) {
-			$commands[] = '/unlink';
-			$commands[] = '/settings';
+			$commands[] = TelePress_Telegram_Response_Builder::code( '/unlink' ) . ' ' . __( 'Unlink Telegram', 'telepress' );
+			$commands[] = TelePress_Telegram_Response_Builder::code( '/settings' ) . ' ' . __( 'TelePress settings info', 'telepress' );
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'moderate_comments' ) ) {
-				$commands[] = '/comments pending';
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/comments pending' );
 			}
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'edit_posts' ) ) {
-				$commands[] = '/posts latest';
-				$commands[] = '/posts search keyword';
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/posts latest' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/posts search keyword' );
 			}
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'edit_pages' ) ) {
-				$commands[] = '/pages list';
-				$commands[] = '/pages search keyword';
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/pages list' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/pages search keyword' );
 			}
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'upload_files' ) ) {
-				$commands[] = '/media recent';
-				$commands[] = '/media search keyword';
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/media recent' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/media search keyword' );
 			}
 
 			$future_commands = array();
 
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'list_users' ) ) {
-				$commands[] = '/users list';
-				$commands[] = '/users search keyword';
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/users list' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/users search keyword' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/users help' ) . ' ' . __( 'Show user-management examples', 'telepress' );
 			}
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'manage_categories' ) ) {
-				$commands[] = '/categories list';
-				$commands[] = '/categories search keyword';
-				$commands[] = '/tags list';
-				$commands[] = '/tags search keyword';
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/categories list' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/categories search keyword' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/tags list' );
+				$commands[] = TelePress_Telegram_Response_Builder::code( '/tags search keyword' );
 			}
 
 			if ( ! empty( $future_commands ) ) {
@@ -247,7 +248,10 @@ class TelePress_Command_Router {
 			}
 		}
 
-		return TelePress_Telegram_Response_Builder::success(
+		$commands[] = '';
+		$commands[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use module-specific help like /users help when you need concrete examples.', 'telepress' ) );
+
+		return TelePress_Telegram_Response_Builder::success_html(
 			implode( "\n", $commands ),
 			array(
 				'command'      => '/help',
@@ -263,9 +267,11 @@ class TelePress_Command_Router {
 			return $permission_result;
 		}
 
-		return TelePress_Telegram_Response_Builder::success(
+		return TelePress_Telegram_Response_Builder::success_html(
+			TelePress_Telegram_Response_Builder::bold( __( 'TelePress Menu', 'telepress' ) ) .
+			"\n\n" .
 			__(
-				"TelePress Menu\nChoose an area below. Use Telegram for quick review and short actions, then jump into WordPress when you need full editing.",
+				'Choose an area below. Use Telegram for quick review and short actions, then jump into WordPress when you need full editing.',
 				'telepress'
 			),
 			array(
@@ -285,15 +291,15 @@ class TelePress_Command_Router {
 		$settings = get_option( 'telepress_settings', array() );
 		$url      = admin_url( 'admin.php?page=telepress' );
 
-		return TelePress_Telegram_Response_Builder::success(
+		return TelePress_Telegram_Response_Builder::success_html(
 			sprintf(
 				__(
-					"TelePress Settings\nAdmin URL: %1$s\nTransport: %2$s\nLinking: %3$s",
+					"<b>TelePress Settings</b>\n\nAdmin URL: %1$s\nTransport: %2$s\nLinking: %3$s",
 					'telepress'
 				),
-				$url,
-				! empty( $settings['transport_mode'] ) ? ucfirst( (string) $settings['transport_mode'] ) : __( 'Webhook', 'telepress' ),
-				! empty( $settings['linking_enabled'] ) ? __( 'Enabled', 'telepress' ) : __( 'Disabled', 'telepress' )
+				TelePress_Telegram_Response_Builder::escape( $url ),
+				TelePress_Telegram_Response_Builder::escape( ! empty( $settings['transport_mode'] ) ? ucfirst( (string) $settings['transport_mode'] ) : __( 'Webhook', 'telepress' ) ),
+				TelePress_Telegram_Response_Builder::escape( ! empty( $settings['linking_enabled'] ) ? __( 'Enabled', 'telepress' ) : __( 'Disabled', 'telepress' ) )
 			),
 			array(
 				'command'      => '/settings',
@@ -306,12 +312,12 @@ class TelePress_Command_Router {
 		$chat_id          = ! empty( $identity['chat_id'] ) ? (string) $identity['chat_id'] : __( 'Unavailable', 'telepress' );
 		$telegram_user_id = ! empty( $identity['telegram_user_id'] ) ? (string) $identity['telegram_user_id'] : __( 'Unavailable', 'telepress' );
 
-		return TelePress_Telegram_Response_Builder::success(
+		return TelePress_Telegram_Response_Builder::success_html(
 			sprintf(
 				/* translators: 1: Telegram chat ID, 2: Telegram user ID. */
-				__( "Current chat ID: %1$s\nTelegram user ID: %2$s\n\nAdd the chat ID to TelePress Allowed Chat IDs if you want this conversation to be authorized.", 'telepress' ),
-				$chat_id,
-				$telegram_user_id
+				__( "<b>Current Chat Details</b>\n\nChat ID: %1$s\nTelegram user ID: %2$s\n\nAdd the chat ID to Allowed Chat IDs if you want this conversation to be authorized.", 'telepress' ),
+				TelePress_Telegram_Response_Builder::escape( $chat_id ),
+				TelePress_Telegram_Response_Builder::escape( $telegram_user_id )
 			),
 			array(
 				'command' => '/chatid',
@@ -403,7 +409,7 @@ class TelePress_Command_Router {
 
 		$summary = $this->dashboard_service->get_summary();
 
-		return TelePress_Telegram_Response_Builder::success(
+		return TelePress_Telegram_Response_Builder::success_html(
 			$this->dashboard_service->render_summary_message( $summary ),
 			array(
 				'command'      => '/site',
@@ -982,7 +988,10 @@ class TelePress_Command_Router {
 		if ( 'search' === $subcommand ) {
 			$term = implode( ' ', array_slice( $args, 1 ) );
 			if ( '' === trim( $term ) ) {
-				return TelePress_Telegram_Response_Builder::error( __( 'Usage: `/users search keyword`', 'telepress' ) );
+				return TelePress_Telegram_Response_Builder::error_html(
+					TelePress_Telegram_Response_Builder::bold( __( 'Users Search', 'telepress' ) ) . "\n\n" .
+					__( 'Usage:', 'telepress' ) . ' ' . TelePress_Telegram_Response_Builder::code( '/users search keyword' )
+				);
 			}
 
 			$users = $this->users_service->search_page( $term, $page );
@@ -992,6 +1001,16 @@ class TelePress_Command_Router {
 				array(
 					'command'      => '/users',
 					'reply_markup' => $this->users_service->build_list_keyboard( $users['items'], 'search', $term, $users['page'], $users['total_pages'] ),
+				)
+			);
+		}
+
+		if ( 'help' === $subcommand ) {
+			return TelePress_Telegram_Response_Builder::success_html(
+				$this->users_service->render_help_message(),
+				array(
+					'command'      => '/users',
+					'reply_markup' => $this->build_home_keyboard( $identity ),
 				)
 			);
 		}
@@ -1007,7 +1026,11 @@ class TelePress_Command_Router {
 			$role     = isset( $args[3] ) ? (string) $args[3] : '';
 
 			if ( '' === $username || '' === $email || '' === $role ) {
-				return TelePress_Telegram_Response_Builder::error( __( 'Usage: `/users create username email role`', 'telepress' ) );
+				return TelePress_Telegram_Response_Builder::error_html(
+					TelePress_Telegram_Response_Builder::bold( __( 'Create User', 'telepress' ) ) . "\n\n" .
+					__( 'Usage:', 'telepress' ) . ' ' . TelePress_Telegram_Response_Builder::code( '/users create username email role' ) . "\n" .
+					__( 'Example:', 'telepress' ) . ' ' . TelePress_Telegram_Response_Builder::code( '/users create jane jane@example.com editor' )
+				);
 			}
 
 			if ( ! $this->users_service->actor_can_assign_role( $identity['wp_user'], $role ) ) {
@@ -1107,7 +1130,12 @@ class TelePress_Command_Router {
 			);
 		}
 
-		return TelePress_Telegram_Response_Builder::error( __( 'Supported user commands: `/users list`, `/users search keyword`, `/users create username email role`, `/users disable 123`, `/users enable 123`, `/users reset-password 123`, `/users role 123 editor`', 'telepress' ) );
+		return TelePress_Telegram_Response_Builder::error_html(
+			$this->users_service->render_help_message(),
+			array(
+				'command' => '/users',
+			)
+		);
 	}
 
 	private function handle_user_callback( $command, $identity ) {

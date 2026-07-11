@@ -68,22 +68,26 @@ class TelePress_Pages_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return $heading . "\n" . __( 'No pages matched that request.', 'telepress' );
+			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No pages matched that request.', 'telepress' );
 		}
 
-		$lines   = array( $heading );
-		$lines[] = sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] );
+		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = TelePress_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		);
+		$lines[] = '';
 
 		foreach ( $result['items'] as $page ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s [%3$s]', 'telepress' ),
+				__( '• #%1$d %2$s [%3$s]', 'telepress' ),
 				$page->ID,
-				html_entity_decode( get_the_title( $page ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-				$page->post_status
+				TelePress_Telegram_Response_Builder::escape( get_the_title( $page ) ),
+				TelePress_Telegram_Response_Builder::escape( $page->post_status )
 			);
 		}
 
-		$lines[] = __( 'Tip: use the buttons below, or run `/pages search keyword` to narrow the list.', 'telepress' );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use the buttons below, or run /pages search keyword to narrow the list.', 'telepress' ) );
 
 		return implode( "\n", $lines );
 	}

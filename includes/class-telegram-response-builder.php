@@ -25,6 +25,30 @@ class TelePress_Telegram_Response_Builder {
 		);
 	}
 
+	public static function success_html( $message, $extra = array() ) {
+		return self::success(
+			$message,
+			wp_parse_args(
+				$extra,
+				array(
+					'parse_mode' => 'HTML',
+				)
+			)
+		);
+	}
+
+	public static function error_html( $message, $extra = array() ) {
+		return self::error(
+			$message,
+			wp_parse_args(
+				$extra,
+				array(
+					'parse_mode' => 'HTML',
+				)
+			)
+		);
+	}
+
 	public static function keyboard( $rows ) {
 		$inline_keyboard = array();
 
@@ -84,5 +108,21 @@ class TelePress_Telegram_Response_Builder {
 		return array(
 			'inline_keyboard' => array_merge( $existing, $extra['inline_keyboard'] ),
 		);
+	}
+
+	public static function escape( $text ) {
+		return esc_html( (string) $text );
+	}
+
+	public static function bold( $text ) {
+		return '<b>' . self::escape( $text ) . '</b>';
+	}
+
+	public static function italic( $text ) {
+		return '<i>' . self::escape( $text ) . '</i>';
+	}
+
+	public static function code( $text ) {
+		return '<code>' . self::escape( $text ) . '</code>';
 	}
 }

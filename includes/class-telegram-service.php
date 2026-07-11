@@ -334,6 +334,10 @@ class TelePress_Telegram_Service {
 			'reply_markup' => ! empty( $result['reply_markup'] ) ? $result['reply_markup'] : array(),
 		);
 
+		if ( ! empty( $result['parse_mode'] ) ) {
+			$args['parse_mode'] = (string) $result['parse_mode'];
+		}
+
 		if ( ! empty( $update['callback_query']['message']['message_id'] ) ) {
 			$response = $this->client->edit_message_text(
 				$chat_id,

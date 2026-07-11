@@ -26,26 +26,28 @@ class TelePress_Comments_Service {
 
 	public function render_pending_message( $comments ) {
 		if ( empty( $comments ) ) {
-			return __( "Pending Comments\nNo comments are waiting for moderation.", 'telepress' );
+			return TelePress_Telegram_Response_Builder::bold( __( 'Pending Comments', 'telepress' ) ) . "\n\n" . __( 'No comments are waiting for moderation.', 'telepress' );
 		}
 
 		$lines   = array();
-		$lines[] = __( 'Pending Comments', 'telepress' );
+		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Pending Comments', 'telepress' ) );
+		$lines[] = '';
 
 		foreach ( $comments as $comment ) {
 			$excerpt   = wp_html_excerpt( wp_strip_all_tags( $comment->comment_content ), 70, '...' );
 			$post_title = get_the_title( $comment->comment_post_ID );
 			$lines[]   = sprintf(
 				/* translators: 1: comment id, 2: author, 3: post title, 4: excerpt. */
-				__( '#%1$d by %2$s on %3$s: %4$s', 'telepress' ),
+				__( '• #%1$d by %2$s on %3$s: %4$s', 'telepress' ),
 				$comment->comment_ID,
-				$comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepress' ),
-				$post_title ? $post_title : __( 'Unknown Post', 'telepress' ),
-				$excerpt
+				TelePress_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepress' ) ),
+				TelePress_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'telepress' ) ),
+				TelePress_Telegram_Response_Builder::escape( $excerpt )
 			);
 		}
 
-		$lines[] = __( 'Tip: approvals and destructive moderation actions are kept in private chat for safety.', 'telepress' );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: approvals and destructive moderation actions are kept in private chat for safety.', 'telepress' ) );
 
 		return implode( "\n", $lines );
 	}

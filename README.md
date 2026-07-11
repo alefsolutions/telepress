@@ -19,6 +19,7 @@ TelePress is a Telegram-first WordPress operations plugin. It lets authorized Wo
   - categories
   - tags
 - Supports search and pagination for the main content and user modules.
+- Formats Telegram responses for readability with clearer headings, spacing, inline tips, and code-style command examples.
 - Uses confirmations for destructive actions and writes activity to the TelePress audit log.
 
 ## Core commands
@@ -27,6 +28,7 @@ TelePress is a Telegram-first WordPress operations plugin. It lets authorized Wo
 - `/menu` opens the TelePress command hub.
 - `/site` shows the site overview and module shortcuts.
 - `/help` shows the available command surface.
+- `/users help` shows concrete user-management examples and syntax.
 - `/chatid` reveals the current Telegram chat ID.
 - `/link CODE` links Telegram to the current WordPress user.
 - `/unlink` removes the Telegram link.
@@ -64,6 +66,12 @@ From `WordPress Admin -> TelePress`, you can:
 - Stale Telegram updates are dropped.
 - Polling uses a lock to avoid overlapping workers.
 - Audit records are captured for linking, moderation, content actions, and Telegram delivery.
+
+## Usability highlights
+
+- The bot uses richer formatting so site summaries and lists are easier to scan.
+- Module-specific help is available where syntax is not obvious.
+- Command discovery is guided through `/menu`, `/help`, `/site`, and inline keyboards instead of relying only on memorized commands.
 
 ## Requirements
 

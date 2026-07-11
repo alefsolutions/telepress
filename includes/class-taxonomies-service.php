@@ -66,29 +66,33 @@ class TelePress_Taxonomies_Service {
 			return implode(
 				"\n",
 				array(
-					$heading,
+					TelePress_Telegram_Response_Builder::bold( $heading ),
 					__( 'No matching terms were found.', 'telepress' ),
 				)
 			);
 		}
 
-		$lines   = array( $heading );
-		$lines[] = sprintf(
-			__( 'Page %1$d of %2$d', 'telepress' ),
-			$result['page'],
-			$result['total_pages']
+		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = TelePress_Telegram_Response_Builder::italic(
+			sprintf(
+				__( 'Page %1$d of %2$d', 'telepress' ),
+				$result['page'],
+				$result['total_pages']
+			)
 		);
+		$lines[] = '';
 
 		foreach ( $result['items'] as $term ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s (%3$d)', 'telepress' ),
+				__( '• #%1$d %2$s (%3$d)', 'telepress' ),
 				$term->term_id,
-				$term->name,
+				TelePress_Telegram_Response_Builder::escape( $term->name ),
 				$term->count
 			);
 		}
 
-		$lines[] = __( 'Tip: use search when your category or tag list grows large.', 'telepress' );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use search when your category or tag list grows large.', 'telepress' ) );
 
 		return implode( "\n", $lines );
 	}

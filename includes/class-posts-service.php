@@ -124,22 +124,26 @@ class TelePress_Posts_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return $heading . "\n" . __( 'No posts matched that request.', 'telepress' );
+			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No posts matched that request.', 'telepress' );
 		}
 
-		$lines   = array( $heading );
-		$lines[] = sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] );
+		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = TelePress_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		);
+		$lines[] = '';
 
 		foreach ( $result['items'] as $post ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s [%3$s]', 'telepress' ),
+				__( '• #%1$d %2$s [%3$s]', 'telepress' ),
 				$post->ID,
-				html_entity_decode( get_the_title( $post ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-				$post->post_status
+				TelePress_Telegram_Response_Builder::escape( get_the_title( $post ) ),
+				TelePress_Telegram_Response_Builder::escape( $post->post_status )
 			);
 		}
 
-		$lines[] = __( 'Tip: use the buttons below, or run `/posts search keyword` for a targeted lookup.', 'telepress' );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use the buttons below, or run /posts search keyword for a targeted lookup.', 'telepress' ) );
 
 		return implode( "\n", $lines );
 	}

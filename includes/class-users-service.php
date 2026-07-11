@@ -75,25 +75,46 @@ class TelePress_Users_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return $heading . "\n" . __( 'No users matched that request.', 'telepress' );
+			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No users matched that request.', 'telepress' );
 		}
 
-		$lines   = array( $heading );
-		$lines[] = sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] );
+		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = TelePress_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		);
+		$lines[] = '';
 
 		foreach ( $result['items'] as $user ) {
 			$roles       = implode( ', ', array_map( 'sanitize_text_field', $user->roles ) );
 			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepress' ) : __( 'active', 'telepress' );
 			$lines[]     = sprintf(
-				__( '#%1$d %2$s [%3$s] (%4$s)', 'telepress' ),
+				__( '• #%1$d %2$s [%3$s] (%4$s)', 'telepress' ),
 				$user->ID,
-				$user->user_login,
-				$roles ? $roles : __( 'no role', 'telepress' ),
-				$is_disabled
+				TelePress_Telegram_Response_Builder::escape( $user->user_login ),
+				TelePress_Telegram_Response_Builder::escape( $roles ? $roles : __( 'no role', 'telepress' ) ),
+				TelePress_Telegram_Response_Builder::escape( $is_disabled )
 			);
 		}
 
-		$lines[] = __( 'Tip: use `/users search keyword` to jump to a person quickly.', 'telepress' );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use /users help for examples and /users search keyword to jump to a person quickly.', 'telepress' ) );
+
+		return implode( "\n", $lines );
+	}
+
+	public function render_help_message() {
+		$lines   = array();
+		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Users Commands', 'telepress' ) );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::code( '/users list' ) . ' ' . __( 'Show recent users', 'telepress' );
+		$lines[] = TelePress_Telegram_Response_Builder::code( '/users search jane' ) . ' ' . __( 'Search by username, display name, or email', 'telepress' );
+		$lines[] = TelePress_Telegram_Response_Builder::code( '/users create jane jane@example.com editor' ) . ' ' . __( 'Create a new user', 'telepress' );
+		$lines[] = TelePress_Telegram_Response_Builder::code( '/users disable 123' ) . ' ' . __( 'Disable a user', 'telepress' );
+		$lines[] = TelePress_Telegram_Response_Builder::code( '/users enable 123' ) . ' ' . __( 'Re-enable a user', 'telepress' );
+		$lines[] = TelePress_Telegram_Response_Builder::code( '/users reset-password 123' ) . ' ' . __( 'Generate a password reset link', 'telepress' );
+		$lines[] = TelePress_Telegram_Response_Builder::code( '/users role 123 editor' ) . ' ' . __( 'Change a user role', 'telepress' );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: user creation and other sensitive actions must be confirmed in a private chat.', 'telepress' ) );
 
 		return implode( "\n", $lines );
 	}

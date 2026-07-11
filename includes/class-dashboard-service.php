@@ -46,19 +46,21 @@ class TelePress_Dashboard_Service {
 
 	public function render_summary_message( $summary ) {
 		$lines   = array();
-		$lines[] = __( 'Site Overview', 'telepress' );
-		$lines[] = sprintf( __( 'Site: %s', 'telepress' ), $summary['site_name'] );
-		$lines[] = sprintf( __( 'URL: %s', 'telepress' ), $summary['site_url'] );
-		$lines[] = sprintf( __( 'WordPress: %s', 'telepress' ), $summary['wordpress_version'] );
-		$lines[] = sprintf( __( 'PHP: %s', 'telepress' ), $summary['php_version'] );
-		$lines[] = sprintf( __( 'Database: %s', 'telepress' ), $summary['database_version'] );
-		$lines[] = sprintf( __( 'Theme: %s', 'telepress' ), $summary['active_theme'] );
-		$lines[] = sprintf( __( 'Active plugins: %d', 'telepress' ), $summary['active_plugins_count'] );
-		$lines[] = sprintf( __( 'Site health: %s', 'telepress' ), $summary['site_health'] );
-		$lines[] = sprintf( __( 'Draft posts: %d', 'telepress' ), $summary['draft_posts_count'] );
+		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Site Overview', 'telepress' ) );
+		$lines[] = '';
+		$lines[] = sprintf( __( 'Site: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['site_name'] ) );
+		$lines[] = sprintf( __( 'URL: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['site_url'] ) );
+		$lines[] = sprintf( __( 'WordPress: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['wordpress_version'] ) );
+		$lines[] = sprintf( __( 'PHP: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['php_version'] ) );
+		$lines[] = sprintf( __( 'Database: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['database_version'] ) );
+		$lines[] = sprintf( __( 'Theme: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['active_theme'] ) );
+		$lines[] = '';
+		$lines[] = sprintf( __( 'Posts in draft: %d', 'telepress' ), $summary['draft_posts_count'] );
 		$lines[] = sprintf( __( 'Pending comments: %d', 'telepress' ), $summary['pending_comments'] );
+		$lines[] = sprintf( __( 'Active plugins: %d', 'telepress' ), $summary['active_plugins_count'] );
+		$lines[] = sprintf( __( 'Site health: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['site_health'] ) );
 		$lines[] = sprintf(
-			__( 'Pending updates: core %1$d, plugins %2$d, themes %3$d', 'telepress' ),
+			__( 'Updates: core %1$d, plugins %2$d, themes %3$d', 'telepress' ),
 			$summary['pending_updates']['core'],
 			$summary['pending_updates']['plugins'],
 			$summary['pending_updates']['themes']

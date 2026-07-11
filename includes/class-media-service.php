@@ -83,22 +83,26 @@ class TelePress_Media_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return $heading . "\n" . __( 'No media items matched that request.', 'telepress' );
+			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No media items matched that request.', 'telepress' );
 		}
 
-		$lines   = array( $heading );
-		$lines[] = sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] );
+		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = TelePress_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		);
+		$lines[] = '';
 
 		foreach ( $result['items'] as $item ) {
 			$lines[] = sprintf(
-				__( "#%1$d %2$s\nPreview: %3$s", 'telepress' ),
+				__( "• #%1$d %2$s\n  Preview: %3$s", 'telepress' ),
 				$item->ID,
-				html_entity_decode( get_the_title( $item ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-				wp_get_attachment_url( $item->ID )
+				TelePress_Telegram_Response_Builder::escape( get_the_title( $item ) ),
+				TelePress_Telegram_Response_Builder::escape( wp_get_attachment_url( $item->ID ) )
 			);
 		}
 
-		$lines[] = __( 'Tip: send a photo or document in this private chat to upload it straight into WordPress.', 'telepress' );
+		$lines[] = '';
+		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: send a photo or document in this private chat to upload it straight into WordPress.', 'telepress' ) );
 
 		return implode( "\n", $lines );
 	}
