@@ -103,7 +103,6 @@ class TelePress_Telegram_Service {
 			'/dashboard',
 			'/comments',
 			'/posts',
-			'/pages',
 			'/media',
 			'/users',
 			'/categories',
