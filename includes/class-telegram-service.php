@@ -131,8 +131,8 @@ class TelePress_Telegram_Service {
 			'upload',
 		);
 
-		$arguments = ! empty( $command['arguments'] ) && is_array( $command['arguments'] ) ? $command['arguments'] : array();
-		$first_arg = ! empty( $arguments[0] ) ? strtolower( (string) $arguments[0] ) : '';
+		$args      = ! empty( $command['args'] ) && is_array( $command['args'] ) ? $command['args'] : array();
+		$first_arg = ! empty( $args[0] ) ? strtolower( (string) $args[0] ) : '';
 
 		if ( in_array( $first_arg, $destructive_actions, true ) ) {
 			return false;
@@ -155,6 +155,11 @@ class TelePress_Telegram_Service {
 		$args    = array(
 			'parse_mode' => 'HTML',
 		);
+
+		if ( ! empty( $update['message']['message_id'] ) ) {
+			$args['reply_to_message_id'] = (int) $update['message']['message_id'];
+		}
+
 		$result  = $this->client->send_message( $chat_id, $message, $args );
 
 		if ( is_wp_error( $result ) || empty( $result['result']['message_id'] ) ) {
@@ -228,6 +233,7 @@ class TelePress_Telegram_Service {
 			$chat_id = ! empty( $job['placeholder_chat_id'] ) ? (string) $job['placeholder_chat_id'] : '';
 			if ( '' !== $chat_id ) {
 				$this->client->send_chat_action( $chat_id, 'typing' );
+				usleep( 750000 );
 			}
 
 			$result = $this->process_update(
@@ -355,6 +361,8 @@ class TelePress_Telegram_Service {
 		}
 
 		$command = $this->command_router->parse_command( $update );
+
+		$this->maybe_send_chat_action( $identity, $command, $update, $options );
 
 		if ( ! empty( $command['name'] ) ) {
 			$this->log_command_event( 'telegram_command_received', $identity, $update, array( 'command' => $command['name'] ) );
@@ -649,6 +657,26 @@ class TelePress_Telegram_Service {
 		);
 
 		return '';
+	}
+
+	private function maybe_send_chat_action( $identity, $command, $update, $options = array() ) {
+		if ( ! empty( $update['callback_query'] ) ) {
+			return;
+		}
+
+		if ( ! empty( $options['edit_message_id'] ) ) {
+			return;
+		}
+
+		if ( empty( $identity['chat_id'] ) ) {
+			return;
+		}
+
+		if ( ! $this->should_defer_command( $command, $update ) ) {
+			return;
+		}
+
+		$this->client->send_chat_action( (string) $identity['chat_id'], 'typing' );
 	}
 
 	private function log_command_event( $action_name, $identity, $update, $context = array() ) {

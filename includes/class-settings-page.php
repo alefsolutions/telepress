@@ -499,6 +499,7 @@ class TelePress_Settings_Page {
 									<tr>
 										<th><?php esc_html_e( 'Time', 'telepress' ); ?></th>
 										<th><?php esc_html_e( 'Action', 'telepress' ); ?></th>
+										<th><?php esc_html_e( 'Command', 'telepress' ); ?></th>
 										<th><?php esc_html_e( 'Chat', 'telepress' ); ?></th>
 										<th><?php esc_html_e( 'Result', 'telepress' ); ?></th>
 									</tr>
@@ -508,6 +509,7 @@ class TelePress_Settings_Page {
 										<tr>
 											<td><?php echo esc_html( get_date_from_gmt( $log['created_at'], 'Y-m-d H:i:s' ) ); ?></td>
 											<td><?php echo esc_html( $log['action_name'] ); ?></td>
+											<td><?php echo esc_html( $this->extract_log_command( $log ) ); ?></td>
 											<td><?php echo esc_html( $log['chat_id'] ? $log['chat_id'] : '-' ); ?></td>
 											<td>
 												<span class="telepress-status-pill <?php echo ! empty( $log['was_successful'] ) ? 'is-good' : 'is-bad'; ?>">
@@ -870,6 +872,30 @@ class TelePress_Settings_Page {
 			wp_date( 'Y-m-d H:i:s', $timestamp ),
 			human_time_diff( $timestamp, current_time( 'timestamp', true ) )
 		);
+	}
+
+	private function extract_log_command( $log ) {
+		if ( ! empty( $log['resource_id'] ) && 0 === strpos( (string) $log['resource_id'], '/' ) ) {
+			return (string) $log['resource_id'];
+		}
+
+		if ( ! empty( $log['context'] ) ) {
+			$context = json_decode( $log['context'], true );
+
+			if ( is_array( $context ) && ! empty( $context['command'] ) ) {
+				return (string) $context['command'];
+			}
+		}
+
+		if ( ! empty( $log['after_state'] ) ) {
+			$after_state = json_decode( $log['after_state'], true );
+
+			if ( is_array( $after_state ) && ! empty( $after_state['command'] ) ) {
+				return (string) $after_state['command'];
+			}
+		}
+
+		return '-';
 	}
 
 	public function handle_tools_actions() {
