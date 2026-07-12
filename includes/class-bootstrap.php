@@ -5,6 +5,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class TelePress_Bootstrap {
+	const SCHEMA_VERSION = '0.2.2';
+
 	private $settings_page;
 	private $rest_controller;
 	private $notification_service;
@@ -19,12 +21,14 @@ class TelePress_Bootstrap {
 
 	public function boot() {
 		load_plugin_textdomain( 'telepress', false, dirname( plugin_basename( TELEPRESS_FILE ) ) . '/languages' );
+		$this->maybe_upgrade_schema();
 		$this->settings_page->register();
 
 		add_filter( 'cron_schedules', array( $this, 'register_cron_schedules' ) );
 		add_action( 'rest_api_init', array( $this->rest_controller, 'register_routes' ) );
 		add_action( 'telepress_daily_maintenance', array( $this, 'run_daily_maintenance' ) );
 		add_action( 'telepress_poll_updates', array( $this, 'poll_updates' ) );
+		add_action( 'telepress_process_jobs', array( $this, 'process_jobs' ) );
 		add_action( 'comment_post', array( $this->notification_service, 'handle_new_comment' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this->notification_service, 'handle_post_transition' ), 10, 3 );
 		add_action( 'wp_login_failed', array( $this->notification_service, 'handle_failed_login' ) );
@@ -57,6 +61,11 @@ class TelePress_Bootstrap {
 		$telegram->poll_updates();
 	}
 
+	public function process_jobs() {
+		$telegram = new TelePress_Telegram_Service();
+		$telegram->process_jobs();
+	}
+
 	public function register_cron_schedules( $schedules ) {
 		$schedules['telepress_every_minute'] = array(
 			'interval' => MINUTE_IN_SECONDS,
@@ -79,5 +88,18 @@ class TelePress_Bootstrap {
 		}
 
 		wp_clear_scheduled_hook( 'telepress_poll_updates' );
+	}
+
+	private function maybe_upgrade_schema() {
+		$current_version = (string) get_option( 'telepress_schema_version', '' );
+
+		if ( self::SCHEMA_VERSION === $current_version ) {
+			return;
+		}
+
+		TelePress_Audit_Log_Repository::create_table();
+		TelePress_Jobs_Repository::create_table();
+		TelePress_Processed_Updates_Repository::create_table();
+		update_option( 'telepress_schema_version', self::SCHEMA_VERSION, false );
 	}
 }

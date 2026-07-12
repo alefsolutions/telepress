@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class TelePress_Telegram_Service {
 	const DIAGNOSTICS_OPTION         = 'telepress_transport_diagnostics';
+	const COMMAND_DIAGNOSTICS_OPTION = 'telepress_command_diagnostics';
 	const STALE_UPDATE_WINDOW_OPTION = 'stale_update_window';
 	const DEFAULT_STALE_WINDOW       = 180;
 	const POLL_LOCK_TRANSIENT        = 'telepress_poll_lock';
@@ -41,7 +42,239 @@ class TelePress_Telegram_Service {
 	}
 
 	public function handle_update( $update, $transport = 'webhook' ) {
-		if ( ! empty( $update['update_id'] ) && TelePress_Processed_Updates_Repository::has_processed( (int) $update['update_id'] ) ) {
+		return $this->process_update( $update, $transport );
+	}
+
+	public function handle_webhook_update( $update ) {
+		$command = $this->command_router->parse_command( $update );
+
+		if ( ! $this->should_defer_command( $command, $update ) ) {
+			return $this->process_update( $update, 'webhook' );
+		}
+
+		$placeholder = $this->send_processing_placeholder( $update, $command );
+		$queue_result = TelePress_Jobs_Repository::enqueue(
+			isset( $update['update_id'] ) ? (int) $update['update_id'] : 0,
+			'webhook',
+			$update,
+			! empty( $command['name'] ) ? $command['name'] : '',
+			$placeholder
+		);
+
+		if ( is_wp_error( $queue_result ) ) {
+			return $this->process_update( $update, 'webhook' );
+		}
+
+		$this->update_diagnostics(
+			array(
+				'last_queued_at'      => time(),
+				'last_queued_command' => ! empty( $command['name'] ) ? $command['name'] : '',
+			),
+			array(
+				'queued_updates' => 'duplicate' === $queue_result ? 0 : 1,
+			)
+		);
+
+		if ( 'duplicate' !== $queue_result ) {
+			$this->schedule_job_processing();
+		}
+
+		return TelePress_Telegram_Response_Builder::success(
+			__( 'Update queued for background processing.', 'telepress' ),
+			array(
+				'command'       => ! empty( $command['name'] ) ? $command['name'] : '',
+				'skip_dispatch' => true,
+				'queued'        => true,
+			)
+		);
+	}
+
+	private function should_defer_command( $command, $update ) {
+		if ( empty( $command['name'] ) || ! is_array( $command ) ) {
+			return false;
+		}
+
+		if ( ! empty( $update['callback_query'] ) ) {
+			return false;
+		}
+
+		$slow_commands = array(
+			'/site',
+			'/dashboard',
+			'/comments',
+			'/posts',
+			'/pages',
+			'/media',
+			'/users',
+			'/categories',
+			'/tags',
+		);
+
+		if ( ! in_array( $command['name'], $slow_commands, true ) ) {
+			return false;
+		}
+
+		$destructive_actions = array(
+			'approve',
+			'spam',
+			'trash',
+			'delete',
+			'publish',
+			'create',
+			'update',
+			'edit',
+			'reset-password',
+			'promote',
+			'demote',
+			'unlink',
+			'link',
+			'upload',
+		);
+
+		$arguments = ! empty( $command['arguments'] ) && is_array( $command['arguments'] ) ? $command['arguments'] : array();
+		$first_arg = ! empty( $arguments[0] ) ? strtolower( (string) $arguments[0] ) : '';
+
+		if ( in_array( $first_arg, $destructive_actions, true ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private function send_processing_placeholder( $update, $command ) {
+		$identity = $this->user_resolver->resolve_from_update( $update );
+		$chat_id  = ! empty( $identity['chat_id'] ) ? (string) $identity['chat_id'] : '';
+
+		if ( '' === $chat_id ) {
+			return array();
+		}
+
+		$this->client->send_chat_action( $chat_id, 'typing' );
+
+		$message = $this->get_processing_message( $command );
+		$args    = array(
+			'parse_mode' => 'HTML',
+		);
+		$result  = $this->client->send_message( $chat_id, $message, $args );
+
+		if ( is_wp_error( $result ) || empty( $result['result']['message_id'] ) ) {
+			return array(
+				'chat_id' => $chat_id,
+			);
+		}
+
+		return array(
+			'chat_id'    => $chat_id,
+			'message_id' => (int) $result['result']['message_id'],
+		);
+	}
+
+	private function get_processing_message( $command ) {
+		$command_name = ! empty( $command['name'] ) ? (string) $command['name'] : '';
+
+		$messages = array(
+			'/site'       => __( '<b>Working on it...</b>' . "\n" . 'Building your site overview now.', 'telepress' ),
+			'/dashboard'  => __( '<b>Working on it...</b>' . "\n" . 'Gathering dashboard data now.', 'telepress' ),
+			'/comments'   => __( '<b>Working on it...</b>' . "\n" . 'Fetching comment moderation data now.', 'telepress' ),
+			'/posts'      => __( '<b>Working on it...</b>' . "\n" . 'Loading posts now.', 'telepress' ),
+			'/pages'      => __( '<b>Working on it...</b>' . "\n" . 'Loading pages now.', 'telepress' ),
+			'/media'      => __( '<b>Working on it...</b>' . "\n" . 'Fetching media items now.', 'telepress' ),
+			'/users'      => __( '<b>Working on it...</b>' . "\n" . 'Loading users now.', 'telepress' ),
+			'/categories' => __( '<b>Working on it...</b>' . "\n" . 'Loading categories now.', 'telepress' ),
+			'/tags'       => __( '<b>Working on it...</b>' . "\n" . 'Loading tags now.', 'telepress' ),
+		);
+
+		if ( isset( $messages[ $command_name ] ) ) {
+			return $messages[ $command_name ];
+		}
+
+		return __( '<b>Working on it...</b>' . "\n" . 'Processing your request now.', 'telepress' );
+	}
+
+	private function schedule_job_processing() {
+		if ( ! wp_next_scheduled( 'telepress_process_jobs' ) ) {
+			wp_schedule_single_event( time() + 1, 'telepress_process_jobs' );
+		}
+
+		if ( function_exists( 'spawn_cron' ) ) {
+			spawn_cron();
+		}
+	}
+
+	public function process_jobs( $limit = 5 ) {
+		$jobs = TelePress_Jobs_Repository::claim_pending_jobs( $limit );
+
+		if ( empty( $jobs ) ) {
+			return array();
+		}
+
+		foreach ( $jobs as $job ) {
+			$payload = ! empty( $job['payload'] ) ? json_decode( $job['payload'], true ) : array();
+
+			if ( empty( $payload ) || ! is_array( $payload ) ) {
+				TelePress_Jobs_Repository::mark_failed( (int) $job['id'], __( 'Queued payload could not be decoded.', 'telepress' ) );
+				$this->update_diagnostics(
+					array(
+						'last_background_job_at'     => time(),
+						'last_background_job_status' => 'failed',
+					),
+					array(
+						'queued_updates' => -1,
+					)
+				);
+				continue;
+			}
+
+			$chat_id = ! empty( $job['placeholder_chat_id'] ) ? (string) $job['placeholder_chat_id'] : '';
+			if ( '' !== $chat_id ) {
+				$this->client->send_chat_action( $chat_id, 'typing' );
+			}
+
+			$result = $this->process_update(
+				$payload,
+				! empty( $job['transport'] ) ? (string) $job['transport'] : 'webhook',
+				array(
+					'skip_duplicate_check' => true,
+					'edit_message_id'      => ! empty( $job['placeholder_message_id'] ) ? (int) $job['placeholder_message_id'] : 0,
+					'forced_chat_id'       => $chat_id,
+				)
+			);
+
+			if ( ! empty( $result['dispatch_error'] ) ) {
+				TelePress_Jobs_Repository::mark_failed( (int) $job['id'], (string) $result['dispatch_error'] );
+				$this->update_diagnostics(
+					array(
+						'last_background_job_at'     => time(),
+						'last_background_job_status' => 'failed',
+						'last_background_job_error'  => (string) $result['dispatch_error'],
+					),
+					array(
+						'queued_updates' => -1,
+					)
+				);
+				continue;
+			}
+
+			TelePress_Jobs_Repository::mark_complete( (int) $job['id'] );
+			$this->update_diagnostics(
+				array(
+					'last_background_job_at'     => time(),
+					'last_background_job_status' => 'success',
+					'last_background_job_error'  => '',
+				),
+				array(
+					'queued_updates' => -1,
+				)
+			);
+		}
+
+		return $jobs;
+	}
+
+	private function process_update( $update, $transport = 'webhook', $options = array() ) {
+		$start_time = microtime( true );
+
+		if ( empty( $options['skip_duplicate_check'] ) && ! empty( $update['update_id'] ) && TelePress_Processed_Updates_Repository::has_processed( (int) $update['update_id'] ) ) {
 			$this->update_diagnostics(
 				array(
 					'last_duplicate_update_at' => time(),
@@ -137,13 +370,23 @@ class TelePress_Telegram_Service {
 			update_user_meta( $identity['wp_user']->ID, '_telepress_last_command_at', time() );
 		}
 
-		$this->dispatch_response( $identity, $update, $result, $transport );
+		$dispatch_error = $this->dispatch_response( $identity, $update, $result, $transport, $options );
 
 		if ( ! empty( $result['code'] ) && 'telepress_capability_denied' === $result['code'] ) {
 			$this->log_command_event( 'telegram_permission_denied', $identity, $update, $result );
 		}
 
 		$this->mark_update_processed( $update, $transport, ! empty( $result['ok'] ) ? 'processed' : 'failed' );
+		$this->record_command_timing(
+			! empty( $command['name'] ) ? $command['name'] : 'non_command',
+			$transport,
+			$start_time,
+			$dispatch_error
+		);
+
+		if ( $dispatch_error ) {
+			$result['dispatch_error'] = $dispatch_error;
+		}
 
 		return $result;
 	}
@@ -319,11 +562,11 @@ class TelePress_Telegram_Service {
 		return in_array( (string) $chat_id, $chat_ids, true );
 	}
 
-	private function dispatch_response( $identity, $update, $result, $transport ) {
-		$chat_id = ! empty( $identity['chat_id'] ) ? $identity['chat_id'] : null;
+	private function dispatch_response( $identity, $update, $result, $transport, $options = array() ) {
+		$chat_id = ! empty( $options['forced_chat_id'] ) ? $options['forced_chat_id'] : ( ! empty( $identity['chat_id'] ) ? $identity['chat_id'] : null );
 
 		if ( ! empty( $result['skip_dispatch'] ) || empty( $chat_id ) || empty( $result['message'] ) ) {
-			return;
+			return '';
 		}
 
 		if ( ! empty( $update['callback_query']['id'] ) ) {
@@ -338,7 +581,14 @@ class TelePress_Telegram_Service {
 			$args['parse_mode'] = (string) $result['parse_mode'];
 		}
 
-		if ( ! empty( $update['callback_query']['message']['message_id'] ) ) {
+		if ( ! empty( $options['edit_message_id'] ) ) {
+			$response = $this->client->edit_message_text(
+				$chat_id,
+				(int) $options['edit_message_id'],
+				$result['message'],
+				$args
+			);
+		} elseif ( ! empty( $update['callback_query']['message']['message_id'] ) ) {
 			$response = $this->client->edit_message_text(
 				$chat_id,
 				(int) $update['callback_query']['message']['message_id'],
@@ -350,7 +600,7 @@ class TelePress_Telegram_Service {
 		}
 
 		if ( is_wp_error( $response ) ) {
-			if ( ! empty( $update['callback_query']['message']['message_id'] ) ) {
+			if ( ! empty( $options['edit_message_id'] ) || ! empty( $update['callback_query']['message']['message_id'] ) ) {
 				$response = $this->client->send_message( $chat_id, $result['message'], $args );
 			}
 		}
@@ -374,7 +624,7 @@ class TelePress_Telegram_Service {
 					'failure_reason'   => $response->get_error_message(),
 				)
 			);
-			return;
+			return $response->get_error_message();
 		}
 
 		TelePress_Audit_Log_Repository::log(
@@ -397,6 +647,8 @@ class TelePress_Telegram_Service {
 				'last_delivery_transport' => $transport,
 			)
 		);
+
+		return '';
 	}
 
 	private function log_command_event( $action_name, $identity, $update, $context = array() ) {
@@ -540,6 +792,9 @@ class TelePress_Telegram_Service {
 
 		foreach ( $increments as $key => $amount ) {
 			$diagnostics[ $key ] = isset( $diagnostics[ $key ] ) ? (int) $diagnostics[ $key ] + (int) $amount : (int) $amount;
+			if ( $diagnostics[ $key ] < 0 ) {
+				$diagnostics[ $key ] = 0;
+			}
 		}
 
 		foreach ( $data as $key => $value ) {
@@ -547,6 +802,41 @@ class TelePress_Telegram_Service {
 		}
 
 		update_option( self::DIAGNOSTICS_OPTION, $diagnostics, false );
+	}
+
+	private function record_command_timing( $command_name, $transport, $start_time, $dispatch_error = '' ) {
+		$duration_ms = (int) round( max( 0, microtime( true ) - (float) $start_time ) * 1000 );
+		$history     = get_option( self::COMMAND_DIAGNOSTICS_OPTION, array() );
+
+		if ( ! is_array( $history ) ) {
+			$history = array();
+		}
+
+		$history[] = array(
+			'command'        => (string) $command_name,
+			'transport'      => (string) $transport,
+			'duration_ms'    => $duration_ms,
+			'dispatch_error' => '' !== $dispatch_error ? (string) $dispatch_error : '',
+			'recorded_at'    => time(),
+		);
+
+		if ( count( $history ) > 20 ) {
+			$history = array_slice( $history, -20 );
+		}
+
+		update_option( self::COMMAND_DIAGNOSTICS_OPTION, $history, false );
+
+		$this->update_diagnostics(
+			array(
+				'last_command_name'        => (string) $command_name,
+				'last_command_transport'   => (string) $transport,
+				'last_command_duration_ms' => $duration_ms,
+				'last_command_error'       => '' !== $dispatch_error ? (string) $dispatch_error : '',
+			),
+			$duration_ms >= 2000
+				? array( 'slow_commands' => 1 )
+				: array()
+		);
 	}
 
 	private function mark_update_processed( $update, $transport, $result ) {

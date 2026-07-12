@@ -81,7 +81,7 @@ class TelePress_REST_Webhook_Controller {
 
 		$payload  = $request->get_json_params();
 		$telegram = new TelePress_Telegram_Service();
-		$result   = $telegram->handle_update( is_array( $payload ) ? $payload : array(), 'webhook' );
+		$result   = $telegram->handle_webhook_update( is_array( $payload ) ? $payload : array() );
 
 		TelePress_Audit_Log_Repository::log(
 			array(

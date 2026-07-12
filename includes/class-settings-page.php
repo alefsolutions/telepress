@@ -83,6 +83,7 @@ class TelePress_Settings_Page {
 		$webhook_url              = rest_url( TelePress_REST_Webhook_Controller::REST_NAMESPACE . TelePress_REST_Webhook_Controller::ROUTE );
 		$webhook_status           = get_option( 'telepress_webhook_status', array() );
 		$diagnostics              = get_option( TelePress_Telegram_Service::DIAGNOSTICS_OPTION, array() );
+		$command_diagnostics      = get_option( TelePress_Telegram_Service::COMMAND_DIAGNOSTICS_OPTION, array() );
 		$recent_logs              = TelePress_Audit_Log_Repository::recent_logs( 8 );
 		$linking_count            = count(
 			get_users(
@@ -347,6 +348,28 @@ class TelePress_Settings_Page {
 								<span><?php esc_html_e( 'Last poll run', 'telepress' ); ?></span>
 								<strong><?php echo ! empty( $diagnostics['last_poll_at'] ) ? esc_html( $this->format_timestamp( (int) $diagnostics['last_poll_at'] ) ) : esc_html__( 'Never', 'telepress' ); ?></strong>
 							</li>
+							<li class="<?php echo ! empty( $diagnostics['last_command_name'] ) ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Last processed command', 'telepress' ); ?></span>
+								<strong><?php echo ! empty( $diagnostics['last_command_name'] ) ? esc_html( $diagnostics['last_command_name'] ) : esc_html__( 'Unknown', 'telepress' ); ?></strong>
+							</li>
+							<li class="<?php echo isset( $diagnostics['last_command_duration_ms'] ) && (int) $diagnostics['last_command_duration_ms'] < 2000 ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Last command duration', 'telepress' ); ?></span>
+								<strong>
+									<?php
+									echo isset( $diagnostics['last_command_duration_ms'] )
+										? esc_html( sprintf( __( '%d ms', 'telepress' ), (int) $diagnostics['last_command_duration_ms'] ) )
+										: esc_html__( 'Unknown', 'telepress' );
+									?>
+								</strong>
+							</li>
+							<li class="<?php echo empty( $diagnostics['queued_updates'] ) ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Queued background updates', 'telepress' ); ?></span>
+								<strong><?php echo esc_html( (string) ( isset( $diagnostics['queued_updates'] ) ? (int) $diagnostics['queued_updates'] : 0 ) ); ?></strong>
+							</li>
+							<li class="<?php echo empty( $diagnostics['slow_commands'] ) ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Slow command count', 'telepress' ); ?></span>
+								<strong><?php echo esc_html( (string) ( isset( $diagnostics['slow_commands'] ) ? (int) $diagnostics['slow_commands'] : 0 ) ); ?></strong>
+							</li>
 							<li class="<?php echo ! empty( $diagnostics['last_poll_status'] ) && 'failed' !== $diagnostics['last_poll_status'] ? 'is-good' : 'is-warn'; ?>">
 								<span><?php esc_html_e( 'Last poll status', 'telepress' ); ?></span>
 								<strong><?php echo ! empty( $diagnostics['last_poll_status'] ) ? esc_html( ucfirst( (string) $diagnostics['last_poll_status'] ) ) : esc_html__( 'Unknown', 'telepress' ); ?></strong>
@@ -384,10 +407,46 @@ class TelePress_Settings_Page {
 							<form method="post">
 								<?php wp_nonce_field( 'telepress_tools_actions', 'telepress_tools_nonce' ); ?>
 								<button class="button button-secondary" type="submit" name="telepress_poll_now" value="1"><?php esc_html_e( 'Poll Now', 'telepress' ); ?></button>
+								<button class="button button-secondary" type="submit" name="telepress_process_jobs_now" value="1"><?php esc_html_e( 'Process Queue', 'telepress' ); ?></button>
 								<button class="button button-secondary" type="submit" name="telepress_refresh_webhook_status" value="1"><?php esc_html_e( 'Refresh Webhook Status', 'telepress' ); ?></button>
 								<button class="button button-secondary" type="submit" name="telepress_flush_updates" value="1"><?php esc_html_e( 'Flush Old Updates', 'telepress' ); ?></button>
 							</form>
 						</div>
+					</section>
+
+					<section class="telepress-panel telepress-panel-wide">
+						<div class="telepress-panel-heading">
+							<div>
+								<p class="telepress-section-label"><?php esc_html_e( 'Performance', 'telepress' ); ?></p>
+								<h2><?php esc_html_e( 'Recent Command Timings', 'telepress' ); ?></h2>
+							</div>
+						</div>
+						<?php if ( empty( $command_diagnostics ) || ! is_array( $command_diagnostics ) ) : ?>
+							<p class="telepress-empty-state"><?php esc_html_e( 'No command timings recorded yet. Use Telegram commands and TelePress will log recent execution times here.', 'telepress' ); ?></p>
+						<?php else : ?>
+							<table class="widefat fixed striped telepress-table">
+								<thead>
+									<tr>
+										<th><?php esc_html_e( 'When', 'telepress' ); ?></th>
+										<th><?php esc_html_e( 'Command', 'telepress' ); ?></th>
+										<th><?php esc_html_e( 'Transport', 'telepress' ); ?></th>
+										<th><?php esc_html_e( 'Duration', 'telepress' ); ?></th>
+										<th><?php esc_html_e( 'Delivery', 'telepress' ); ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php foreach ( array_reverse( $command_diagnostics ) as $entry ) : ?>
+										<tr>
+											<td><?php echo ! empty( $entry['recorded_at'] ) ? esc_html( $this->format_timestamp( (int) $entry['recorded_at'] ) ) : esc_html__( 'Unknown', 'telepress' ); ?></td>
+											<td><?php echo ! empty( $entry['command'] ) ? esc_html( $entry['command'] ) : '-'; ?></td>
+											<td><?php echo ! empty( $entry['transport'] ) ? esc_html( strtoupper( (string) $entry['transport'] ) ) : '-'; ?></td>
+											<td><?php echo isset( $entry['duration_ms'] ) ? esc_html( sprintf( __( '%d ms', 'telepress' ), (int) $entry['duration_ms'] ) ) : '-'; ?></td>
+											<td><?php echo ! empty( $entry['dispatch_error'] ) ? esc_html__( 'Failed', 'telepress' ) : esc_html__( 'Sent', 'telepress' ); ?></td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+						<?php endif; ?>
 					</section>
 
 					<section class="telepress-panel telepress-panel-wide">
@@ -844,6 +903,20 @@ class TelePress_Settings_Page {
 			$this->set_tools_notice(
 				is_wp_error( $result ) ? 'error' : 'success',
 				is_wp_error( $result ) ? $result->get_error_message() : __( 'TelePress polled Telegram successfully.', 'telepress' )
+			);
+			return;
+		}
+
+		if ( ! empty( $_POST['telepress_process_jobs_now'] ) ) {
+			$telegram = new TelePress_Telegram_Service();
+			$jobs     = $telegram->process_jobs();
+			$this->set_tools_notice(
+				'success',
+				sprintf(
+					/* translators: %d: number of jobs claimed for processing. */
+					__( 'TelePress processed %d queued background job(s).', 'telepress' ),
+					is_array( $jobs ) ? count( $jobs ) : 0
+				)
 			);
 			return;
 		}

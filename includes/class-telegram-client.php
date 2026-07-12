@@ -51,6 +51,16 @@ class TelePress_Telegram_Client {
 		return $this->request( 'answerCallbackQuery', $payload );
 	}
 
+	public function send_chat_action( $chat_id, $action = 'typing' ) {
+		return $this->request(
+			'sendChatAction',
+			array(
+				'chat_id' => (string) $chat_id,
+				'action'  => sanitize_key( $action ),
+			)
+		);
+	}
+
 	public function edit_message_text( $chat_id, $message_id, $text, $args = array() ) {
 		$payload = array(
 			'chat_id'                  => (string) $chat_id,

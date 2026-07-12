@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class TelePress_Activator {
 	public static function activate() {
 		TelePress_Audit_Log_Repository::create_table();
+		TelePress_Jobs_Repository::create_table();
 		TelePress_Processed_Updates_Repository::create_table();
 
 		$defaults = array(
@@ -33,5 +34,7 @@ class TelePress_Activator {
 				)
 			);
 		}
+
+		update_option( 'telepress_schema_version', TelePress_Bootstrap::SCHEMA_VERSION, false );
 	}
 }
