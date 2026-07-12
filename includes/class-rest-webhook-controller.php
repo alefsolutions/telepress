@@ -102,7 +102,10 @@ class TelePress_REST_Webhook_Controller {
 				'action_name'      => 'webhook_received',
 				'resource_type'    => 'telegram_update',
 				'after_state'      => $result,
-				'context'          => array( 'update_id' => isset( $payload['update_id'] ) ? $payload['update_id'] : null ),
+				'context'          => array(
+					'update_id' => isset( $payload['update_id'] ) ? $payload['update_id'] : null,
+					'command'   => $this->extract_update_command_text( $payload ),
+				),
 				'was_successful'   => ! empty( $result['ok'] ),
 				'failure_reason'   => empty( $result['ok'] ) ? $result['message'] : null,
 			)
@@ -187,6 +190,18 @@ class TelePress_REST_Webhook_Controller {
 		}
 
 		return (string) $request->get_header( 'x-telepress-secret' );
+	}
+
+	private function extract_update_command_text( $payload ) {
+		if ( ! empty( $payload['message']['text'] ) ) {
+			return sanitize_text_field( (string) $payload['message']['text'] );
+		}
+
+		if ( ! empty( $payload['callback_query']['data'] ) ) {
+			return sanitize_text_field( (string) $payload['callback_query']['data'] );
+		}
+
+		return '';
 	}
 
 	private function update_diagnostics( $data ) {

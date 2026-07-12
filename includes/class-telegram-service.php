@@ -374,10 +374,38 @@ class TelePress_Telegram_Service {
 			$this->log_command_event( 'telegram_command_received', $identity, $update, array( 'command' => $command['name'] ) );
 		}
 
-		$result = $this->handle_media_upload( $update, $identity, $command );
+		try {
+			$result = $this->handle_media_upload( $update, $identity, $command );
 
-		if ( null === $result ) {
-			$result = $this->command_router->route( $update, $identity );
+			if ( null === $result ) {
+				$result = $this->command_router->route( $update, $identity );
+			}
+		} catch ( Throwable $throwable ) {
+			$result = TelePress_Telegram_Response_Builder::error(
+				__( 'TelePress hit an internal error while processing that command.', 'telepress' ),
+				array(
+					'command' => ! empty( $command['name'] ) ? $command['name'] : '',
+					'code'    => 'telepress_command_exception',
+				)
+			);
+
+			TelePress_Audit_Log_Repository::log(
+				array(
+					'wp_user_id'       => ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ? $identity['wp_user']->ID : null,
+					'telegram_user_id' => ! empty( $identity['telegram_user_id'] ) ? $identity['telegram_user_id'] : null,
+					'chat_id'          => ! empty( $identity['chat_id'] ) ? $identity['chat_id'] : null,
+					'action_name'      => 'telegram_command_exception',
+					'resource_type'    => 'telegram_command',
+					'resource_id'      => ! empty( $command['name'] ) ? $command['name'] : null,
+					'was_successful'   => 0,
+					'failure_reason'   => $throwable->getMessage(),
+					'context'          => array(
+						'command' => ! empty( $command['name'] ) ? $command['name'] : '',
+						'file'    => $throwable->getFile(),
+						'line'    => $throwable->getLine(),
+					),
+				)
+			);
 		}
 
 		if ( ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ) {

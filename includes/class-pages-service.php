@@ -178,36 +178,36 @@ class TelePress_Pages_Service {
 	public function build_list_keyboard( $pages, $subcommand = 'list', $search_term = '', $page = 1, $total_pages = 1 ) {
 		$rows = array();
 
-		foreach ( $pages as $page ) {
-			if ( ! $page instanceof WP_Post ) {
+		foreach ( $pages as $page_item ) {
+			if ( ! $page_item instanceof WP_Post ) {
 				continue;
 			}
 
 			$row = array();
 
-			if ( 'trash' === $page->post_status ) {
+			if ( 'trash' === $page_item->post_status ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Restore #%d', 'telepress' ), $page->ID ),
-					'callback_data' => '/pages restore ' . (int) $page->ID,
+					'text'          => sprintf( __( 'Restore #%d', 'telepress' ), $page_item->ID ),
+					'callback_data' => '/pages restore ' . (int) $page_item->ID,
 				);
 			} else {
-				if ( 'publish' !== $page->post_status ) {
+				if ( 'publish' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Publish #%d', 'telepress' ), $page->ID ),
-						'callback_data' => '/pages publish ' . (int) $page->ID,
+						'text'          => sprintf( __( 'Publish #%d', 'telepress' ), $page_item->ID ),
+						'callback_data' => '/pages publish ' . (int) $page_item->ID,
 					);
 				}
 
-				if ( 'draft' !== $page->post_status ) {
+				if ( 'draft' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Draft #%d', 'telepress' ), $page->ID ),
-						'callback_data' => '/pages draft ' . (int) $page->ID,
+						'text'          => sprintf( __( 'Draft #%d', 'telepress' ), $page_item->ID ),
+						'callback_data' => '/pages draft ' . (int) $page_item->ID,
 					);
 				}
 
 				$row[] = array(
-					'text'          => sprintf( __( 'Trash #%d', 'telepress' ), $page->ID ),
-					'callback_data' => '/pages trash ' . (int) $page->ID,
+					'text'          => sprintf( __( 'Trash #%d', 'telepress' ), $page_item->ID ),
+					'callback_data' => '/pages trash ' . (int) $page_item->ID,
 				);
 			}
 
