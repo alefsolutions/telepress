@@ -33,6 +33,12 @@ WP Telepilot is a Telegram-first WordPress operations plugin. It lets authorized
 - `/link CODE` links Telegram to the current WordPress user.
 - `/unlink` removes the Telegram link.
 
+## Command reference
+
+- Full command documentation is available in [COMMANDS.md](COMMANDS.md).
+- The reference is grouped by scope such as Core, Comments, Posts, Pages, Media, Users, Categories, and Tags.
+- Each command entry includes syntax, an example, and expected behavior.
+
 ## Admin settings
 
 From `WordPress Admin -> WP Telepilot`, you can:

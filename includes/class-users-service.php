@@ -112,6 +112,7 @@ class Telepilot_Users_Service {
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users disable 123' ) . ' ' . __( 'Disable a user', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users enable 123' ) . ' ' . __( 'Re-enable a user', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users reset-password 123' ) . ' ' . __( 'Generate a password reset link', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users send-reset 123' ) . ' ' . __( 'Email the official WordPress reset link to the user', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users role 123 editor' ) . ' ' . __( 'Change a user role', 'telepilot' );
 		$lines[] = '';
 		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: user creation and other sensitive actions must be confirmed in a private chat.', 'telepilot' ) );
@@ -237,6 +238,23 @@ class Telepilot_Users_Service {
 		);
 	}
 
+	public function send_reset_email( $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
+		}
+
+		$result = retrieve_password( $user->user_login );
+		if ( true !== $result ) {
+			return is_wp_error( $result ) ? $result : new WP_Error( 'telepilot_reset_email_failed', __( 'WordPress could not send the password reset email.', 'telepilot' ) );
+		}
+
+		return array(
+			'user'  => $user,
+			'label' => __( 'password reset emailed', 'telepilot' ),
+		);
+	}
+
 	public function build_confirmation_keyboard( $action, $user_id, $telegram_user_id, $extra = array() ) {
 		$payload = array(
 			'action'           => (string) $action,
@@ -277,6 +295,10 @@ class Telepilot_Users_Service {
 			$row[] = array(
 				'text'          => sprintf( __( 'Reset #%d', 'telepilot' ), $user->ID ),
 				'callback_data' => '/users reset-password ' . (int) $user->ID,
+			);
+			$row[] = array(
+				'text'          => sprintf( __( 'Email Reset #%d', 'telepilot' ), $user->ID ),
+				'callback_data' => '/users send-reset ' . (int) $user->ID,
 			);
 
 			if ( $this->is_disabled( $user->ID ) ) {

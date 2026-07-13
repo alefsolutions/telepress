@@ -108,6 +108,7 @@ class Telepilot_Telegram_Service {
 			'update',
 			'edit',
 			'reset-password',
+			'send-reset',
 			'promote',
 			'demote',
 			'unlink',

@@ -1270,6 +1270,26 @@ class Telepilot_Command_Router {
 			);
 		}
 
+		if ( 'send-reset' === $subcommand && $user_id ) {
+			$permission_result = $this->permission_service->require_capability( $identity, 'edit_users' );
+			if ( true !== $permission_result ) {
+				return $permission_result;
+			}
+
+			return Telepilot_Telegram_Response_Builder::success(
+				sprintf( __( 'Confirm password reset email for user #%d', 'telepilot' ), $user_id ),
+				array(
+					'command'      => '/users',
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $user_id, $identity ) {
+							return $this->users_service->build_confirmation_keyboard( 'send-reset', $user_id, $identity['telegram_user_id'] );
+						},
+						'user_send_reset_confirm'
+					),
+				)
+			);
+		}
+
 		if ( 'role' === $subcommand && $user_id ) {
 			$permission_result = $this->permission_service->require_capability( $identity, 'promote_users' );
 			if ( true !== $permission_result ) {
@@ -1413,6 +1433,54 @@ class Telepilot_Command_Router {
 				) .
 				"\n" .
 				__( 'Open:', 'telepilot' ) . ' ' . Telepilot_Telegram_Response_Builder::link( __( 'Reset password', 'telepilot' ), $result['url'] ),
+				array( 'command' => '/users' )
+			);
+		}
+
+		if ( 'send-reset' === $action ) {
+			$permission_result = $this->permission_service->require_capability( $identity, 'edit_users' );
+			if ( true !== $permission_result ) {
+				return $permission_result;
+			}
+
+			if ( (int) $payload['user_id'] !== $user_id ) {
+				return Telepilot_Telegram_Response_Builder::error( __( 'That user action is invalid or expired.', 'telepilot' ) );
+			}
+
+			$result = $this->users_service->send_reset_email( $user_id );
+			if ( is_wp_error( $result ) ) {
+				return Telepilot_Telegram_Response_Builder::error( $result->get_error_message() );
+			}
+
+			Telepilot_Audit_Log_Repository::log(
+				array(
+					'wp_user_id'       => $identity['wp_user']->ID,
+					'telegram_user_id' => $identity['telegram_user_id'],
+					'chat_id'          => $identity['chat_id'],
+					'action_name'      => 'user_password_reset_emailed',
+					'resource_type'    => 'user',
+					'resource_id'      => (string) $user_id,
+					'after_state'      => array(
+						'user_login' => $result['user']->user_login,
+						'user_email' => $result['user']->user_email,
+						'action'     => 'send-reset',
+					),
+				)
+			);
+
+			return Telepilot_Telegram_Response_Builder::success_html(
+				Telepilot_Telegram_Response_Builder::bold( __( 'Password Reset Email Sent', 'telepilot' ) ) .
+				"\n\n" .
+				sprintf(
+					__( 'User: #%1$d (%2$s)', 'telepilot' ),
+					$user_id,
+					Telepilot_Telegram_Response_Builder::escape( $result['user']->user_login )
+				) .
+				"\n" .
+				sprintf(
+					__( 'Email: %s', 'telepilot' ),
+					Telepilot_Telegram_Response_Builder::escape( $result['user']->user_email )
+				),
 				array( 'command' => '/users' )
 			);
 		}
