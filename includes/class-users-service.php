@@ -62,7 +62,7 @@ class Telepilot_Users_Service {
 			$roles      = implode( ', ', array_map( 'sanitize_text_field', $user->roles ) );
 			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepilot' ) : __( 'active', 'telepilot' );
 			$lines[]    = sprintf(
-				__( '#%1$d %2$s [%3$s] (%4$s)', 'telepilot' ),
+				__( '[%1$d] %2$s [%3$s] (%4$s)', 'telepilot' ),
 				$user->ID,
 				$user->user_login,
 				$roles ? $roles : __( 'no role', 'telepilot' ),
@@ -88,7 +88,7 @@ class Telepilot_Users_Service {
 			$roles       = implode( ', ', array_map( 'sanitize_text_field', $user->roles ) );
 			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepilot' ) : __( 'active', 'telepilot' );
 			$lines[]     = sprintf(
-				__( '- #%1$d %2$s [%3$s] (%4$s)', 'telepilot' ),
+				__( '[%1$d] %2$s [%3$s] (%4$s)', 'telepilot' ),
 				$user->ID,
 				Telepilot_Telegram_Response_Builder::escape( $user->user_login ),
 				Telepilot_Telegram_Response_Builder::escape( $roles ? $roles : __( 'no role', 'telepilot' ) ),

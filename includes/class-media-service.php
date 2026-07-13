@@ -72,7 +72,7 @@ class Telepilot_Media_Service {
 		$lines = array( $heading );
 		foreach ( $items as $item ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s', 'telepilot' ),
+				__( '[%1$d] %2$s', 'telepilot' ),
 				$item->ID,
 				html_entity_decode( get_the_title( $item ), ENT_QUOTES, get_bloginfo( 'charset' ) )
 			);
@@ -99,7 +99,7 @@ class Telepilot_Media_Service {
 			}
 
 			$lines[] = sprintf(
-				__( '- #%1$d %2$s', 'telepilot' ),
+				__( '[%1$d] %2$s', 'telepilot' ),
 				$item->ID,
 				Telepilot_Telegram_Response_Builder::escape( $title )
 			);

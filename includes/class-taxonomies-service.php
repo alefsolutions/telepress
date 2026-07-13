@@ -94,7 +94,7 @@ class Telepilot_Taxonomies_Service {
 
 		foreach ( $result['items'] as $term ) {
 			$lines[] = sprintf(
-				__( '- #%1$d %2$s (%3$d)', 'telepilot' ),
+				__( '[%1$d] %2$s (%3$d)', 'telepilot' ),
 				$term->term_id,
 				Telepilot_Telegram_Response_Builder::escape( $term->name ),
 				$term->count

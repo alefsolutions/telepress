@@ -112,7 +112,7 @@ class Telepilot_Posts_Service {
 		$lines   = array( $heading );
 		foreach ( $posts as $post ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s [%3$s]', 'telepilot' ),
+				__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
 				$post->ID,
 				html_entity_decode( get_the_title( $post ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 				$post->post_status
@@ -135,7 +135,7 @@ class Telepilot_Posts_Service {
 
 		foreach ( $result['items'] as $post ) {
 			$lines[] = sprintf(
-				__( '- #%1$d %2$s [%3$s]', 'telepilot' ),
+				__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
 				$post->ID,
 				Telepilot_Telegram_Response_Builder::escape( get_the_title( $post ) ),
 				Telepilot_Telegram_Response_Builder::escape( $post->post_status )

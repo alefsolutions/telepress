@@ -38,7 +38,7 @@ class Telepilot_Comments_Service {
 			$post_title = get_the_title( $comment->comment_post_ID );
 			$lines[]   = sprintf(
 				/* translators: 1: comment id, 2: author, 3: post title, 4: excerpt. */
-				__( '- #%1$d by %2$s on %3$s: %4$s', 'telepilot' ),
+				__( '[%1$d] by %2$s on %3$s: %4$s', 'telepilot' ),
 				$comment->comment_ID,
 				Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ) ),
 				Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'telepilot' ) ),
