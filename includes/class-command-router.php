@@ -184,7 +184,7 @@ class Telepilot_Command_Router {
 			$message,
 			array(
 				'command'      => '/start',
-				'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 			)
 		);
 	}
@@ -258,7 +258,7 @@ class Telepilot_Command_Router {
 			implode( "\n", $commands ),
 			array(
 				'command'      => '/help',
-				'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 			)
 		);
 	}
@@ -279,7 +279,7 @@ class Telepilot_Command_Router {
 			),
 			array(
 				'command'      => '/menu',
-				'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 			)
 		);
 	}
@@ -297,16 +297,16 @@ class Telepilot_Command_Router {
 		return Telepilot_Telegram_Response_Builder::success_html(
 			sprintf(
 				__(
-					"<b>WP Telepilot Settings</b>\n\nAdmin URL: %1$s\nTransport: %2$s\nLinking: %3$s",
+					"<b>WP Telepilot Settings</b>\n\nAdmin: %1$s\nTransport: %2$s\nLinking: %3$s",
 					'telepilot'
 				),
-				Telepilot_Telegram_Response_Builder::escape( $url ),
+				Telepilot_Telegram_Response_Builder::link( __( 'Open settings', 'telepilot' ), $url ),
 				Telepilot_Telegram_Response_Builder::escape( ! empty( $settings['transport_mode'] ) ? ucfirst( (string) $settings['transport_mode'] ) : __( 'Webhook', 'telepilot' ) ),
 				Telepilot_Telegram_Response_Builder::escape( ! empty( $settings['linking_enabled'] ) ? __( 'Enabled', 'telepilot' ) : __( 'Disabled', 'telepilot' ) )
 			),
 			array(
 				'command'      => '/settings',
-				'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 			)
 		);
 	}
@@ -417,7 +417,12 @@ class Telepilot_Command_Router {
 			array(
 				'command'      => '/site',
 				'data'         => $summary,
-				'reply_markup' => $this->dashboard_service->build_overview_keyboard( $identity['wp_user'] ),
+				'reply_markup' => $this->safe_reply_markup(
+					function() use ( $identity ) {
+						return $this->dashboard_service->build_overview_keyboard( $identity['wp_user'] );
+					},
+					'dashboard_overview'
+				),
 			)
 		);
 	}
@@ -438,7 +443,12 @@ class Telepilot_Command_Router {
 				$this->comments_service->render_pending_message( $comments ),
 				array(
 					'command'      => '/comments',
-					'reply_markup' => $this->comments_service->build_pending_keyboard( $comments, $identity['telegram_user_id'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $comments, $identity ) {
+							return $this->comments_service->build_pending_keyboard( $comments, $identity['telegram_user_id'] );
+						},
+						'comments_pending'
+					),
 				)
 			);
 		}
@@ -489,7 +499,12 @@ class Telepilot_Command_Router {
 			),
 			array(
 				'command'      => '/comments',
-				'reply_markup' => $this->comments_service->build_action_confirmation_keyboard( $comment_id, $subcommand, $identity['telegram_user_id'] ),
+				'reply_markup' => $this->safe_reply_markup(
+					function() use ( $comment_id, $subcommand, $identity ) {
+						return $this->comments_service->build_action_confirmation_keyboard( $comment_id, $subcommand, $identity['telegram_user_id'] );
+					},
+					'comments_confirm'
+				),
 			)
 		);
 	}
@@ -571,7 +586,7 @@ class Telepilot_Command_Router {
 				$this->posts_service->render_help_message(),
 				array(
 					'command'      => '/posts',
-					'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 				)
 			);
 		}
@@ -582,7 +597,12 @@ class Telepilot_Command_Router {
 				$this->posts_service->render_page_message( $result, __( 'Latest Posts', 'telepilot' ) ),
 				array(
 					'command'      => '/posts',
-					'reply_markup' => $this->posts_service->build_list_keyboard( $result['items'], 'latest', '', $result['page'], $result['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $result ) {
+							return $this->posts_service->build_list_keyboard( $result['items'], 'latest', '', $result['page'], $result['total_pages'] );
+						},
+						'posts_list'
+					),
 				)
 			);
 		}
@@ -593,7 +613,12 @@ class Telepilot_Command_Router {
 				$this->posts_service->render_page_message( $result, __( 'Draft Posts', 'telepilot' ) ),
 				array(
 					'command'      => '/posts',
-					'reply_markup' => $this->posts_service->build_list_keyboard( $result['items'], 'drafts', '', $result['page'], $result['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $result ) {
+							return $this->posts_service->build_list_keyboard( $result['items'], 'drafts', '', $result['page'], $result['total_pages'] );
+						},
+						'posts_drafts'
+					),
 				)
 			);
 		}
@@ -609,7 +634,12 @@ class Telepilot_Command_Router {
 				$this->posts_service->render_page_message( $posts, sprintf( __( 'Post Search: %s', 'telepilot' ), $term ) ),
 				array(
 					'command'      => '/posts',
-					'reply_markup' => $this->posts_service->build_list_keyboard( $posts['items'], 'search', $term, $posts['page'], $posts['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $posts, $term ) {
+							return $this->posts_service->build_list_keyboard( $posts['items'], 'search', $term, $posts['page'], $posts['total_pages'] );
+						},
+						'posts_search'
+					),
 				)
 			);
 		}
@@ -619,7 +649,7 @@ class Telepilot_Command_Router {
 				$this->posts_service->render_stats_message( $this->posts_service->stats() ),
 				array(
 					'command'      => '/posts',
-					'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 				)
 			);
 		}
@@ -672,7 +702,12 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm unpublish for post #%d', 'telepilot' ), $post_id ),
 				array(
 					'command'      => '/posts',
-					'reply_markup' => $this->posts_service->build_action_confirmation_keyboard( $post_id, 'unpublish', $identity['telegram_user_id'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $post_id, $identity ) {
+							return $this->posts_service->build_action_confirmation_keyboard( $post_id, 'unpublish', $identity['telegram_user_id'] );
+						},
+						'posts_unpublish_confirm'
+					),
 				)
 			);
 		}
@@ -733,7 +768,12 @@ class Telepilot_Command_Router {
 				$this->pages_service->render_page_message( $pages, __( 'Recent Pages', 'telepilot' ) ),
 				array(
 					'command'      => '/pages',
-					'reply_markup' => $this->pages_service->build_list_keyboard( $pages['items'], 'list', '', $pages['page'], $pages['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $pages ) {
+							return $this->pages_service->build_list_keyboard( $pages['items'], 'list', '', $pages['page'], $pages['total_pages'] );
+						},
+						'pages_list'
+					),
 				)
 			);
 		}
@@ -749,7 +789,12 @@ class Telepilot_Command_Router {
 				$this->pages_service->render_page_message( $pages, sprintf( __( 'Page Search: %s', 'telepilot' ), $term ) ),
 				array(
 					'command'      => '/pages',
-					'reply_markup' => $this->pages_service->build_list_keyboard( $pages['items'], 'search', $term, $pages['page'], $pages['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $pages, $term ) {
+							return $this->pages_service->build_list_keyboard( $pages['items'], 'search', $term, $pages['page'], $pages['total_pages'] );
+						},
+						'pages_search'
+					),
 				)
 			);
 		}
@@ -759,7 +804,7 @@ class Telepilot_Command_Router {
 				$this->pages_service->render_help_message(),
 				array(
 					'command'      => '/pages',
-					'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 				)
 			);
 		}
@@ -770,7 +815,12 @@ class Telepilot_Command_Router {
 				$this->pages_service->render_page_message( $pages, __( 'Trashed Pages', 'telepilot' ) ),
 				array(
 					'command'      => '/pages',
-					'reply_markup' => $this->pages_service->build_list_keyboard( $pages['items'], 'trashed', '', $pages['page'], $pages['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $pages ) {
+							return $this->pages_service->build_list_keyboard( $pages['items'], 'trashed', '', $pages['page'], $pages['total_pages'] );
+						},
+						'pages_trashed'
+					),
 				)
 			);
 		}
@@ -844,7 +894,12 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm %1$s for page #%2$d', 'telepilot' ), $subcommand, $page_id ),
 				array(
 					'command'      => '/pages',
-					'reply_markup' => $this->pages_service->build_action_confirmation_keyboard( $page_id, $subcommand, $identity['telegram_user_id'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $page_id, $subcommand, $identity ) {
+							return $this->pages_service->build_action_confirmation_keyboard( $page_id, $subcommand, $identity['telegram_user_id'] );
+						},
+						'pages_action_confirm'
+					),
 				)
 			);
 		}
@@ -919,7 +974,7 @@ class Telepilot_Command_Router {
 				$this->media_service->render_help_message(),
 				array(
 					'command'      => '/media',
-					'reply_markup' => $this->build_home_keyboard( $identity ),
+				'reply_markup' => $this->safe_home_keyboard( $identity ),
 				)
 			);
 		}
@@ -930,7 +985,12 @@ class Telepilot_Command_Router {
 				$this->media_service->render_page_message( $items, __( 'Recent Media', 'telepilot' ) ),
 				array(
 					'command'      => '/media',
-					'reply_markup' => $this->media_service->build_list_keyboard( $items['items'], 'list', '', $items['page'], $items['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $items ) {
+							return $this->media_service->build_list_keyboard( $items['items'], 'list', '', $items['page'], $items['total_pages'] );
+						},
+						'media_list'
+					),
 				)
 			);
 		}
@@ -951,7 +1011,12 @@ class Telepilot_Command_Router {
 				$this->media_service->render_page_message( $items, sprintf( __( 'Media Search: %s', 'telepilot' ), $term ) ),
 				array(
 					'command'      => '/media',
-					'reply_markup' => $this->media_service->build_list_keyboard( $items['items'], 'search', $term, $items['page'], $items['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $items, $term ) {
+							return $this->media_service->build_list_keyboard( $items['items'], 'search', $term, $items['page'], $items['total_pages'] );
+						},
+						'media_search'
+					),
 				)
 			);
 		}
@@ -972,7 +1037,12 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm delete for media #%d', 'telepilot' ), $attachment_id ),
 				array(
 					'command'      => '/media',
-					'reply_markup' => $this->media_service->build_delete_confirmation_keyboard( $attachment_id, $identity['telegram_user_id'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $attachment_id, $identity ) {
+							return $this->media_service->build_delete_confirmation_keyboard( $attachment_id, $identity['telegram_user_id'] );
+						},
+						'media_delete_confirm'
+					),
 				)
 			);
 		}
@@ -1049,7 +1119,12 @@ class Telepilot_Command_Router {
 				$this->users_service->render_page_message( $users, __( 'Recent Users', 'telepilot' ) ),
 				array(
 					'command'      => '/users',
-					'reply_markup' => $this->users_service->build_list_keyboard( $users['items'], 'list', '', $users['page'], $users['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $users ) {
+							return $this->users_service->build_list_keyboard( $users['items'], 'list', '', $users['page'], $users['total_pages'] );
+						},
+						'users_list'
+					),
 				)
 			);
 		}
@@ -1069,7 +1144,12 @@ class Telepilot_Command_Router {
 				$this->users_service->render_page_message( $users, sprintf( __( 'User Search: %s', 'telepilot' ), $term ) ),
 				array(
 					'command'      => '/users',
-					'reply_markup' => $this->users_service->build_list_keyboard( $users['items'], 'search', $term, $users['page'], $users['total_pages'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $users, $term ) {
+							return $this->users_service->build_list_keyboard( $users['items'], 'search', $term, $users['page'], $users['total_pages'] );
+						},
+						'users_search'
+					),
 				)
 			);
 		}
@@ -1079,7 +1159,7 @@ class Telepilot_Command_Router {
 				$this->users_service->render_help_message(),
 				array(
 					'command'      => '/users',
-					'reply_markup' => $this->build_home_keyboard( $identity ),
+					'reply_markup' => $this->safe_home_keyboard( $identity ),
 				)
 			);
 		}
@@ -1110,15 +1190,20 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm create user `%1$s` with role `%2$s`', 'telepilot' ), $username, $role ),
 				array(
 					'command'      => '/users',
-					'reply_markup' => $this->users_service->build_confirmation_keyboard(
-						'create',
-						0,
-						$identity['telegram_user_id'],
-						array(
-							'username' => $username,
-							'email'    => $email,
-							'role'     => $role,
-						)
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $identity, $username, $email, $role ) {
+							return $this->users_service->build_confirmation_keyboard(
+								'create',
+								0,
+								$identity['telegram_user_id'],
+								array(
+									'username' => $username,
+									'email'    => $email,
+									'role'     => $role,
+								)
+							);
+						},
+						'users_create_confirm'
 					),
 				)
 			);
@@ -1136,7 +1221,12 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm disable for user #%d', 'telepilot' ), $user_id ),
 				array(
 					'command'      => '/users',
-					'reply_markup' => $this->users_service->build_confirmation_keyboard( 'disable', $user_id, $identity['telegram_user_id'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $user_id, $identity ) {
+							return $this->users_service->build_confirmation_keyboard( 'disable', $user_id, $identity['telegram_user_id'] );
+						},
+						'users_disable_confirm'
+					),
 				)
 			);
 		}
@@ -1170,7 +1260,12 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm password reset for user #%d', 'telepilot' ), $user_id ),
 				array(
 					'command'      => '/users',
-					'reply_markup' => $this->users_service->build_confirmation_keyboard( 'reset-password', $user_id, $identity['telegram_user_id'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $user_id, $identity ) {
+							return $this->users_service->build_confirmation_keyboard( 'reset-password', $user_id, $identity['telegram_user_id'] );
+						},
+						'user_reset_password_confirm'
+					),
 				)
 			);
 		}
@@ -1194,7 +1289,12 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm role change for user #%1$d to `%2$s`', 'telepilot' ), $user_id, $role ),
 				array(
 					'command'      => '/users',
-					'reply_markup' => $this->users_service->build_confirmation_keyboard( 'role', $user_id, $identity['telegram_user_id'], array( 'role' => $role ) ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $user_id, $identity, $role ) {
+							return $this->users_service->build_confirmation_keyboard( 'role', $user_id, $identity['telegram_user_id'], array( 'role' => $role ) );
+						},
+						'users_role_confirm'
+					),
 				)
 			);
 		}
@@ -1304,8 +1404,15 @@ class Telepilot_Command_Router {
 				)
 			);
 
-			return Telepilot_Telegram_Response_Builder::success(
-				sprintf( __( "Password reset generated for user #%1$d\nReset URL: %2$s", 'telepilot' ), $user_id, $result['url'] ),
+			return Telepilot_Telegram_Response_Builder::success_html(
+				Telepilot_Telegram_Response_Builder::bold( __( 'Password Reset Link Generated', 'telepilot' ) ) .
+				"\n\n" .
+				sprintf(
+					__( 'User: #%1$d', 'telepilot' ),
+					$user_id
+				) .
+				"\n" .
+				__( 'Open:', 'telepilot' ) . ' ' . Telepilot_Telegram_Response_Builder::link( __( 'Reset password', 'telepilot' ), $result['url'] ),
 				array( 'command' => '/users' )
 			);
 		}
@@ -1374,7 +1481,12 @@ class Telepilot_Command_Router {
 				$this->taxonomies_service->render_terms_message( $result, sprintf( __( '%s List', 'telepilot' ), ucfirst( $resource ) ) ),
 				array(
 					'command'      => '/' . $resource,
-					'reply_markup' => $this->taxonomies_service->build_terms_keyboard( $resource, $result ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $resource, $result ) {
+							return $this->taxonomies_service->build_terms_keyboard( $resource, $result );
+						},
+						'terms_list'
+					),
 				)
 			);
 		}
@@ -1394,7 +1506,12 @@ class Telepilot_Command_Router {
 				$this->taxonomies_service->render_terms_message( $result, sprintf( __( '%1$s Search: %2$s', 'telepilot' ), ucfirst( $resource ), $term ) ),
 				array(
 					'command'      => '/' . $resource,
-					'reply_markup' => $this->taxonomies_service->build_terms_keyboard( $resource, $result ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $resource, $result ) {
+							return $this->taxonomies_service->build_terms_keyboard( $resource, $result );
+						},
+						'terms_search'
+					),
 				)
 			);
 		}
@@ -1455,7 +1572,12 @@ class Telepilot_Command_Router {
 				sprintf( __( 'Confirm delete for %1$s #%2$d', 'telepilot' ), rtrim( $resource, 's' ), $term_id ),
 				array(
 					'command'      => '/' . $resource,
-					'reply_markup' => $this->taxonomies_service->build_delete_confirmation_keyboard( $taxonomy, $term_id, $identity['telegram_user_id'] ),
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $taxonomy, $term_id, $identity ) {
+							return $this->taxonomies_service->build_delete_confirmation_keyboard( $taxonomy, $term_id, $identity['telegram_user_id'] );
+						},
+						'terms_delete_confirm'
+					),
 				)
 			);
 		}
@@ -1520,6 +1642,40 @@ class Telepilot_Command_Router {
 		return $this->permission_service->require_private_chat( $identity );
 	}
 
+	private function safe_reply_markup( $callback, $context = '' ) {
+		try {
+			$markup = is_callable( $callback ) ? call_user_func( $callback ) : array();
+		} catch ( Throwable $throwable ) {
+			Telepilot_Audit_Log_Repository::log(
+				array(
+					'action_name'    => 'telegram_keyboard_build_failed',
+					'resource_type'  => 'telegram_keyboard',
+					'resource_id'    => $context ? (string) $context : null,
+					'was_successful' => 0,
+					'failure_reason' => $throwable->getMessage(),
+					'context'        => array(
+						'context' => $context,
+						'file'    => $throwable->getFile(),
+						'line'    => $throwable->getLine(),
+					),
+				)
+			);
+
+			return array();
+		}
+
+		return is_array( $markup ) ? $markup : array();
+	}
+
+	private function safe_home_keyboard( $identity ) {
+		return $this->safe_reply_markup(
+			function() use ( $identity ) {
+				return $this->build_home_keyboard( $identity );
+			},
+			'home'
+		);
+	}
+
 	private function build_home_keyboard( $identity ) {
 		$rows   = array();
 		$rows[] = array(
@@ -1553,6 +1709,11 @@ class Telepilot_Command_Router {
 						'text'          => __( 'Comments', 'telepilot' ),
 						'callback_data' => '/comments pending',
 					),
+				);
+			}
+
+			if ( $this->permission_service->user_can( $identity['wp_user'], 'upload_files' ) ) {
+				$rows[] = array(
 					array(
 						'text'          => __( 'Media', 'telepilot' ),
 						'callback_data' => '/media list',

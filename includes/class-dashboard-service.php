@@ -101,6 +101,11 @@ class Telepilot_Dashboard_Service {
 					'text'          => __( 'Comments', 'telepilot' ),
 					'callback_data' => '/comments pending',
 				),
+			);
+		}
+
+		if ( $wp_user instanceof WP_User && user_can( $wp_user, 'upload_files' ) ) {
+			$rows[] = array(
 				array(
 					'text'          => __( 'Media', 'telepilot' ),
 					'callback_data' => '/media list',

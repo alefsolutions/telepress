@@ -93,10 +93,15 @@ class Telepilot_Media_Service {
 		$lines[] = '';
 
 		foreach ( $result['items'] as $item ) {
+			$title = get_the_title( $item );
+			if ( '' === (string) $title ) {
+				$title = sprintf( __( 'Attachment #%d', 'telepilot' ), $item->ID );
+			}
+
 			$lines[] = sprintf(
 				__( '- #%1$d %2$s', 'telepilot' ),
 				$item->ID,
-				Telepilot_Telegram_Response_Builder::escape( get_the_title( $item ) )
+				Telepilot_Telegram_Response_Builder::escape( $title )
 			);
 
 			$preview_url = wp_get_attachment_url( $item->ID );

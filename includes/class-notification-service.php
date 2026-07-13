@@ -565,57 +565,78 @@ class Telepilot_Notification_Service {
 	}
 
 	private function send_standard_notification( $setting_key, $action_name, $capability, $title, $facts = array(), $links = array(), $context = array(), $resource_type = 'notification', $resource_id = '' ) {
-		if ( ! $this->is_notification_enabled( $setting_key ) ) {
-			return;
-		}
+		try {
+			if ( ! $this->is_notification_enabled( $setting_key ) ) {
+				return;
+			}
 
-		$message    = $this->build_standard_message( $title, $facts, $links );
-		$recipients = $this->get_recipient_chat_ids( $capability );
+			$message    = $this->build_standard_message( $title, $facts, $links );
+			$recipients = $this->get_recipient_chat_ids( $capability );
 
-		foreach ( $recipients as $chat_id ) {
-			$response = $this->client->send_message(
-				$chat_id,
-				$message,
-				array(
-					'parse_mode' => 'HTML',
-				)
-			);
+			foreach ( $recipients as $chat_id ) {
+				$response = $this->client->send_message(
+					$chat_id,
+					$message,
+					array(
+						'parse_mode' => 'HTML',
+					)
+				);
 
-			if ( is_wp_error( $response ) ) {
+				if ( is_wp_error( $response ) ) {
+					Telepilot_Audit_Log_Repository::log(
+						array(
+							'chat_id'        => $chat_id,
+							'action_name'    => 'telegram_notification_failed',
+							'resource_type'  => $resource_type,
+							'resource_id'    => $resource_id ? $resource_id : $action_name,
+							'was_successful' => 0,
+							'failure_reason' => $response->get_error_message(),
+							'context'        => wp_parse_args(
+								$context,
+								array(
+									'notification' => $setting_key,
+									'action_name'  => $action_name,
+								)
+							),
+						)
+					);
+					continue;
+				}
+
 				Telepilot_Audit_Log_Repository::log(
 					array(
-						'chat_id'        => $chat_id,
-						'action_name'    => 'telegram_notification_failed',
-						'resource_type'  => $resource_type,
-						'resource_id'    => $resource_id ? $resource_id : $action_name,
-						'was_successful' => 0,
-						'failure_reason' => $response->get_error_message(),
-						'context'        => wp_parse_args(
+						'chat_id'       => $chat_id,
+						'action_name'   => 'telegram_notification_sent',
+						'resource_type' => $resource_type,
+						'resource_id'   => $resource_id ? $resource_id : $action_name,
+						'context'       => wp_parse_args(
 							$context,
 							array(
 								'notification' => $setting_key,
 								'action_name'  => $action_name,
 							)
 						),
+						'after_state'   => isset( $response['result'] ) ? $response['result'] : null,
 					)
 				);
-				continue;
 			}
-
+		} catch ( Throwable $throwable ) {
 			Telepilot_Audit_Log_Repository::log(
 				array(
-					'chat_id'       => $chat_id,
-					'action_name'   => 'telegram_notification_sent',
-					'resource_type' => $resource_type,
-					'resource_id'   => $resource_id ? $resource_id : $action_name,
-					'context'       => wp_parse_args(
+					'action_name'    => 'telegram_notification_exception',
+					'resource_type'  => $resource_type,
+					'resource_id'    => $resource_id ? $resource_id : $action_name,
+					'was_successful' => 0,
+					'failure_reason' => $throwable->getMessage(),
+					'context'        => wp_parse_args(
 						$context,
 						array(
 							'notification' => $setting_key,
 							'action_name'  => $action_name,
+							'file'         => $throwable->getFile(),
+							'line'         => $throwable->getLine(),
 						)
 					),
-					'after_state'   => isset( $response['result'] ) ? $response['result'] : null,
 				)
 			);
 		}
