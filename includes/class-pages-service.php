@@ -191,7 +191,7 @@ class Telepilot_Pages_Service {
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepilot' ), ucfirst( $action ), $page_id ),
+							'text'          => sprintf( __( 'Confirm %1$s [%2$d]', 'telepilot' ), ucfirst( $action ), $page_id ),
 							'callback_data' => 'tp:page:' . $action . ':' . (int) $page_id . ':' . $token,
 						),
 					),
@@ -213,38 +213,38 @@ class Telepilot_Pages_Service {
 
 			if ( 'publish' === $page_item->post_status ) {
 				$row[] = array(
-					'text' => sprintf( __( 'Preview #%d', 'telepilot' ), $page_item->ID ),
+					'text' => sprintf( __( 'Preview [%d]', 'telepilot' ), $page_item->ID ),
 					'url'  => $this->get_preview_url( $page_item ),
 				);
 			} else {
 				$row[] = array(
-					'text' => sprintf( __( 'Edit #%d', 'telepilot' ), $page_item->ID ),
+					'text' => sprintf( __( 'Edit [%d]', 'telepilot' ), $page_item->ID ),
 					'url'  => $this->get_admin_edit_url( $page_item->ID ),
 				);
 			}
 
 			if ( 'trash' === $page_item->post_status ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Restore #%d', 'telepilot' ), $page_item->ID ),
+					'text'          => sprintf( __( 'Restore [%d]', 'telepilot' ), $page_item->ID ),
 					'callback_data' => '/pages restore ' . (int) $page_item->ID,
 				);
 			} else {
 				if ( 'publish' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Publish #%d', 'telepilot' ), $page_item->ID ),
+						'text'          => sprintf( __( 'Publish [%d]', 'telepilot' ), $page_item->ID ),
 						'callback_data' => '/pages publish ' . (int) $page_item->ID,
 					);
 				}
 
 				if ( 'draft' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Draft #%d', 'telepilot' ), $page_item->ID ),
+						'text'          => sprintf( __( 'Draft [%d]', 'telepilot' ), $page_item->ID ),
 						'callback_data' => '/pages draft ' . (int) $page_item->ID,
 					);
 				}
 
 				$row[] = array(
-					'text'          => sprintf( __( 'Trash #%d', 'telepilot' ), $page_item->ID ),
+					'text'          => sprintf( __( 'Trash [%d]', 'telepilot' ), $page_item->ID ),
 					'callback_data' => '/pages trash ' . (int) $page_item->ID,
 				);
 			}

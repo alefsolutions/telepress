@@ -95,7 +95,7 @@ class Telepilot_Media_Service {
 		foreach ( $result['items'] as $item ) {
 			$title = get_the_title( $item );
 			if ( '' === (string) $title ) {
-				$title = sprintf( __( 'Attachment #%d', 'telepilot' ), $item->ID );
+				$title = sprintf( __( 'Attachment [%d]', 'telepilot' ), $item->ID );
 			}
 
 			$lines[] = sprintf(
@@ -167,7 +167,7 @@ class Telepilot_Media_Service {
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm delete #%d', 'telepilot' ), $attachment_id ),
+							'text'          => sprintf( __( 'Confirm delete [%d]', 'telepilot' ), $attachment_id ),
 							'callback_data' => 'tp:media:delete:' . (int) $attachment_id . ':' . $token,
 						),
 					),
@@ -187,11 +187,11 @@ class Telepilot_Media_Service {
 
 			$rows[] = array(
 				array(
-					'text' => sprintf( __( 'Open #%d', 'telepilot' ), $item->ID ),
+					'text' => sprintf( __( 'Open [%d]', 'telepilot' ), $item->ID ),
 					'url'  => wp_get_attachment_url( $item->ID ),
 				),
 				array(
-					'text'          => sprintf( __( 'Delete #%d', 'telepilot' ), $item->ID ),
+					'text'          => sprintf( __( 'Delete [%d]', 'telepilot' ), $item->ID ),
 					'callback_data' => '/media delete ' . (int) $item->ID,
 				),
 			);

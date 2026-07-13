@@ -172,7 +172,7 @@ class Telepilot_Taxonomies_Service {
 		foreach ( $result['items'] as $term ) {
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Delete #%d', 'telepilot' ), $term->term_id ),
+					'text'          => sprintf( __( 'Delete [%d]', 'telepilot' ), $term->term_id ),
 					'callback_data' => '/' . $resource . ' delete ' . (int) $term->term_id,
 				),
 			);
@@ -205,7 +205,7 @@ class Telepilot_Taxonomies_Service {
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm delete #%d', 'telepilot' ), $term_id ),
+							'text'          => sprintf( __( 'Confirm delete [%d]', 'telepilot' ), $term_id ),
 							'callback_data' => 'tp:term:' . $taxonomy . ':delete:' . (int) $term_id . ':' . $token,
 						),
 					),

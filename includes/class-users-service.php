@@ -273,7 +273,7 @@ class Telepilot_Users_Service {
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepilot' ), ucfirst( str_replace( '-', ' ', $action ) ), $user_id ),
+							'text'          => sprintf( __( 'Confirm %1$s [%2$d]', 'telepilot' ), ucfirst( str_replace( '-', ' ', $action ) ), $user_id ),
 							'callback_data' => 'tp:user:' . $action . ':' . (int) $user_id . ':' . $token,
 						),
 					),
@@ -293,22 +293,22 @@ class Telepilot_Users_Service {
 
 			$row = array();
 			$row[] = array(
-				'text'          => sprintf( __( 'Reset #%d', 'telepilot' ), $user->ID ),
+				'text'          => sprintf( __( 'Reset [%d]', 'telepilot' ), $user->ID ),
 				'callback_data' => '/users reset-password ' . (int) $user->ID,
 			);
 			$row[] = array(
-				'text'          => sprintf( __( 'Email Reset #%d', 'telepilot' ), $user->ID ),
+				'text'          => sprintf( __( 'Email Reset [%d]', 'telepilot' ), $user->ID ),
 				'callback_data' => '/users send-reset ' . (int) $user->ID,
 			);
 
 			if ( $this->is_disabled( $user->ID ) ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Enable #%d', 'telepilot' ), $user->ID ),
+					'text'          => sprintf( __( 'Enable [%d]', 'telepilot' ), $user->ID ),
 					'callback_data' => '/users enable ' . (int) $user->ID,
 				);
 			} else {
 				$row[] = array(
-					'text'          => sprintf( __( 'Disable #%d', 'telepilot' ), $user->ID ),
+					'text'          => sprintf( __( 'Disable [%d]', 'telepilot' ), $user->ID ),
 					'callback_data' => '/users disable ' . (int) $user->ID,
 				);
 			}

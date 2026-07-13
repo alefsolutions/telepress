@@ -87,21 +87,21 @@ class Telepilot_Comments_Service {
 
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Approve #%d', 'telepilot' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Approve [%d]', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:approve:' . (int) $comment->comment_ID . ':' . $approve_token,
 				),
 			);
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Reject #%d', 'telepilot' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Reject [%d]', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:reject:' . (int) $comment->comment_ID . ':' . $reject_token,
 				),
 				array(
-					'text'          => sprintf( __( 'Spam #%d', 'telepilot' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Spam [%d]', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:spam:' . (int) $comment->comment_ID . ':' . $spam_token,
 				),
 				array(
-					'text'          => sprintf( __( 'Trash #%d', 'telepilot' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Trash [%d]', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:trash:' . (int) $comment->comment_ID . ':' . $trash_token,
 				),
 			);
@@ -173,7 +173,7 @@ class Telepilot_Comments_Service {
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepilot' ), ucfirst( $action ), $comment_id ),
+							'text'          => sprintf( __( 'Confirm %1$s [%2$d]', 'telepilot' ), ucfirst( $action ), $comment_id ),
 							'callback_data' => 'tp:comment:' . $action . ':' . (int) $comment_id . ':' . $token,
 						),
 					),

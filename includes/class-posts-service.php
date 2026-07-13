@@ -187,7 +187,7 @@ class Telepilot_Posts_Service {
 			if ( 'publish' === $post->post_status ) {
 				$rows[] = array(
 					array(
-						'text'          => sprintf( __( 'Unpublish #%d', 'telepilot' ), $post->ID ),
+						'text'          => sprintf( __( 'Unpublish [%d]', 'telepilot' ), $post->ID ),
 						'callback_data' => '/posts unpublish ' . (int) $post->ID,
 					),
 				);
@@ -196,7 +196,7 @@ class Telepilot_Posts_Service {
 
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Publish #%d', 'telepilot' ), $post->ID ),
+					'text'          => sprintf( __( 'Publish [%d]', 'telepilot' ), $post->ID ),
 					'callback_data' => '/posts publish ' . (int) $post->ID,
 				),
 			);

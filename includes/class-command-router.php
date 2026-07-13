@@ -699,7 +699,7 @@ class Telepilot_Command_Router {
 			}
 
 			return Telepilot_Telegram_Response_Builder::success(
-				sprintf( __( 'Confirm unpublish for post #%d', 'telepilot' ), $post_id ),
+				sprintf( __( 'Confirm unpublish for post [%d]', 'telepilot' ), $post_id ),
 				array(
 					'command'      => '/posts',
 					'reply_markup' => $this->safe_reply_markup(
@@ -1034,7 +1034,7 @@ class Telepilot_Command_Router {
 			}
 
 			return Telepilot_Telegram_Response_Builder::success(
-				sprintf( __( 'Confirm delete for media #%d', 'telepilot' ), $attachment_id ),
+				sprintf( __( 'Confirm delete for media [%d]', 'telepilot' ), $attachment_id ),
 				array(
 					'command'      => '/media',
 					'reply_markup' => $this->safe_reply_markup(
@@ -1218,7 +1218,7 @@ class Telepilot_Command_Router {
 			}
 
 			return Telepilot_Telegram_Response_Builder::success(
-				sprintf( __( 'Confirm disable for user #%d', 'telepilot' ), $user_id ),
+				sprintf( __( 'Confirm disable for user [%d]', 'telepilot' ), $user_id ),
 				array(
 					'command'      => '/users',
 					'reply_markup' => $this->safe_reply_markup(
@@ -1257,7 +1257,7 @@ class Telepilot_Command_Router {
 			}
 
 			return Telepilot_Telegram_Response_Builder::success(
-				sprintf( __( 'Confirm password reset for user #%d', 'telepilot' ), $user_id ),
+				sprintf( __( 'Confirm password reset for user [%d]', 'telepilot' ), $user_id ),
 				array(
 					'command'      => '/users',
 					'reply_markup' => $this->safe_reply_markup(
@@ -1277,7 +1277,7 @@ class Telepilot_Command_Router {
 			}
 
 			return Telepilot_Telegram_Response_Builder::success(
-				sprintf( __( 'Confirm password reset email for user #%d', 'telepilot' ), $user_id ),
+				sprintf( __( 'Confirm password reset email for user [%d]', 'telepilot' ), $user_id ),
 				array(
 					'command'      => '/users',
 					'reply_markup' => $this->safe_reply_markup(
