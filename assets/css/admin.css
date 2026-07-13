@@ -1,39 +1,39 @@
 :root {
-  --telepress-accent: #0ea5d3;
-  --telepress-accent-strong: #0b88af;
-  --telepress-charcoal: #1f2933;
-  --telepress-ink: #1f2933;
-  --telepress-muted: #52606d;
-  --telepress-light: #f3f7f9;
-  --telepress-border: #d5dde3;
-  --telepress-success: #0f766e;
-  --telepress-success-bg: #ecfeff;
-  --telepress-warn: #9a6700;
-  --telepress-warn-bg: #fff8db;
-  --telepress-danger: #b42318;
-  --telepress-danger-bg: #fef3f2;
+  --telepilot-accent: #0ea5d3;
+  --telepilot-accent-strong: #0b88af;
+  --telepilot-charcoal: #1f2933;
+  --telepilot-ink: #1f2933;
+  --telepilot-muted: #52606d;
+  --telepilot-light: #f3f7f9;
+  --telepilot-border: #d5dde3;
+  --telepilot-success: #0f766e;
+  --telepilot-success-bg: #ecfeff;
+  --telepilot-warn: #9a6700;
+  --telepilot-warn-bg: #fff8db;
+  --telepilot-danger: #b42318;
+  --telepilot-danger-bg: #fef3f2;
 }
 
-.telepress-admin {
+.telepilot-admin {
   margin: 0 0 0 -20px;
 }
 
-.telepress-shell {
+.telepilot-shell {
   min-height: calc(100vh - 32px);
   padding: 32px;
   background:
     radial-gradient(circle at top, rgba(14, 165, 211, 0.12), transparent 25rem),
     linear-gradient(180deg, #f8fbfd 0%, #eef4f7 100%);
-  color: var(--telepress-ink);
+  color: var(--telepilot-ink);
 }
 
-.telepress-admin *,
-.telepress-admin *::before,
-.telepress-admin *::after {
+.telepilot-admin *,
+.telepilot-admin *::before,
+.telepilot-admin *::after {
   box-sizing: border-box;
 }
 
-.telepress-hero {
+.telepilot-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
   gap: 24px;
@@ -47,20 +47,20 @@
   box-shadow: 0 28px 70px rgba(15, 23, 42, 0.22);
 }
 
-.telepress-hero-copy {
+.telepilot-hero-copy {
   display: flex;
   flex-direction: column;
 }
 
-.telepress-hero-logo {
+.telepilot-hero-logo {
   width: 72px;
   height: auto;
   margin-bottom: 18px;
   filter: drop-shadow(0 10px 24px rgba(14, 165, 211, 0.24));
 }
 
-.telepress-kicker,
-.telepress-section-label {
+.telepilot-kicker,
+.telepilot-section-label {
   margin: 0 0 12px;
   font-size: 11px;
   font-weight: 800;
@@ -68,12 +68,12 @@
   text-transform: uppercase;
 }
 
-.telepress-kicker {
+.telepilot-kicker {
   color: rgba(255, 255, 255, 0.72);
 }
 
-.telepress-hero h1,
-.telepress-panel h2 {
+.telepilot-hero h1,
+.telepilot-panel h2 {
   margin: 0;
   color: inherit;
   font-family: "Sora", "Avenir Next", sans-serif;
@@ -81,17 +81,17 @@
   letter-spacing: -0.03em;
 }
 
-.telepress-hero h1 {
+.telepilot-hero h1 {
   font-size: 38px;
   line-height: 1.1;
 }
 
-.telepress-panel h2 {
-  color: var(--telepress-charcoal);
+.telepilot-panel h2 {
+  color: var(--telepilot-charcoal);
   font-size: 28px;
 }
 
-.telepress-lead {
+.telepilot-lead {
   max-width: 48rem;
   margin: 16px 0 0;
   color: rgba(255, 255, 255, 0.82);
@@ -99,24 +99,28 @@
   line-height: 1.9;
 }
 
-.telepress-hero-card,
-.telepress-panel {
-  border: 1px solid var(--telepress-border);
+.telepilot-hero-meta {
+  margin-top: 18px;
+}
+
+.telepilot-hero-card,
+.telepilot-panel {
+  border: 1px solid var(--telepilot-border);
   border-radius: 32px;
   background: #fff;
   box-shadow: 0 24px 70px rgba(15, 23, 42, 0.06);
 }
 
-.telepress-hero-card {
+.telepilot-hero-card {
   padding: 24px;
-  color: var(--telepress-ink);
+  color: var(--telepilot-ink);
   background:
     linear-gradient(180deg, rgba(14, 165, 211, 0.08), rgba(255, 255, 255, 0.94)),
     #fff;
 }
 
-.telepress-badge,
-.telepress-status-pill {
+.telepilot-badge,
+.telepilot-status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -127,13 +131,13 @@
   text-transform: uppercase;
 }
 
-.telepress-badge {
+.telepilot-badge {
   padding: 8px 14px;
-  background: var(--telepress-success-bg);
-  color: var(--telepress-success);
+  background: var(--telepilot-success-bg);
+  color: var(--telepilot-success);
 }
 
-.telepress-hero-metrics {
+.telepilot-hero-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
@@ -142,45 +146,45 @@
   list-style: none;
 }
 
-.telepress-hero-metrics li,
-.telepress-check,
-.telepress-status-list li {
+.telepilot-hero-metrics li,
+.telepilot-check,
+.telepilot-status-list li {
   border-radius: 24px;
-  border: 1px solid var(--telepress-border);
+  border: 1px solid var(--telepilot-border);
   background: #f8fbff;
 }
 
-.telepress-hero-metrics li {
+.telepilot-hero-metrics li {
   padding: 18px 16px;
 }
 
-.telepress-hero-metrics strong {
+.telepilot-hero-metrics strong {
   display: block;
-  color: var(--telepress-charcoal);
+  color: var(--telepilot-charcoal);
   font-size: 22px;
 }
 
-.telepress-hero-metrics span {
+.telepilot-hero-metrics span {
   display: block;
   margin-top: 6px;
-  color: var(--telepress-muted);
+  color: var(--telepilot-muted);
 }
 
-.telepress-grid {
+.telepilot-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
   gap: 24px;
 }
 
-.telepress-panel {
+.telepilot-panel {
   padding: 28px;
 }
 
-.telepress-panel-wide {
+.telepilot-panel-wide {
   grid-column: 1 / -1;
 }
 
-.telepress-panel-heading {
+.telepilot-panel-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -188,147 +192,147 @@
   margin-bottom: 24px;
 }
 
-.telepress-section-label {
-  color: var(--telepress-accent);
+.telepilot-section-label {
+  color: var(--telepilot-accent);
 }
 
-.telepress-tabs {
+.telepilot-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.telepress-tab {
+.telepilot-tab {
   padding: 10px 16px;
   border: 1px solid rgba(31, 41, 51, 0.12);
   border-radius: 999px;
   background: #fff;
-  color: var(--telepress-charcoal);
+  color: var(--telepilot-charcoal);
   cursor: pointer;
   font-weight: 700;
 }
 
-.telepress-tab.is-active,
-.telepress-tab:hover,
-.telepress-tab:focus {
-  border-color: var(--telepress-accent);
-  color: var(--telepress-accent);
+.telepilot-tab.is-active,
+.telepilot-tab:hover,
+.telepilot-tab:focus {
+  border-color: var(--telepilot-accent);
+  color: var(--telepilot-accent);
   outline: none;
 }
 
-.telepress-tab-panel {
+.telepilot-tab-panel {
   display: none;
 }
 
-.telepress-tab-panel.is-active {
+.telepilot-tab-panel.is-active {
   display: block;
 }
 
-.telepress-field-grid,
-.telepress-checkbox-grid {
+.telepilot-field-grid,
+.telepilot-checkbox-grid {
   display: grid;
   gap: 16px;
 }
 
-.telepress-field-grid {
+.telepilot-field-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.telepress-field,
-.telepress-check {
+.telepilot-field,
+.telepilot-check {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 18px;
 }
 
-.telepress-field-full {
+.telepilot-field-full {
   grid-column: 1 / -1;
 }
 
-.telepress-field span,
-.telepress-check span {
+.telepilot-field span,
+.telepilot-check span {
   font-weight: 700;
-  color: var(--telepress-charcoal);
+  color: var(--telepilot-charcoal);
 }
 
-.telepress-field small,
-.telepress-inline-note,
-.telepress-empty-state {
-  color: var(--telepress-muted);
+.telepilot-field small,
+.telepilot-inline-note,
+.telepilot-empty-state {
+  color: var(--telepilot-muted);
   line-height: 1.7;
 }
 
-.telepress-setup-list {
+.telepilot-setup-list {
   margin: 0;
   padding-left: 22px;
-  color: var(--telepress-ink);
+  color: var(--telepilot-ink);
   line-height: 1.9;
 }
 
-.telepress-setup-list li + li {
+.telepilot-setup-list li + li {
   margin-top: 10px;
 }
 
-.telepress-field input[type="text"],
-.telepress-field input[type="password"],
-.telepress-field input[type="number"],
-.telepress-field select,
-.telepress-field textarea {
+.telepilot-field input[type="text"],
+.telepilot-field input[type="password"],
+.telepilot-field input[type="number"],
+.telepilot-field select,
+.telepilot-field textarea {
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid var(--telepress-border);
+  border: 1px solid var(--telepilot-border);
   border-radius: 18px;
-  background: var(--telepress-light);
+  background: var(--telepilot-light);
   box-shadow: none;
 }
 
-.telepress-field input:focus,
-.telepress-field textarea:focus {
-  border-color: var(--telepress-accent);
+.telepilot-field input:focus,
+.telepilot-field textarea:focus {
+  border-color: var(--telepilot-accent);
   outline: none;
   box-shadow: 0 0 0 3px rgba(14, 165, 211, 0.14);
 }
 
-.telepress-checkbox-grid {
+.telepilot-checkbox-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.telepress-check {
+.telepilot-check {
   gap: 12px;
   flex-direction: row;
   align-items: center;
 }
 
-.telepress-check-inline {
+.telepilot-check-inline {
   max-width: 40rem;
 }
 
-.telepress-check input {
+.telepilot-check input {
   margin: 0;
 }
 
-.telepress-actions {
+.telepilot-actions {
   margin-top: 24px;
 }
 
-.telepress-actions .button-primary {
+.telepilot-actions .button-primary {
   height: auto;
   padding: 12px 22px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--telepress-accent), var(--telepress-accent-strong));
+  background: linear-gradient(135deg, var(--telepilot-accent), var(--telepilot-accent-strong));
   box-shadow: none;
   text-shadow: none;
   font-weight: 700;
 }
 
-.telepress-actions .button-primary:hover,
-.telepress-actions .button-primary:focus {
-  background: linear-gradient(135deg, var(--telepress-accent-strong), #086f90);
+.telepilot-actions .button-primary:hover,
+.telepilot-actions .button-primary:focus {
+  background: linear-gradient(135deg, var(--telepilot-accent-strong), #086f90);
 }
 
-.telepress-status-list {
+.telepilot-status-list {
   display: grid;
   gap: 14px;
   padding: 0;
@@ -336,7 +340,7 @@
   list-style: none;
 }
 
-.telepress-status-list li {
+.telepilot-status-list li {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -344,86 +348,106 @@
   padding: 16px 18px;
 }
 
-.telepress-status-list li span {
-  color: var(--telepress-ink);
+.telepilot-status-list li span {
+  color: var(--telepilot-ink);
   font-weight: 600;
 }
 
-.telepress-status-list li strong {
+.telepilot-status-list li strong {
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.telepress-status-list li.is-good strong,
-.telepress-status-pill.is-good {
-  color: var(--telepress-success);
+.telepilot-status-list li.is-good strong,
+.telepilot-status-pill.is-good {
+  color: var(--telepilot-success);
 }
 
-.telepress-status-list li.is-warn strong {
-  color: var(--telepress-warn);
+.telepilot-status-list li.is-warn strong {
+  color: var(--telepilot-warn);
 }
 
-.telepress-status-pill {
+.telepilot-status-pill {
   min-width: 90px;
   padding: 7px 12px;
 }
 
-.telepress-status-pill.is-good {
-  background: var(--telepress-success-bg);
+.telepilot-status-pill.is-good {
+  background: var(--telepilot-success-bg);
 }
 
-.telepress-status-pill.is-bad {
-  color: var(--telepress-danger);
-  background: var(--telepress-danger-bg);
+.telepilot-status-pill.is-bad {
+  color: var(--telepilot-danger);
+  background: var(--telepilot-danger-bg);
 }
 
-.telepress-table th {
-  color: var(--telepress-charcoal);
+.telepilot-table th {
+  color: var(--telepilot-charcoal);
 }
 
-.telepress-hero-note {
+.telepilot-table-scroll {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--telepilot-border);
+  border-radius: 24px;
+  background: #fff;
+}
+
+.telepilot-table-scroll .telepilot-table {
+  margin: 0;
+  border: 0;
+}
+
+.telepilot-table-scroll .telepilot-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8fbff;
+}
+
+.telepilot-hero-note {
   margin: 18px 0 0;
-  color: var(--telepress-muted);
+  color: var(--telepilot-muted);
   line-height: 1.7;
 }
 
-.telepress-table td,
-.telepress-table th {
+.telepilot-table td,
+.telepilot-table th {
   padding-top: 14px;
   padding-bottom: 14px;
 }
 
 @media (max-width: 1080px) {
-  .telepress-grid,
-  .telepress-hero,
-  .telepress-field-grid,
-  .telepress-checkbox-grid {
+  .telepilot-grid,
+  .telepilot-hero,
+  .telepilot-field-grid,
+  .telepilot-checkbox-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 782px) {
-  .telepress-shell {
+  .telepilot-shell {
     min-height: auto;
     padding: 20px;
   }
 
-  .telepress-panel,
-  .telepress-hero {
+  .telepilot-panel,
+  .telepilot-hero {
     padding: 22px;
     border-radius: 24px;
   }
 
-  .telepress-hero h1 {
+  .telepilot-hero h1 {
     font-size: 30px;
   }
 
-  .telepress-panel-heading {
+  .telepilot-panel-heading {
     flex-direction: column;
   }
 
-  .telepress-hero-metrics {
+  .telepilot-hero-metrics {
     grid-template-columns: 1fr;
   }
 }

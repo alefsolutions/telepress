@@ -4,17 +4,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Deactivator {
+class Telepilot_Deactivator {
 	public static function deactivate() {
-		wp_clear_scheduled_hook( 'telepress_daily_maintenance' );
-		wp_clear_scheduled_hook( 'telepress_poll_updates' );
-		delete_transient( TelePress_Telegram_Service::POLL_LOCK_TRANSIENT );
+		wp_clear_scheduled_hook( 'telepilot_daily_maintenance' );
+		wp_clear_scheduled_hook( 'telepilot_poll_updates' );
+		delete_transient( Telepilot_Telegram_Service::POLL_LOCK_TRANSIENT );
 
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$token    = isset( $settings['bot_token'] ) ? (string) $settings['bot_token'] : '';
 
 		if ( '' !== $token ) {
-			$client = new TelePress_Telegram_Client( $token );
+			$client = new Telepilot_Telegram_Client( $token );
 			$client->delete_webhook();
 		}
 	}

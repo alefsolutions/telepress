@@ -4,11 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Processed_Updates_Repository {
+class Telepilot_Processed_Updates_Repository {
 	public static function table_name() {
 		global $wpdb;
 
-		return $wpdb->prefix . 'telepress_processed_updates';
+		return $wpdb->prefix . 'telepilot_processed_updates';
 	}
 
 	public static function create_table() {

@@ -4,33 +4,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Notification_Service {
+class Telepilot_Notification_Service {
 	private $client;
 
 	public function __construct( $client = null ) {
-		$this->client = $client instanceof TelePress_Telegram_Client ? $client : new TelePress_Telegram_Client();
+		$this->client = $client instanceof Telepilot_Telegram_Client ? $client : new Telepilot_Telegram_Client();
 	}
 
 	public static function option_labels() {
 		return array(
-			'new_post_published'       => __( 'Content: new post published', 'telepress' ),
-			'new_page_published'       => __( 'Content: new page published', 'telepress' ),
-			'new_comment'              => __( 'Comments: new comment received', 'telepress' ),
-			'comment_status_changed'   => __( 'Comments: moderation status changed', 'telepress' ),
-			'user_registered'          => __( 'Users: new user registered', 'telepress' ),
-			'user_profile_updated'     => __( 'Users: profile updated', 'telepress' ),
-			'user_deleted'             => __( 'Users: user deleted', 'telepress' ),
-			'user_role_changed'        => __( 'Users: role changed', 'telepress' ),
-			'failed_login'             => __( 'Security: failed login', 'telepress' ),
-			'password_reset_requested' => __( 'Security: password reset requested', 'telepress' ),
-			'password_reset_completed' => __( 'Security: password reset completed', 'telepress' ),
-			'plugin_activated'         => __( 'System: plugin activated', 'telepress' ),
-			'plugin_deactivated'       => __( 'System: plugin deactivated', 'telepress' ),
-			'theme_switched'           => __( 'System: theme switched', 'telepress' ),
-			'plugin_updates'           => __( 'Updates: plugin updates available', 'telepress' ),
-			'theme_updates'            => __( 'Updates: theme updates available', 'telepress' ),
-			'core_updates'             => __( 'Updates: core updates available', 'telepress' ),
-			'update_completed'         => __( 'Updates: upgrade completed', 'telepress' ),
+			'new_post_published'       => __( 'Content: new post published', 'telepilot' ),
+			'new_page_published'       => __( 'Content: new page published', 'telepilot' ),
+			'new_comment'              => __( 'Comments: new comment received', 'telepilot' ),
+			'comment_status_changed'   => __( 'Comments: moderation status changed', 'telepilot' ),
+			'user_registered'          => __( 'Users: new user registered', 'telepilot' ),
+			'user_profile_updated'     => __( 'Users: profile updated', 'telepilot' ),
+			'user_deleted'             => __( 'Users: user deleted', 'telepilot' ),
+			'user_role_changed'        => __( 'Users: role changed', 'telepilot' ),
+			'failed_login'             => __( 'Security: failed login', 'telepilot' ),
+			'password_reset_requested' => __( 'Security: password reset requested', 'telepilot' ),
+			'password_reset_completed' => __( 'Security: password reset completed', 'telepilot' ),
+			'plugin_activated'         => __( 'System: plugin activated', 'telepilot' ),
+			'plugin_deactivated'       => __( 'System: plugin deactivated', 'telepilot' ),
+			'theme_switched'           => __( 'System: theme switched', 'telepilot' ),
+			'plugin_updates'           => __( 'Updates: plugin updates available', 'telepilot' ),
+			'theme_updates'            => __( 'Updates: theme updates available', 'telepilot' ),
+			'core_updates'             => __( 'Updates: core updates available', 'telepilot' ),
+			'update_completed'         => __( 'Updates: upgrade completed', 'telepilot' ),
 		);
 	}
 
@@ -50,12 +50,12 @@ class TelePress_Notification_Service {
 			'new_comment',
 			'new_comment_notification',
 			'moderate_comments',
-			__( 'New Comment', 'telepress' ),
+			__( 'New Comment', 'telepilot' ),
 			array(
-				__( 'Author', 'telepress' )  => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepress' ),
-				__( 'Post', 'telepress' )    => $post ? get_the_title( $post ) : __( 'Unknown Post', 'telepress' ),
-				__( 'Status', 'telepress' )  => $this->humanize_comment_status( $comment_approved ),
-				__( 'Preview', 'telepress' ) => wp_html_excerpt( wp_strip_all_tags( $comment->comment_content ), 120, '...' ),
+				__( 'Author', 'telepilot' )  => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ),
+				__( 'Post', 'telepilot' )    => $post ? get_the_title( $post ) : __( 'Unknown Post', 'telepilot' ),
+				__( 'Status', 'telepilot' )  => $this->humanize_comment_status( $comment_approved ),
+				__( 'Preview', 'telepilot' ) => wp_html_excerpt( wp_strip_all_tags( $comment->comment_content ), 120, '...' ),
 			),
 			$this->build_comment_links( $comment, $post ),
 			array(
@@ -79,11 +79,11 @@ class TelePress_Notification_Service {
 			'comment_status_changed',
 			'comment_status_changed_notification',
 			'moderate_comments',
-			__( 'Comment Status Changed', 'telepress' ),
+			__( 'Comment Status Changed', 'telepilot' ),
 			array(
-				__( 'Author', 'telepress' ) => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepress' ),
-				__( 'Post', 'telepress' )   => $post ? get_the_title( $post ) : __( 'Unknown Post', 'telepress' ),
-				__( 'Status', 'telepress' ) => $this->humanize_comment_status( $comment_status ),
+				__( 'Author', 'telepilot' ) => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ),
+				__( 'Post', 'telepilot' )   => $post ? get_the_title( $post ) : __( 'Unknown Post', 'telepilot' ),
+				__( 'Status', 'telepilot' ) => $this->humanize_comment_status( $comment_status ),
 			),
 			$this->build_comment_links( $comment, $post ),
 			array(
@@ -113,7 +113,7 @@ class TelePress_Notification_Service {
 		}
 
 		$setting_key = 'page' === $post->post_type ? 'new_page_published' : 'new_post_published';
-		$title       = 'page' === $post->post_type ? __( 'Page Published', 'telepress' ) : __( 'Post Published', 'telepress' );
+		$title       = 'page' === $post->post_type ? __( 'Page Published', 'telepilot' ) : __( 'Post Published', 'telepilot' );
 		$capability  = 'page' === $post->post_type ? 'edit_pages' : 'edit_posts';
 
 		$this->send_standard_notification(
@@ -122,10 +122,10 @@ class TelePress_Notification_Service {
 			$capability,
 			$title,
 			array(
-				__( 'Title', 'telepress' )  => get_the_title( $post ),
-				__( 'Author', 'telepress' ) => $this->get_post_author_label( $post ),
-				__( 'Type', 'telepress' )   => ucfirst( (string) $post->post_type ),
-				__( 'Status', 'telepress' ) => ucfirst( (string) $new_status ),
+				__( 'Title', 'telepilot' )  => get_the_title( $post ),
+				__( 'Author', 'telepilot' ) => $this->get_post_author_label( $post ),
+				__( 'Type', 'telepilot' )   => ucfirst( (string) $post->post_type ),
+				__( 'Status', 'telepilot' ) => ucfirst( (string) $new_status ),
 			),
 			$this->build_post_links( $post ),
 			array(
@@ -149,11 +149,11 @@ class TelePress_Notification_Service {
 			'user_registered',
 			'user_registered_notification',
 			'manage_options',
-			__( 'User Registered', 'telepress' ),
+			__( 'User Registered', 'telepilot' ),
 			array(
-				__( 'Username', 'telepress' ) => $user->user_login,
-				__( 'Email', 'telepress' )    => $user->user_email,
-				__( 'Role', 'telepress' )     => $this->implode_roles( $user->roles ),
+				__( 'Username', 'telepilot' ) => $user->user_login,
+				__( 'Email', 'telepilot' )    => $user->user_email,
+				__( 'Role', 'telepilot' )     => $this->implode_roles( $user->roles ),
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -180,11 +180,11 @@ class TelePress_Notification_Service {
 			'user_profile_updated',
 			'user_profile_updated_notification',
 			'manage_options',
-			__( 'User Profile Updated', 'telepress' ),
+			__( 'User Profile Updated', 'telepilot' ),
 			array(
-				__( 'Username', 'telepress' ) => $user->user_login,
-				__( 'Email', 'telepress' )    => $user->user_email,
-				__( 'Changed', 'telepress' )  => $changes,
+				__( 'Username', 'telepilot' ) => $user->user_login,
+				__( 'Email', 'telepilot' )    => $user->user_email,
+				__( 'Changed', 'telepilot' )  => $changes,
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -201,18 +201,18 @@ class TelePress_Notification_Service {
 			$user = get_userdata( $user_id );
 		}
 
-		$username = $user instanceof WP_User ? $user->user_login : sprintf( __( 'User #%d', 'telepress' ), (int) $user_id );
+		$username = $user instanceof WP_User ? $user->user_login : sprintf( __( 'User #%d', 'telepilot' ), (int) $user_id );
 		$email    = $user instanceof WP_User ? $user->user_email : '';
 
 		$this->send_standard_notification(
 			'user_deleted',
 			'user_deleted_notification',
 			'manage_options',
-			__( 'User Deleted', 'telepress' ),
+			__( 'User Deleted', 'telepilot' ),
 			array(
-				__( 'Username', 'telepress' )     => $username,
-				__( 'Email', 'telepress' )        => $email ? $email : __( 'Unknown', 'telepress' ),
-				__( 'Reassigned To', 'telepress' ) => $reassign ? sprintf( __( 'User #%d', 'telepress' ), (int) $reassign ) : __( 'No reassignment', 'telepress' ),
+				__( 'Username', 'telepilot' )     => $username,
+				__( 'Email', 'telepilot' )        => $email ? $email : __( 'Unknown', 'telepilot' ),
+				__( 'Reassigned To', 'telepilot' ) => $reassign ? sprintf( __( 'User #%d', 'telepilot' ), (int) $reassign ) : __( 'No reassignment', 'telepilot' ),
 			),
 			array(),
 			array(
@@ -234,11 +234,11 @@ class TelePress_Notification_Service {
 			'user_role_changed',
 			'user_role_changed_notification',
 			'manage_options',
-			__( 'User Role Changed', 'telepress' ),
+			__( 'User Role Changed', 'telepilot' ),
 			array(
-				__( 'Username', 'telepress' ) => $user->user_login,
-				__( 'Old Roles', 'telepress' ) => $this->implode_roles( (array) $old_roles ),
-				__( 'New Role', 'telepress' )  => $this->normalize_role( $role ),
+				__( 'Username', 'telepilot' ) => $user->user_login,
+				__( 'Old Roles', 'telepilot' ) => $this->implode_roles( (array) $old_roles ),
+				__( 'New Role', 'telepilot' )  => $this->normalize_role( $role ),
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -256,10 +256,10 @@ class TelePress_Notification_Service {
 			'failed_login',
 			'failed_login_notification',
 			'manage_options',
-			__( 'Failed Login', 'telepress' ),
+			__( 'Failed Login', 'telepilot' ),
 			array(
-				__( 'Username', 'telepress' ) => $username,
-				__( 'Site', 'telepress' )     => get_bloginfo( 'name' ),
+				__( 'Username', 'telepilot' ) => $username,
+				__( 'Site', 'telepilot' )     => get_bloginfo( 'name' ),
 			),
 			array(),
 			array(
@@ -277,11 +277,11 @@ class TelePress_Notification_Service {
 			'password_reset_requested',
 			'password_reset_requested_notification',
 			'manage_options',
-			__( 'Password Reset Requested', 'telepress' ),
+			__( 'Password Reset Requested', 'telepilot' ),
 			array(
-				__( 'Username', 'telepress' ) => $user_login,
-				__( 'Email', 'telepress' )    => $user instanceof WP_User ? $user->user_email : __( 'Unknown', 'telepress' ),
-				__( 'Note', 'telepress' )     => __( 'A reset key was generated, but TelePress does not include secrets in Telegram alerts.', 'telepress' ),
+				__( 'Username', 'telepilot' ) => $user_login,
+				__( 'Email', 'telepilot' )    => $user instanceof WP_User ? $user->user_email : __( 'Unknown', 'telepilot' ),
+				__( 'Note', 'telepilot' )     => __( 'A reset key was generated, but WP Telepilot does not include secrets in Telegram alerts.', 'telepilot' ),
 			),
 			$user instanceof WP_User ? $this->build_user_links( $user->ID ) : array(),
 			array(
@@ -302,11 +302,11 @@ class TelePress_Notification_Service {
 			'password_reset_completed',
 			'password_reset_completed_notification',
 			'manage_options',
-			__( 'Password Reset Completed', 'telepress' ),
+			__( 'Password Reset Completed', 'telepilot' ),
 			array(
-				__( 'Username', 'telepress' ) => $user->user_login,
-				__( 'Email', 'telepress' )    => $user->user_email,
-				__( 'Status', 'telepress' )   => __( 'Password updated successfully', 'telepress' ),
+				__( 'Username', 'telepilot' ) => $user->user_login,
+				__( 'Email', 'telepilot' )    => $user->user_email,
+				__( 'Status', 'telepilot' )   => __( 'Password updated successfully', 'telepilot' ),
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -322,14 +322,14 @@ class TelePress_Notification_Service {
 			'plugin_activated',
 			'plugin_activated_notification',
 			'activate_plugins',
-			__( 'Plugin Activated', 'telepress' ),
+			__( 'Plugin Activated', 'telepilot' ),
 			array(
-				__( 'Plugin', 'telepress' )  => $this->plugin_label_from_path( $plugin ),
-				__( 'Scope', 'telepress' )   => $network_wide ? __( 'Network-wide', 'telepress' ) : __( 'Single site', 'telepress' ),
+				__( 'Plugin', 'telepilot' )  => $this->plugin_label_from_path( $plugin ),
+				__( 'Scope', 'telepilot' )   => $network_wide ? __( 'Network-wide', 'telepilot' ) : __( 'Single site', 'telepilot' ),
 			),
 			array(
 				array(
-					'label' => __( 'Plugins', 'telepress' ),
+					'label' => __( 'Plugins', 'telepilot' ),
 					'url'   => admin_url( 'plugins.php' ),
 				),
 			),
@@ -347,14 +347,14 @@ class TelePress_Notification_Service {
 			'plugin_deactivated',
 			'plugin_deactivated_notification',
 			'activate_plugins',
-			__( 'Plugin Deactivated', 'telepress' ),
+			__( 'Plugin Deactivated', 'telepilot' ),
 			array(
-				__( 'Plugin', 'telepress' ) => $this->plugin_label_from_path( $plugin ),
-				__( 'Scope', 'telepress' )  => $network_deactivating ? __( 'Network-wide', 'telepress' ) : __( 'Single site', 'telepress' ),
+				__( 'Plugin', 'telepilot' ) => $this->plugin_label_from_path( $plugin ),
+				__( 'Scope', 'telepilot' )  => $network_deactivating ? __( 'Network-wide', 'telepilot' ) : __( 'Single site', 'telepilot' ),
 			),
 			array(
 				array(
-					'label' => __( 'Plugins', 'telepress' ),
+					'label' => __( 'Plugins', 'telepilot' ),
 					'url'   => admin_url( 'plugins.php' ),
 				),
 			),
@@ -368,20 +368,20 @@ class TelePress_Notification_Service {
 	}
 
 	public function handle_theme_switched( $new_name, $new_theme, $old_theme ) {
-		$old_name_label = $old_theme instanceof WP_Theme ? $old_theme->get( 'Name' ) : __( 'Unknown', 'telepress' );
+		$old_name_label = $old_theme instanceof WP_Theme ? $old_theme->get( 'Name' ) : __( 'Unknown', 'telepilot' );
 
 		$this->send_standard_notification(
 			'theme_switched',
 			'theme_switched_notification',
 			'switch_themes',
-			__( 'Theme Switched', 'telepress' ),
+			__( 'Theme Switched', 'telepilot' ),
 			array(
-				__( 'Old Theme', 'telepress' ) => $old_name_label,
-				__( 'New Theme', 'telepress' ) => $new_name,
+				__( 'Old Theme', 'telepilot' ) => $old_name_label,
+				__( 'New Theme', 'telepilot' ) => $new_name,
 			),
 			array(
 				array(
-					'label' => __( 'Themes', 'telepress' ),
+					'label' => __( 'Themes', 'telepilot' ),
 					'url'   => admin_url( 'themes.php' ),
 				),
 			),
@@ -409,7 +409,7 @@ class TelePress_Notification_Service {
 		}
 
 		$items = $this->extract_upgrader_items( $type, $options );
-		$key   = 'telepress_upgrade_' . md5( wp_json_encode( array( $type, $action, $items ) ) );
+		$key   = 'telepilot_upgrade_' . md5( wp_json_encode( array( $type, $action, $items ) ) );
 
 		if ( get_transient( $key ) ) {
 			return;
@@ -423,15 +423,15 @@ class TelePress_Notification_Service {
 			'update_completed',
 			'update_completed_notification',
 			$capability,
-			__( 'Upgrade Completed', 'telepress' ),
+			__( 'Upgrade Completed', 'telepilot' ),
 			array(
-				__( 'Type', 'telepress' )  => ucfirst( $type ),
-				__( 'Action', 'telepress' ) => ucfirst( $action ),
-				__( 'Items', 'telepress' )  => ! empty( $items ) ? implode( ', ', $items ) : __( 'Not provided by WordPress', 'telepress' ),
+				__( 'Type', 'telepilot' )  => ucfirst( $type ),
+				__( 'Action', 'telepilot' ) => ucfirst( $action ),
+				__( 'Items', 'telepilot' )  => ! empty( $items ) ? implode( ', ', $items ) : __( 'Not provided by WordPress', 'telepilot' ),
 			),
 			array(
 				array(
-					'label' => __( 'Updates', 'telepress' ),
+					'label' => __( 'Updates', 'telepilot' ),
 					'url'   => admin_url( 'update-core.php' ),
 				),
 			),
@@ -451,7 +451,7 @@ class TelePress_Notification_Service {
 			return;
 		}
 
-		$key = 'telepress_auto_updates_' . md5( wp_json_encode( $summary ) );
+		$key = 'telepilot_auto_updates_' . md5( wp_json_encode( $summary ) );
 		if ( get_transient( $key ) ) {
 			return;
 		}
@@ -462,15 +462,15 @@ class TelePress_Notification_Service {
 			'update_completed',
 			'automatic_updates_completed_notification',
 			'update_core',
-			__( 'Automatic Updates Completed', 'telepress' ),
+			__( 'Automatic Updates Completed', 'telepilot' ),
 			array(
-				__( 'Successful Updates', 'telepress' ) => (string) $summary['count'],
-				__( 'Types', 'telepress' )              => implode( ', ', $summary['types'] ),
-				__( 'Items', 'telepress' )              => implode( ', ', $summary['items'] ),
+				__( 'Successful Updates', 'telepilot' ) => (string) $summary['count'],
+				__( 'Types', 'telepilot' )              => implode( ', ', $summary['types'] ),
+				__( 'Items', 'telepilot' )              => implode( ', ', $summary['items'] ),
 			),
 			array(
 				array(
-					'label' => __( 'Updates', 'telepress' ),
+					'label' => __( 'Updates', 'telepilot' ),
 					'url'   => admin_url( 'update-core.php' ),
 				),
 			),
@@ -487,24 +487,24 @@ class TelePress_Notification_Service {
 			'plugin_updates',
 			'update_plugins',
 			'update_plugins',
-			__( 'Plugin Updates Available', 'telepress' ),
-			__( 'Plugins awaiting update', 'telepress' ),
+			__( 'Plugin Updates Available', 'telepilot' ),
+			__( 'Plugins awaiting update', 'telepilot' ),
 			admin_url( 'update-core.php' )
 		);
 		$this->maybe_send_single_update_notification(
 			'theme_updates',
 			'update_themes',
 			'update_themes',
-			__( 'Theme Updates Available', 'telepress' ),
-			__( 'Themes awaiting update', 'telepress' ),
+			__( 'Theme Updates Available', 'telepilot' ),
+			__( 'Themes awaiting update', 'telepilot' ),
 			admin_url( 'update-core.php' )
 		);
 		$this->maybe_send_single_update_notification(
 			'core_updates',
 			'update_core',
 			'update_core',
-			__( 'WordPress Core Updates Available', 'telepress' ),
-			__( 'Core updates available', 'telepress' ),
+			__( 'WordPress Core Updates Available', 'telepilot' ),
+			__( 'Core updates available', 'telepilot' ),
 			admin_url( 'update-core.php' )
 		);
 	}
@@ -533,7 +533,7 @@ class TelePress_Notification_Service {
 			return;
 		}
 
-		$dedupe_key = 'telepress_notified_' . $setting_key . '_' . gmdate( 'Ymd' );
+		$dedupe_key = 'telepilot_notified_' . $setting_key . '_' . gmdate( 'Ymd' );
 		if ( get_transient( $dedupe_key ) ) {
 			return;
 		}
@@ -546,12 +546,12 @@ class TelePress_Notification_Service {
 			$capability,
 			$title,
 			array(
-				__( 'Site', 'telepress' ) => get_bloginfo( 'name' ),
+				__( 'Site', 'telepilot' ) => get_bloginfo( 'name' ),
 				$count_label              => (string) $count,
 			),
 			array(
 				array(
-					'label' => __( 'Open updates screen', 'telepress' ),
+					'label' => __( 'Open updates screen', 'telepilot' ),
 					'url'   => $url,
 				),
 			),
@@ -582,7 +582,7 @@ class TelePress_Notification_Service {
 			);
 
 			if ( is_wp_error( $response ) ) {
-				TelePress_Audit_Log_Repository::log(
+				Telepilot_Audit_Log_Repository::log(
 					array(
 						'chat_id'        => $chat_id,
 						'action_name'    => 'telegram_notification_failed',
@@ -602,7 +602,7 @@ class TelePress_Notification_Service {
 				continue;
 			}
 
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'chat_id'       => $chat_id,
 					'action_name'   => 'telegram_notification_sent',
@@ -623,16 +623,16 @@ class TelePress_Notification_Service {
 
 	private function build_standard_message( $title, $facts, $links ) {
 		$lines   = array();
-		$lines[] = TelePress_Telegram_Response_Builder::bold( $title );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( $title );
 		$lines[] = sprintf(
 			/* translators: %s: site name. */
-			__( 'Site: %s', 'telepress' ),
-			TelePress_Telegram_Response_Builder::escape( get_bloginfo( 'name' ) )
+			__( 'Site: %s', 'telepilot' ),
+			Telepilot_Telegram_Response_Builder::escape( get_bloginfo( 'name' ) )
 		);
 		$lines[] = sprintf(
 			/* translators: %s: current local time. */
-			__( 'Time: %s', 'telepress' ),
-			TelePress_Telegram_Response_Builder::escape( wp_date( 'Y-m-d H:i:s T' ) )
+			__( 'Time: %s', 'telepilot' ),
+			Telepilot_Telegram_Response_Builder::escape( wp_date( 'Y-m-d H:i:s T' ) )
 		);
 		$lines[] = '';
 
@@ -643,8 +643,8 @@ class TelePress_Notification_Service {
 
 			$lines[] = sprintf(
 				'%1$s: %2$s',
-				TelePress_Telegram_Response_Builder::escape( $label ),
-				TelePress_Telegram_Response_Builder::escape( $value )
+				Telepilot_Telegram_Response_Builder::escape( $label ),
+				Telepilot_Telegram_Response_Builder::escape( $value )
 			);
 		}
 
@@ -655,12 +655,12 @@ class TelePress_Notification_Service {
 				continue;
 			}
 
-			$link_parts[] = TelePress_Telegram_Response_Builder::link( $link['label'], $link['url'] );
+			$link_parts[] = Telepilot_Telegram_Response_Builder::link( $link['label'], $link['url'] );
 		}
 
 		if ( ! empty( $link_parts ) ) {
 			$lines[] = '';
-			$lines[] = __( 'Open:', 'telepress' ) . ' ' . implode( ' | ', $link_parts );
+			$lines[] = __( 'Open:', 'telepilot' ) . ' ' . implode( ' | ', $link_parts );
 		}
 
 		return implode( "\n", $lines );
@@ -674,14 +674,14 @@ class TelePress_Notification_Service {
 			$permalink = get_permalink( $post );
 			if ( $permalink ) {
 				$links[] = array(
-					'label' => __( 'View', 'telepress' ),
+					'label' => __( 'View', 'telepilot' ),
 					'url'   => $permalink,
 				);
 			}
 		}
 
 		$links[] = array(
-			'label' => __( 'Edit', 'telepress' ),
+			'label' => __( 'Edit', 'telepilot' ),
 			'url'   => $edit,
 		);
 
@@ -691,7 +691,7 @@ class TelePress_Notification_Service {
 	private function build_comment_links( $comment, $post ) {
 		$links = array(
 			array(
-				'label' => __( 'Moderate', 'telepress' ),
+				'label' => __( 'Moderate', 'telepilot' ),
 				'url'   => admin_url( 'comment.php?action=editcomment&c=' . (int) $comment->comment_ID ),
 			),
 		);
@@ -700,7 +700,7 @@ class TelePress_Notification_Service {
 			$permalink = get_comment_link( $comment );
 			if ( $permalink ) {
 				$links[] = array(
-					'label' => __( 'View Comment', 'telepress' ),
+					'label' => __( 'View Comment', 'telepilot' ),
 					'url'   => $permalink,
 				);
 			}
@@ -712,11 +712,11 @@ class TelePress_Notification_Service {
 	private function build_user_links( $user_id ) {
 		return array(
 			array(
-				'label' => __( 'Edit User', 'telepress' ),
+				'label' => __( 'Edit User', 'telepilot' ),
 				'url'   => admin_url( 'user-edit.php?user_id=' . (int) $user_id ),
 			),
 			array(
-				'label' => __( 'Users', 'telepress' ),
+				'label' => __( 'Users', 'telepilot' ),
 				'url'   => admin_url( 'users.php' ),
 			),
 		);
@@ -729,35 +729,35 @@ class TelePress_Notification_Service {
 			return $author->display_name ? $author->display_name : $author->user_login;
 		}
 
-		return __( 'Unknown', 'telepress' );
+		return __( 'Unknown', 'telepilot' );
 	}
 
 	private function summarize_user_changes( $old_user_data, $user, $userdata ) {
 		$changes = array();
 
 		if ( $old_user_data->user_email !== $user->user_email ) {
-			$changes[] = __( 'email', 'telepress' );
+			$changes[] = __( 'email', 'telepilot' );
 		}
 
 		if ( $old_user_data->display_name !== $user->display_name ) {
-			$changes[] = __( 'display name', 'telepress' );
+			$changes[] = __( 'display name', 'telepilot' );
 		}
 
 		if ( $old_user_data->user_url !== $user->user_url ) {
-			$changes[] = __( 'website', 'telepress' );
+			$changes[] = __( 'website', 'telepilot' );
 		}
 
 		if ( is_array( $userdata ) ) {
 			if ( array_key_exists( 'first_name', $userdata ) ) {
-				$changes[] = __( 'first name', 'telepress' );
+				$changes[] = __( 'first name', 'telepilot' );
 			}
 
 			if ( array_key_exists( 'last_name', $userdata ) ) {
-				$changes[] = __( 'last name', 'telepress' );
+				$changes[] = __( 'last name', 'telepilot' );
 			}
 
 			if ( array_key_exists( 'description', $userdata ) ) {
-				$changes[] = __( 'bio', 'telepress' );
+				$changes[] = __( 'bio', 'telepilot' );
 			}
 		}
 
@@ -804,7 +804,7 @@ class TelePress_Notification_Service {
 		$summary['items'] = array_values( array_unique( array_filter( $summary['items'] ) ) );
 
 		if ( empty( $summary['items'] ) ) {
-			$summary['items'][] = __( 'Updated items reported by WordPress', 'telepress' );
+			$summary['items'][] = __( 'Updated items reported by WordPress', 'telepilot' );
 		}
 
 		return $summary;
@@ -835,7 +835,7 @@ class TelePress_Notification_Service {
 		}
 
 		if ( 'core' === $type ) {
-			return array( __( 'WordPress core', 'telepress' ) );
+			return array( __( 'WordPress core', 'telepilot' ) );
 		}
 
 		return array();
@@ -857,19 +857,19 @@ class TelePress_Notification_Service {
 		$status = (string) $status;
 
 		if ( '1' === $status || 'approve' === $status ) {
-			return __( 'Approved', 'telepress' );
+			return __( 'Approved', 'telepilot' );
 		}
 
 		if ( '0' === $status || 'hold' === $status ) {
-			return __( 'Pending', 'telepress' );
+			return __( 'Pending', 'telepilot' );
 		}
 
 		if ( 'spam' === $status ) {
-			return __( 'Spam', 'telepress' );
+			return __( 'Spam', 'telepilot' );
 		}
 
 		if ( 'trash' === $status ) {
-			return __( 'Trashed', 'telepress' );
+			return __( 'Trashed', 'telepilot' );
 		}
 
 		return ucfirst( $status );
@@ -877,7 +877,7 @@ class TelePress_Notification_Service {
 
 	private function normalize_role( $role ) {
 		if ( '' === (string) $role ) {
-			return __( 'None', 'telepress' );
+			return __( 'None', 'telepilot' );
 		}
 
 		return ucwords( str_replace( array( '-', '_' ), ' ', (string) $role ) );
@@ -886,14 +886,14 @@ class TelePress_Notification_Service {
 	private function implode_roles( $roles ) {
 		$roles = array_map( array( $this, 'normalize_role' ), array_filter( (array) $roles ) );
 
-		return ! empty( $roles ) ? implode( ', ', $roles ) : __( 'No role', 'telepress' );
+		return ! empty( $roles ) ? implode( ', ', $roles ) : __( 'No role', 'telepilot' );
 	}
 
 	private function get_recipient_chat_ids( $capability ) {
 		$recipients = array();
 		$users      = get_users(
 			array(
-				'meta_key'     => TelePress_User_Linking_Service::META_TELEGRAM_CHAT,
+				'meta_key'     => Telepilot_User_Linking_Service::META_TELEGRAM_CHAT,
 				'meta_compare' => 'EXISTS',
 			)
 		);
@@ -903,13 +903,13 @@ class TelePress_Notification_Service {
 				continue;
 			}
 
-			$chat_id = get_user_meta( $user->ID, TelePress_User_Linking_Service::META_TELEGRAM_CHAT, true );
+			$chat_id = get_user_meta( $user->ID, Telepilot_User_Linking_Service::META_TELEGRAM_CHAT, true );
 			if ( $chat_id ) {
 				$recipients[] = (string) $chat_id;
 			}
 		}
 
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$allowed  = isset( $settings['allowed_chat_ids'] ) ? (string) $settings['allowed_chat_ids'] : '';
 		$extra    = array_filter( array_map( 'trim', explode( "\n", str_replace( ',', "\n", $allowed ) ) ) );
 
@@ -917,7 +917,7 @@ class TelePress_Notification_Service {
 	}
 
 	private function is_notification_enabled( $key ) {
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$enabled  = isset( $settings['default_notifications'] ) && is_array( $settings['default_notifications'] )
 			? $settings['default_notifications']
 			: array();

@@ -4,10 +4,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Comments_Service {
+class Telepilot_Comments_Service {
 	private $confirmation_service;
 
-	public function __construct( TelePress_Confirmation_Service $confirmation_service ) {
+	public function __construct( Telepilot_Confirmation_Service $confirmation_service ) {
 		$this->confirmation_service = $confirmation_service;
 	}
 
@@ -26,11 +26,11 @@ class TelePress_Comments_Service {
 
 	public function render_pending_message( $comments ) {
 		if ( empty( $comments ) ) {
-			return TelePress_Telegram_Response_Builder::bold( __( 'Pending Comments', 'telepress' ) ) . "\n\n" . __( 'No comments are waiting for moderation.', 'telepress' );
+			return Telepilot_Telegram_Response_Builder::bold( __( 'Pending Comments', 'telepilot' ) ) . "\n\n" . __( 'No comments are waiting for moderation.', 'telepilot' );
 		}
 
 		$lines   = array();
-		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Pending Comments', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'Pending Comments', 'telepilot' ) );
 		$lines[] = '';
 
 		foreach ( $comments as $comment ) {
@@ -38,16 +38,16 @@ class TelePress_Comments_Service {
 			$post_title = get_the_title( $comment->comment_post_ID );
 			$lines[]   = sprintf(
 				/* translators: 1: comment id, 2: author, 3: post title, 4: excerpt. */
-				__( '- #%1$d by %2$s on %3$s: %4$s', 'telepress' ),
+				__( '- #%1$d by %2$s on %3$s: %4$s', 'telepilot' ),
 				$comment->comment_ID,
-				TelePress_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepress' ) ),
-				TelePress_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'telepress' ) ),
-				TelePress_Telegram_Response_Builder::escape( $excerpt )
+				Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::escape( $excerpt )
 			);
 		}
 
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: approvals and destructive moderation actions are kept in private chat for safety.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: approvals and destructive moderation actions are kept in private chat for safety.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
@@ -87,28 +87,28 @@ class TelePress_Comments_Service {
 
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Approve #%d', 'telepress' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Approve #%d', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:approve:' . (int) $comment->comment_ID . ':' . $approve_token,
 				),
 			);
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Reject #%d', 'telepress' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Reject #%d', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:reject:' . (int) $comment->comment_ID . ':' . $reject_token,
 				),
 				array(
-					'text'          => sprintf( __( 'Spam #%d', 'telepress' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Spam #%d', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:spam:' . (int) $comment->comment_ID . ':' . $spam_token,
 				),
 				array(
-					'text'          => sprintf( __( 'Trash #%d', 'telepress' ), $comment->comment_ID ),
+					'text'          => sprintf( __( 'Trash #%d', 'telepilot' ), $comment->comment_ID ),
 					'callback_data' => 'tp:comment:trash:' . (int) $comment->comment_ID . ':' . $trash_token,
 				),
 			);
 		}
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard( $rows ),
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard( $rows ),
 			$this->navigation_rows()
 		);
 	}
@@ -117,7 +117,7 @@ class TelePress_Comments_Service {
 		$comment = get_comment( $comment_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'telepress_comment_not_found', __( 'Comment not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_comment_not_found', __( 'Comment not found.', 'telepilot' ) );
 		}
 
 		$before_status = wp_get_comment_status( $comment );
@@ -125,30 +125,30 @@ class TelePress_Comments_Service {
 		switch ( $action ) {
 			case 'approve':
 				$result = wp_set_comment_status( $comment_id, 'approve' );
-				$label  = __( 'approved', 'telepress' );
+				$label  = __( 'approved', 'telepilot' );
 				break;
 
 			case 'reject':
 				$result = wp_set_comment_status( $comment_id, 'hold' );
-				$label  = __( 'rejected', 'telepress' );
+				$label  = __( 'rejected', 'telepilot' );
 				break;
 
 			case 'trash':
 				$result = wp_trash_comment( $comment_id );
-				$label  = __( 'trashed', 'telepress' );
+				$label  = __( 'trashed', 'telepilot' );
 				break;
 
 			case 'spam':
 				$result = wp_spam_comment( $comment_id );
-				$label  = __( 'marked as spam', 'telepress' );
+				$label  = __( 'marked as spam', 'telepilot' );
 				break;
 
 			default:
-				return new WP_Error( 'telepress_invalid_comment_action', __( 'Unsupported comment action.', 'telepress' ) );
+				return new WP_Error( 'telepilot_invalid_comment_action', __( 'Unsupported comment action.', 'telepilot' ) );
 		}
 
 		if ( false === $result ) {
-			return new WP_Error( 'telepress_comment_update_failed', __( 'WordPress could not update that comment.', 'telepress' ) );
+			return new WP_Error( 'telepilot_comment_update_failed', __( 'WordPress could not update that comment.', 'telepilot' ) );
 		}
 
 		return array(
@@ -168,12 +168,12 @@ class TelePress_Comments_Service {
 			)
 		);
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard(
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard(
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepress' ), ucfirst( $action ), $comment_id ),
+							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepilot' ), ucfirst( $action ), $comment_id ),
 							'callback_data' => 'tp:comment:' . $action . ':' . (int) $comment_id . ':' . $token,
 						),
 					),
@@ -187,11 +187,11 @@ class TelePress_Comments_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepress' ),
+					'text'          => __( 'Menu', 'telepilot' ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepress' ),
+					'text'          => __( 'Site', 'telepilot' ),
 					'callback_data' => '/site',
 				),
 			),

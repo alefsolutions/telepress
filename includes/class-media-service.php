@@ -4,12 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Media_Service {
+class Telepilot_Media_Service {
 	private $confirmation_service;
 	private $telegram_client;
 	const PER_PAGE = 5;
 
-	public function __construct( TelePress_Confirmation_Service $confirmation_service, TelePress_Telegram_Client $telegram_client ) {
+	public function __construct( Telepilot_Confirmation_Service $confirmation_service, Telepilot_Telegram_Client $telegram_client ) {
 		$this->confirmation_service = $confirmation_service;
 		$this->telegram_client      = $telegram_client;
 	}
@@ -66,13 +66,13 @@ class TelePress_Media_Service {
 
 	public function render_list_message( $items, $heading ) {
 		if ( empty( $items ) ) {
-			return $heading . "\n" . __( 'No media items matched that request.', 'telepress' );
+			return $heading . "\n" . __( 'No media items matched that request.', 'telepilot' );
 		}
 
 		$lines = array( $heading );
 		foreach ( $items as $item ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s', 'telepress' ),
+				__( '#%1$d %2$s', 'telepilot' ),
 				$item->ID,
 				html_entity_decode( get_the_title( $item ), ENT_QUOTES, get_bloginfo( 'charset' ) )
 			);
@@ -83,43 +83,43 @@ class TelePress_Media_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No media items matched that request.', 'telepress' );
+			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No media items matched that request.', 'telepilot' );
 		}
 
-		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
-		$lines[] = TelePress_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		$lines   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
 		$lines[] = '';
 
 		foreach ( $result['items'] as $item ) {
 			$lines[] = sprintf(
-				__( '- #%1$d %2$s', 'telepress' ),
+				__( '- #%1$d %2$s', 'telepilot' ),
 				$item->ID,
-				TelePress_Telegram_Response_Builder::escape( get_the_title( $item ) )
+				Telepilot_Telegram_Response_Builder::escape( get_the_title( $item ) )
 			);
 
 			$preview_url = wp_get_attachment_url( $item->ID );
 			if ( $preview_url ) {
-				$lines[] = '  ' . __( 'Preview:', 'telepress' ) . ' ' . TelePress_Telegram_Response_Builder::link( __( 'Open file', 'telepress' ), $preview_url );
+				$lines[] = '  ' . __( 'Preview:', 'telepilot' ) . ' ' . Telepilot_Telegram_Response_Builder::link( __( 'Open file', 'telepilot' ), $preview_url );
 			}
 		}
 
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: send a photo or document in this private chat to upload it straight into WordPress.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: send a photo or document in this private chat to upload it straight into WordPress.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
 
 	public function render_help_message() {
 		$lines   = array();
-		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Media Commands', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'Media Commands', 'telepilot' ) );
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/media list' ) . ' ' . __( 'Show recent media items', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/media search logo' ) . ' ' . __( 'Search media by title', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/media delete 123' ) . ' ' . __( 'Delete a media item after confirmation', 'telepress' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media list' ) . ' ' . __( 'Show recent media items', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media search logo' ) . ' ' . __( 'Search media by title', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media delete 123' ) . ' ' . __( 'Delete a media item after confirmation', 'telepilot' );
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: send a photo or document directly to the bot in a private chat to upload it to WordPress.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: send a photo or document directly to the bot in a private chat to upload it to WordPress.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
@@ -127,7 +127,7 @@ class TelePress_Media_Service {
 	public function delete( $attachment_id ) {
 		$item = get_post( $attachment_id );
 		if ( ! $item || 'attachment' !== $item->post_type ) {
-			return new WP_Error( 'telepress_media_not_found', __( 'Media item not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_media_not_found', __( 'Media item not found.', 'telepilot' ) );
 		}
 
 		$before_state = array(
@@ -137,14 +137,14 @@ class TelePress_Media_Service {
 
 		$result = wp_delete_attachment( $attachment_id, true );
 		if ( ! $result ) {
-			return new WP_Error( 'telepress_media_delete_failed', __( 'WordPress could not delete that media item.', 'telepress' ) );
+			return new WP_Error( 'telepilot_media_delete_failed', __( 'WordPress could not delete that media item.', 'telepilot' ) );
 		}
 
 		$this->bump_cache_version();
 
 		return array(
 			'before_state' => $before_state,
-			'label'        => __( 'deleted', 'telepress' ),
+			'label'        => __( 'deleted', 'telepilot' ),
 		);
 	}
 
@@ -157,12 +157,12 @@ class TelePress_Media_Service {
 			)
 		);
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard(
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard(
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm delete #%d', 'telepress' ), $attachment_id ),
+							'text'          => sprintf( __( 'Confirm delete #%d', 'telepilot' ), $attachment_id ),
 							'callback_data' => 'tp:media:delete:' . (int) $attachment_id . ':' . $token,
 						),
 					),
@@ -182,11 +182,11 @@ class TelePress_Media_Service {
 
 			$rows[] = array(
 				array(
-					'text' => sprintf( __( 'Open #%d', 'telepress' ), $item->ID ),
+					'text' => sprintf( __( 'Open #%d', 'telepilot' ), $item->ID ),
 					'url'  => wp_get_attachment_url( $item->ID ),
 				),
 				array(
-					'text'          => sprintf( __( 'Delete #%d', 'telepress' ), $item->ID ),
+					'text'          => sprintf( __( 'Delete #%d', 'telepilot' ), $item->ID ),
 					'callback_data' => '/media delete ' . (int) $item->ID,
 				),
 			);
@@ -197,8 +197,8 @@ class TelePress_Media_Service {
 			$rows[] = $pagination;
 		}
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard( $rows ),
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard( $rows ),
 			$this->navigation_rows()
 		);
 	}
@@ -212,14 +212,14 @@ class TelePress_Media_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepress' ),
+				'text'          => __( 'Prev', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepress' ),
+				'text'          => __( 'Next', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -240,7 +240,7 @@ class TelePress_Media_Service {
 		$file    = $this->extract_file_reference( $message );
 
 		if ( empty( $file['file_id'] ) ) {
-			return new WP_Error( 'telepress_media_missing_file', __( 'No supported Telegram file was found in that message.', 'telepress' ) );
+			return new WP_Error( 'telepilot_media_missing_file', __( 'No supported Telegram file was found in that message.', 'telepilot' ) );
 		}
 
 		$file_response = $this->telegram_client->get_file( $file['file_id'] );
@@ -249,7 +249,7 @@ class TelePress_Media_Service {
 		}
 
 		if ( empty( $file_response['result']['file_path'] ) ) {
-			return new WP_Error( 'telepress_media_missing_path', __( 'Telegram did not return a downloadable file path.', 'telepress' ) );
+			return new WP_Error( 'telepilot_media_missing_path', __( 'Telegram did not return a downloadable file path.', 'telepilot' ) );
 		}
 
 		$download_url = $this->telegram_client->build_file_url( $file_response['result']['file_path'] );
@@ -315,7 +315,7 @@ class TelePress_Media_Service {
 	private function query_media_page( $args, $page, $limit ) {
 		$page      = max( 1, absint( $page ) );
 		$limit     = max( 1, absint( $limit ) );
-		$cache_key = 'telepress_media_' . $this->get_cache_version() . '_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
+		$cache_key = 'telepilot_media_' . $this->get_cache_version() . '_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
 		$cached    = get_transient( $cache_key );
 
 		if ( is_array( $cached ) ) {
@@ -351,22 +351,22 @@ class TelePress_Media_Service {
 	}
 
 	private function bump_cache_version() {
-		update_option( 'telepress_media_cache_version', $this->get_cache_version() + 1, false );
+		update_option( 'telepilot_media_cache_version', $this->get_cache_version() + 1, false );
 	}
 
 	private function get_cache_version() {
-		return max( 1, (int) get_option( 'telepress_media_cache_version', 1 ) );
+		return max( 1, (int) get_option( 'telepilot_media_cache_version', 1 ) );
 	}
 
 	private function navigation_rows() {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepress' ),
+					'text'          => __( 'Menu', 'telepilot' ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepress' ),
+					'text'          => __( 'Site', 'telepilot' ),
 					'callback_data' => '/site',
 				),
 			),

@@ -4,8 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Confirmation_Service {
-	const TOKEN_PREFIX = 'telepress_confirm_';
+class Telepilot_Confirmation_Service {
+	const TOKEN_PREFIX = 'telepilot_confirm_';
 
 	public function create_token( $payload, $expiration = 600 ) {
 		$token = $this->normalize_token( wp_generate_password( 20, false, false ) );

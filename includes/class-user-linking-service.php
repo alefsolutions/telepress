@@ -4,14 +4,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_User_Linking_Service {
-	const META_LINK_CODE      = '_telepress_link_code';
-	const META_LINK_CODE_HASH = '_telepress_link_code_hash';
-	const META_LINK_EXPIRES   = '_telepress_link_expires';
-	const META_TELEGRAM_ID    = '_telepress_telegram_user_id';
-	const META_TELEGRAM_CHAT  = '_telepress_telegram_chat_id';
-	const META_TELEGRAM_NAME  = '_telepress_telegram_username';
-	const META_LINKED_AT      = '_telepress_linked_at';
+class Telepilot_User_Linking_Service {
+	const META_LINK_CODE      = '_telepilot_link_code';
+	const META_LINK_CODE_HASH = '_telepilot_link_code_hash';
+	const META_LINK_EXPIRES   = '_telepilot_link_expires';
+	const META_TELEGRAM_ID    = '_telepilot_telegram_user_id';
+	const META_TELEGRAM_CHAT  = '_telepilot_telegram_chat_id';
+	const META_TELEGRAM_NAME  = '_telepilot_telegram_username';
+	const META_LINKED_AT      = '_telepilot_linked_at';
 
 	public function generate_link_code( $user_id ) {
 		$user_id = absint( $user_id );
@@ -45,7 +45,7 @@ class TelePress_User_Linking_Service {
 		if ( ! $user ) {
 			return array(
 				'ok'      => false,
-				'message' => __( 'Link code is invalid or expired.', 'telepress' ),
+				'message' => __( 'Link code is invalid or expired.', 'telepilot' ),
 			);
 		}
 
@@ -59,7 +59,7 @@ class TelePress_User_Linking_Service {
 		update_user_meta( $user->ID, self::META_LINKED_AT, time() );
 		$this->clear_link_code( $user->ID );
 
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'wp_user_id'       => $user->ID,
 				'telegram_user_id' => $telegram_user_id,
@@ -79,7 +79,7 @@ class TelePress_User_Linking_Service {
 			'ok'      => true,
 			'message' => sprintf(
 				/* translators: %s: WordPress display name. */
-				__( 'Telegram successfully linked to WordPress user %s.', 'telepress' ),
+				__( 'Telegram successfully linked to WordPress user %s.', 'telepilot' ),
 				$user->display_name
 			),
 		);
@@ -89,7 +89,7 @@ class TelePress_User_Linking_Service {
 		$user_id = absint( $user_id );
 
 		if ( ! $user_id || ! get_user_by( 'id', $user_id ) ) {
-			return new WP_Error( 'telepress_user_not_found', __( 'User not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
 		}
 
 		delete_user_meta( $user_id, self::META_TELEGRAM_ID );
@@ -136,6 +136,6 @@ class TelePress_User_Linking_Service {
 	}
 
 	private function get_display_transient_key( $user_id ) {
-		return 'telepress_link_code_' . absint( $user_id );
+		return 'telepilot_link_code_' . absint( $user_id );
 	}
 }

@@ -4,12 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Telegram_Service {
-	const DIAGNOSTICS_OPTION         = 'telepress_transport_diagnostics';
-	const COMMAND_DIAGNOSTICS_OPTION = 'telepress_command_diagnostics';
+class Telepilot_Telegram_Service {
+	const DIAGNOSTICS_OPTION         = 'telepilot_transport_diagnostics';
+	const COMMAND_DIAGNOSTICS_OPTION = 'telepilot_command_diagnostics';
 	const STALE_UPDATE_WINDOW_OPTION = 'stale_update_window';
 	const DEFAULT_STALE_WINDOW       = 180;
-	const POLL_LOCK_TRANSIENT        = 'telepress_poll_lock';
+	const POLL_LOCK_TRANSIENT        = 'telepilot_poll_lock';
 	private $client;
 	private $user_resolver;
 	private $permission_service;
@@ -20,23 +20,23 @@ class TelePress_Telegram_Service {
 	private $confirmation_service;
 
 	public function __construct() {
-		$this->client             = new TelePress_Telegram_Client();
-		$this->user_resolver      = new TelePress_Linked_User_Resolver();
-		$this->permission_service = new TelePress_Permission_Service();
-		$this->rate_limiter       = new TelePress_Rate_Limiter();
-		$this->confirmation_service = new TelePress_Confirmation_Service();
-		$this->media_service      = new TelePress_Media_Service( $this->confirmation_service, $this->client );
-		$this->users_service      = new TelePress_Users_Service( $this->confirmation_service );
-		$this->command_router     = new TelePress_Command_Router(
-			new TelePress_User_Linking_Service(),
+		$this->client             = new Telepilot_Telegram_Client();
+		$this->user_resolver      = new Telepilot_Linked_User_Resolver();
+		$this->permission_service = new Telepilot_Permission_Service();
+		$this->rate_limiter       = new Telepilot_Rate_Limiter();
+		$this->confirmation_service = new Telepilot_Confirmation_Service();
+		$this->media_service      = new Telepilot_Media_Service( $this->confirmation_service, $this->client );
+		$this->users_service      = new Telepilot_Users_Service( $this->confirmation_service );
+		$this->command_router     = new Telepilot_Command_Router(
+			new Telepilot_User_Linking_Service(),
 			$this->permission_service,
-			new TelePress_Dashboard_Service(),
-			new TelePress_Comments_Service( $this->confirmation_service ),
-			new TelePress_Posts_Service( $this->confirmation_service ),
-			new TelePress_Pages_Service( $this->confirmation_service ),
+			new Telepilot_Dashboard_Service(),
+			new Telepilot_Comments_Service( $this->confirmation_service ),
+			new Telepilot_Posts_Service( $this->confirmation_service ),
+			new Telepilot_Pages_Service( $this->confirmation_service ),
 			$this->media_service,
 			$this->users_service,
-			new TelePress_Taxonomies_Service( $this->confirmation_service ),
+			new Telepilot_Taxonomies_Service( $this->confirmation_service ),
 			$this->confirmation_service
 		);
 	}
@@ -53,7 +53,7 @@ class TelePress_Telegram_Service {
 		}
 
 		$placeholder = $this->send_processing_placeholder( $update, $command );
-		$queue_result = TelePress_Jobs_Repository::enqueue(
+		$queue_result = Telepilot_Jobs_Repository::enqueue(
 			isset( $update['update_id'] ) ? (int) $update['update_id'] : 0,
 			'webhook',
 			$update,
@@ -79,8 +79,8 @@ class TelePress_Telegram_Service {
 			$this->schedule_job_processing();
 		}
 
-		return TelePress_Telegram_Response_Builder::success(
-			__( 'Update queued for background processing.', 'telepress' ),
+		return Telepilot_Telegram_Response_Builder::success(
+			__( 'Update queued for background processing.', 'telepilot' ),
 			array(
 				'command'       => ! empty( $command['name'] ) ? $command['name'] : '',
 				'skip_dispatch' => true,
@@ -174,22 +174,22 @@ class TelePress_Telegram_Service {
 		$command_name = ! empty( $command['name'] ) ? (string) $command['name'] : '';
 
 		$messages = array(
-			'/site'       => __( '<b>Working on it...</b>' . "\n" . 'Building your site overview now.', 'telepress' ),
-			'/dashboard'  => __( '<b>Working on it...</b>' . "\n" . 'Gathering dashboard data now.', 'telepress' ),
-			'/comments'   => __( '<b>Working on it...</b>' . "\n" . 'Fetching comment moderation data now.', 'telepress' ),
-			'/posts'      => __( '<b>Working on it...</b>' . "\n" . 'Loading posts now.', 'telepress' ),
-			'/pages'      => __( '<b>Working on it...</b>' . "\n" . 'Loading pages now.', 'telepress' ),
-			'/media'      => __( '<b>Working on it...</b>' . "\n" . 'Fetching media items now.', 'telepress' ),
-			'/users'      => __( '<b>Working on it...</b>' . "\n" . 'Loading users now.', 'telepress' ),
-			'/categories' => __( '<b>Working on it...</b>' . "\n" . 'Loading categories now.', 'telepress' ),
-			'/tags'       => __( '<b>Working on it...</b>' . "\n" . 'Loading tags now.', 'telepress' ),
+			'/site'       => __( '<b>Working on it...</b>' . "\n" . 'Building your site overview now.', 'telepilot' ),
+			'/dashboard'  => __( '<b>Working on it...</b>' . "\n" . 'Gathering dashboard data now.', 'telepilot' ),
+			'/comments'   => __( '<b>Working on it...</b>' . "\n" . 'Fetching comment moderation data now.', 'telepilot' ),
+			'/posts'      => __( '<b>Working on it...</b>' . "\n" . 'Loading posts now.', 'telepilot' ),
+			'/pages'      => __( '<b>Working on it...</b>' . "\n" . 'Loading pages now.', 'telepilot' ),
+			'/media'      => __( '<b>Working on it...</b>' . "\n" . 'Fetching media items now.', 'telepilot' ),
+			'/users'      => __( '<b>Working on it...</b>' . "\n" . 'Loading users now.', 'telepilot' ),
+			'/categories' => __( '<b>Working on it...</b>' . "\n" . 'Loading categories now.', 'telepilot' ),
+			'/tags'       => __( '<b>Working on it...</b>' . "\n" . 'Loading tags now.', 'telepilot' ),
 		);
 
 		if ( isset( $messages[ $command_name ] ) ) {
 			return $messages[ $command_name ];
 		}
 
-		return __( '<b>Working on it...</b>' . "\n" . 'Processing your request now.', 'telepress' );
+		return __( '<b>Working on it...</b>' . "\n" . 'Processing your request now.', 'telepilot' );
 	}
 
 	private function schedule_job_processing() {
@@ -203,8 +203,8 @@ class TelePress_Telegram_Service {
 			)
 		);
 
-		if ( ! wp_next_scheduled( 'telepress_process_jobs' ) ) {
-			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'telepress_process_jobs' );
+		if ( ! wp_next_scheduled( 'telepilot_process_jobs' ) ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'telepilot_process_jobs' );
 		}
 
 		if ( is_wp_error( $worker_result ) && function_exists( 'spawn_cron' ) ) {
@@ -213,7 +213,7 @@ class TelePress_Telegram_Service {
 	}
 
 	public function process_jobs( $limit = 5 ) {
-		$jobs = TelePress_Jobs_Repository::claim_pending_jobs( $limit );
+		$jobs = Telepilot_Jobs_Repository::claim_pending_jobs( $limit );
 
 		if ( empty( $jobs ) ) {
 			return array();
@@ -223,7 +223,7 @@ class TelePress_Telegram_Service {
 			$payload = ! empty( $job['payload'] ) ? json_decode( $job['payload'], true ) : array();
 
 			if ( empty( $payload ) || ! is_array( $payload ) ) {
-				TelePress_Jobs_Repository::mark_failed( (int) $job['id'], __( 'Queued payload could not be decoded.', 'telepress' ) );
+				Telepilot_Jobs_Repository::mark_failed( (int) $job['id'], __( 'Queued payload could not be decoded.', 'telepilot' ) );
 				$this->update_diagnostics(
 					array(
 						'last_background_job_at'     => time(),
@@ -253,7 +253,7 @@ class TelePress_Telegram_Service {
 			);
 
 			if ( ! empty( $result['dispatch_error'] ) ) {
-				TelePress_Jobs_Repository::mark_failed( (int) $job['id'], (string) $result['dispatch_error'] );
+				Telepilot_Jobs_Repository::mark_failed( (int) $job['id'], (string) $result['dispatch_error'] );
 				$this->update_diagnostics(
 					array(
 						'last_background_job_at'     => time(),
@@ -267,7 +267,7 @@ class TelePress_Telegram_Service {
 				continue;
 			}
 
-			TelePress_Jobs_Repository::mark_complete( (int) $job['id'] );
+			Telepilot_Jobs_Repository::mark_complete( (int) $job['id'] );
 			$this->update_diagnostics(
 				array(
 					'last_background_job_at'     => time(),
@@ -286,7 +286,7 @@ class TelePress_Telegram_Service {
 	private function process_update( $update, $transport = 'webhook', $options = array() ) {
 		$start_time = microtime( true );
 
-		if ( empty( $options['skip_duplicate_check'] ) && ! empty( $update['update_id'] ) && TelePress_Processed_Updates_Repository::has_processed( (int) $update['update_id'] ) ) {
+		if ( empty( $options['skip_duplicate_check'] ) && ! empty( $update['update_id'] ) && Telepilot_Processed_Updates_Repository::has_processed( (int) $update['update_id'] ) ) {
 			$this->update_diagnostics(
 				array(
 					'last_duplicate_update_at' => time(),
@@ -298,12 +298,12 @@ class TelePress_Telegram_Service {
 				)
 			);
 
-			return TelePress_Telegram_Response_Builder::success(
-				__( 'Duplicate Telegram update ignored.', 'telepress' ),
+			return Telepilot_Telegram_Response_Builder::success(
+				__( 'Duplicate Telegram update ignored.', 'telepilot' ),
 				array(
 					'command'       => '',
 					'skip_dispatch' => true,
-					'code'          => 'telepress_duplicate_update',
+					'code'          => 'telepilot_duplicate_update',
 				)
 			);
 		}
@@ -313,10 +313,10 @@ class TelePress_Telegram_Service {
 		if ( $this->is_stale_update( $update ) ) {
 			$this->record_stale_update( $transport, $update );
 			$this->mark_update_processed( $update, $transport, 'stale' );
-			return TelePress_Telegram_Response_Builder::error(
-				__( 'Skipped a stale Telegram update.', 'telepress' ),
+			return Telepilot_Telegram_Response_Builder::error(
+				__( 'Skipped a stale Telegram update.', 'telepilot' ),
 				array(
-					'code' => 'telepress_stale_update',
+					'code' => 'telepilot_stale_update',
 				)
 			);
 		}
@@ -325,19 +325,19 @@ class TelePress_Telegram_Service {
 		$chat_id  = ! empty( $identity['chat_id'] ) ? (string) $identity['chat_id'] : '';
 
 		if ( '' !== $chat_id && ! $this->is_chat_allowed( $chat_id ) ) {
-			$result = TelePress_Telegram_Response_Builder::error(
+			$result = Telepilot_Telegram_Response_Builder::error(
 				sprintf(
 					/* translators: %s: Telegram chat ID. */
-					__( "This chat is not authorized for the site yet.\n\nYour current chat ID is: %s\n\nAdd it to Allowed Chat IDs in TelePress settings, then send /start again.", 'telepress' ),
+					__( "This chat is not authorized for the site yet.\n\nYour current chat ID is: %s\n\nAdd it to Allowed Chat IDs in WP Telepilot settings, then send /start again.", 'telepilot' ),
 					$chat_id
 				),
 				array(
 					'command' => '/chatid',
-					'code'    => 'telepress_chat_not_allowed',
+					'code'    => 'telepilot_chat_not_allowed',
 				)
 			);
 
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'chat_id'         => $chat_id,
 					'action_name'     => 'telegram_rejected_chat',
@@ -355,7 +355,7 @@ class TelePress_Telegram_Service {
 			return $result;
 		}
 
-		$settings          = get_option( 'telepress_settings', array() );
+		$settings          = get_option( 'telepilot_settings', array() );
 		$limit_per_minute  = isset( $settings['rate_limit_per_minute'] ) ? (int) $settings['rate_limit_per_minute'] : 20;
 		$rate_limit_result = $this->rate_limiter->check( $identity, $limit_per_minute );
 
@@ -381,15 +381,15 @@ class TelePress_Telegram_Service {
 				$result = $this->command_router->route( $update, $identity );
 			}
 		} catch ( Throwable $throwable ) {
-			$result = TelePress_Telegram_Response_Builder::error(
-				__( 'TelePress hit an internal error while processing that command.', 'telepress' ),
+			$result = Telepilot_Telegram_Response_Builder::error(
+				__( 'WP Telepilot hit an internal error while processing that command.', 'telepilot' ),
 				array(
 					'command' => ! empty( $command['name'] ) ? $command['name'] : '',
-					'code'    => 'telepress_command_exception',
+					'code'    => 'telepilot_command_exception',
 				)
 			);
 
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'wp_user_id'       => ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ? $identity['wp_user']->ID : null,
 					'telegram_user_id' => ! empty( $identity['telegram_user_id'] ) ? $identity['telegram_user_id'] : null,
@@ -409,12 +409,12 @@ class TelePress_Telegram_Service {
 		}
 
 		if ( ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ) {
-			update_user_meta( $identity['wp_user']->ID, '_telepress_last_command_at', time() );
+			update_user_meta( $identity['wp_user']->ID, '_telepilot_last_command_at', time() );
 		}
 
 		$dispatch_error = $this->dispatch_response( $identity, $update, $result, $transport, $options );
 
-		if ( ! empty( $result['code'] ) && 'telepress_capability_denied' === $result['code'] ) {
+		if ( ! empty( $result['code'] ) && 'telepilot_capability_denied' === $result['code'] ) {
 			$this->log_command_event( 'telegram_permission_denied', $identity, $update, $result );
 		}
 
@@ -439,16 +439,16 @@ class TelePress_Telegram_Service {
 				array(
 					'last_poll_at'     => time(),
 					'last_poll_status' => 'locked',
-					'last_poll_error'  => __( 'A previous polling worker is still active.', 'telepress' ),
+					'last_poll_error'  => __( 'A previous polling worker is still active.', 'telepilot' ),
 				)
 			);
 
-			return new WP_Error( 'telepress_poll_locked', __( 'TelePress polling is already running.', 'telepress' ) );
+			return new WP_Error( 'telepilot_poll_locked', __( 'WP Telepilot polling is already running.', 'telepilot' ) );
 		}
 
 		$this->acquire_poll_lock();
 
-		$offset   = (int) get_option( 'telepress_telegram_poll_offset', 0 );
+		$offset   = (int) get_option( 'telepilot_telegram_poll_offset', 0 );
 		$response = $this->client->get_updates( $offset, 10, 0 );
 		$this->update_diagnostics(
 			array(
@@ -463,7 +463,7 @@ class TelePress_Telegram_Service {
 					'last_poll_error'  => $response->get_error_message(),
 				)
 			);
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'action_name'     => 'telegram_poll_failed',
 					'resource_type'   => 'telegram_poll',
@@ -496,7 +496,7 @@ class TelePress_Telegram_Service {
 			$this->handle_update( $update, 'polling' );
 		}
 
-		update_option( 'telepress_telegram_poll_offset', $last_offset, false );
+		update_option( 'telepilot_telegram_poll_offset', $last_offset, false );
 		$this->update_diagnostics(
 			array(
 				'last_poll_status' => 'success',
@@ -519,8 +519,8 @@ class TelePress_Telegram_Service {
 				return $delete_result;
 			}
 
-			$settings      = get_option( 'telepress_settings', array() );
-			$webhook_url   = rest_url( TelePress_REST_Webhook_Controller::REST_NAMESPACE . TelePress_REST_Webhook_Controller::ROUTE );
+			$settings      = get_option( 'telepilot_settings', array() );
+			$webhook_url   = rest_url( Telepilot_REST_Webhook_Controller::REST_NAMESPACE . Telepilot_REST_Webhook_Controller::ROUTE );
 			$secret_token  = isset( $settings['webhook_secret'] ) ? (string) $settings['webhook_secret'] : '';
 			$webhook_reset = $this->client->set_webhook( $webhook_url, $secret_token );
 
@@ -541,7 +541,7 @@ class TelePress_Telegram_Service {
 		}
 
 		$flushed = 0;
-		$offset  = (int) get_option( 'telepress_telegram_poll_offset', 0 );
+		$offset  = (int) get_option( 'telepilot_telegram_poll_offset', 0 );
 
 		while ( true ) {
 			$response = $this->client->get_updates( $offset, 100, 0 );
@@ -574,7 +574,7 @@ class TelePress_Telegram_Service {
 			}
 		}
 
-		update_option( 'telepress_telegram_poll_offset', $offset, false );
+		update_option( 'telepilot_telegram_poll_offset', $offset, false );
 		$this->update_diagnostics(
 			array(
 				'last_flush_at'     => time(),
@@ -593,7 +593,7 @@ class TelePress_Telegram_Service {
 	}
 
 	private function is_chat_allowed( $chat_id ) {
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$allowed  = isset( $settings['allowed_chat_ids'] ) ? $settings['allowed_chat_ids'] : '';
 		$chat_ids = array_filter( array_map( 'trim', explode( "\n", str_replace( ',', "\n", $allowed ) ) ) );
 
@@ -655,7 +655,7 @@ class TelePress_Telegram_Service {
 					'last_delivery_transport' => $transport,
 				)
 			);
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'wp_user_id'       => ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ? $identity['wp_user']->ID : null,
 					'telegram_user_id' => ! empty( $identity['telegram_user_id'] ) ? $identity['telegram_user_id'] : null,
@@ -669,7 +669,7 @@ class TelePress_Telegram_Service {
 			return $response->get_error_message();
 		}
 
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'wp_user_id'       => ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ? $identity['wp_user']->ID : null,
 				'telegram_user_id' => ! empty( $identity['telegram_user_id'] ) ? $identity['telegram_user_id'] : null,
@@ -714,20 +714,20 @@ class TelePress_Telegram_Service {
 	}
 
 	private function trigger_async_worker( $limit = 5 ) {
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$secret   = isset( $settings['worker_secret'] ) ? (string) $settings['worker_secret'] : '';
 
 		if ( '' === $secret ) {
-			return new WP_Error( 'telepress_missing_worker_secret', __( 'TelePress worker secret is not configured.', 'telepress' ) );
+			return new WP_Error( 'telepilot_missing_worker_secret', __( 'WP Telepilot worker secret is not configured.', 'telepilot' ) );
 		}
 
 		$response = wp_remote_post(
-			rest_url( TelePress_REST_Webhook_Controller::REST_NAMESPACE . TelePress_REST_Webhook_Controller::WORKER_ROUTE ),
+			rest_url( Telepilot_REST_Webhook_Controller::REST_NAMESPACE . Telepilot_REST_Webhook_Controller::WORKER_ROUTE ),
 			array(
 				'timeout'  => 1,
 				'blocking' => false,
 				'headers'  => array(
-					'X-TelePress-Worker-Secret' => $secret,
+					'X-Telepilot-Worker-Secret' => $secret,
 				),
 				'body'     => array(
 					'limit' => max( 1, absint( $limit ) ),
@@ -736,7 +736,7 @@ class TelePress_Telegram_Service {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'action_name'     => 'worker_trigger_failed',
 					'resource_type'   => 'worker',
@@ -748,7 +748,7 @@ class TelePress_Telegram_Service {
 			return $response;
 		}
 
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'action_name'    => 'worker_triggered',
 				'resource_type'  => 'worker',
@@ -763,7 +763,7 @@ class TelePress_Telegram_Service {
 	}
 
 	private function log_command_event( $action_name, $identity, $update, $context = array() ) {
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'wp_user_id'       => ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User ? $identity['wp_user']->ID : null,
 				'telegram_user_id' => ! empty( $identity['telegram_user_id'] ) ? $identity['telegram_user_id'] : null,
@@ -798,10 +798,10 @@ class TelePress_Telegram_Service {
 
 		$result = $this->media_service->import_from_update( $update );
 		if ( is_wp_error( $result ) ) {
-			return TelePress_Telegram_Response_Builder::error( $result->get_error_message() );
+			return Telepilot_Telegram_Response_Builder::error( $result->get_error_message() );
 		}
 
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'wp_user_id'       => $identity['wp_user']->ID,
 				'telegram_user_id' => $identity['telegram_user_id'],
@@ -813,14 +813,14 @@ class TelePress_Telegram_Service {
 			)
 		);
 
-		return TelePress_Telegram_Response_Builder::success_html(
-			TelePress_Telegram_Response_Builder::bold( __( 'Media Uploaded', 'telepress' ) ) .
+		return Telepilot_Telegram_Response_Builder::success_html(
+			Telepilot_Telegram_Response_Builder::bold( __( 'Media Uploaded', 'telepilot' ) ) .
 			"\n\n" .
 			sprintf(
-				__( "ID: %1$d\nTitle: %2$s\nPreview: %3$s", 'telepress' ),
+				__( "ID: %1$d\nTitle: %2$s\nPreview: %3$s", 'telepilot' ),
 				$result['attachment_id'],
-				TelePress_Telegram_Response_Builder::escape( $result['title'] ),
-				TelePress_Telegram_Response_Builder::link( __( 'Open file', 'telepress' ), $result['url'] )
+				Telepilot_Telegram_Response_Builder::escape( $result['title'] ),
+				Telepilot_Telegram_Response_Builder::link( __( 'Open file', 'telepilot' ), $result['url'] )
 			),
 			array(
 				'command' => '/media',
@@ -830,7 +830,7 @@ class TelePress_Telegram_Service {
 	}
 
 	private function get_stale_update_window() {
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$window   = isset( $settings[ self::STALE_UPDATE_WINDOW_OPTION ] ) ? (int) $settings[ self::STALE_UPDATE_WINDOW_OPTION ] : self::DEFAULT_STALE_WINDOW;
 
 		return max( 30, $window );
@@ -870,7 +870,7 @@ class TelePress_Telegram_Service {
 			)
 		);
 
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'action_name'     => 'telegram_update_stale',
 				'resource_type'   => 'telegram_update',
@@ -957,7 +957,7 @@ class TelePress_Telegram_Service {
 			return;
 		}
 
-		TelePress_Processed_Updates_Repository::mark_processed( (int) $update['update_id'], $transport, $result );
+		Telepilot_Processed_Updates_Repository::mark_processed( (int) $update['update_id'], $transport, $result );
 	}
 
 	private function poll_lock_exists() {

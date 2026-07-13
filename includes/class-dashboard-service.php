@@ -4,8 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Dashboard_Service {
-	const CACHE_KEY = 'telepress_dashboard_summary';
+class Telepilot_Dashboard_Service {
+	const CACHE_KEY = 'telepilot_dashboard_summary';
 
 	public function get_summary() {
 		$cached = get_transient( self::CACHE_KEY );
@@ -30,7 +30,7 @@ class TelePress_Dashboard_Service {
 			'wordpress_version'     => get_bloginfo( 'version' ),
 			'php_version'           => PHP_VERSION,
 			'database_version'      => $database_version,
-			'active_theme'          => $active_theme->exists() ? $active_theme->get( 'Name' ) : __( 'Unknown', 'telepress' ),
+			'active_theme'          => $active_theme->exists() ? $active_theme->get( 'Name' ) : __( 'Unknown', 'telepilot' ),
 			'active_plugins_count'  => $plugin_counts['active'],
 			'inactive_plugins_count'=> $plugin_counts['inactive'],
 			'site_health'           => $health_label,
@@ -46,21 +46,21 @@ class TelePress_Dashboard_Service {
 
 	public function render_summary_message( $summary ) {
 		$lines   = array();
-		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Site Overview', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'Site Overview', 'telepilot' ) );
 		$lines[] = '';
-		$lines[] = sprintf( __( 'Site: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['site_name'] ) );
-		$lines[] = sprintf( __( 'URL: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['site_url'] ) );
-		$lines[] = sprintf( __( 'WordPress: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['wordpress_version'] ) );
-		$lines[] = sprintf( __( 'PHP: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['php_version'] ) );
-		$lines[] = sprintf( __( 'Database: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['database_version'] ) );
-		$lines[] = sprintf( __( 'Theme: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['active_theme'] ) );
+		$lines[] = sprintf( __( 'Site: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_name'] ) );
+		$lines[] = sprintf( __( 'URL: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_url'] ) );
+		$lines[] = sprintf( __( 'WordPress: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['wordpress_version'] ) );
+		$lines[] = sprintf( __( 'PHP: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['php_version'] ) );
+		$lines[] = sprintf( __( 'Database: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['database_version'] ) );
+		$lines[] = sprintf( __( 'Theme: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['active_theme'] ) );
 		$lines[] = '';
-		$lines[] = sprintf( __( 'Posts in draft: %d', 'telepress' ), $summary['draft_posts_count'] );
-		$lines[] = sprintf( __( 'Pending comments: %d', 'telepress' ), $summary['pending_comments'] );
-		$lines[] = sprintf( __( 'Active plugins: %d', 'telepress' ), $summary['active_plugins_count'] );
-		$lines[] = sprintf( __( 'Site health: %s', 'telepress' ), TelePress_Telegram_Response_Builder::escape( $summary['site_health'] ) );
+		$lines[] = sprintf( __( 'Posts in draft: %d', 'telepilot' ), $summary['draft_posts_count'] );
+		$lines[] = sprintf( __( 'Pending comments: %d', 'telepilot' ), $summary['pending_comments'] );
+		$lines[] = sprintf( __( 'Active plugins: %d', 'telepilot' ), $summary['active_plugins_count'] );
+		$lines[] = sprintf( __( 'Site health: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_health'] ) );
 		$lines[] = sprintf(
-			__( 'Updates: core %1$d, plugins %2$d, themes %3$d', 'telepress' ),
+			__( 'Updates: core %1$d, plugins %2$d, themes %3$d', 'telepilot' ),
 			$summary['pending_updates']['core'],
 			$summary['pending_updates']['plugins'],
 			$summary['pending_updates']['themes']
@@ -73,11 +73,11 @@ class TelePress_Dashboard_Service {
 		$rows   = array();
 		$rows[] = array(
 			array(
-				'text'          => __( 'Refresh', 'telepress' ),
+				'text'          => __( 'Refresh', 'telepilot' ),
 				'callback_data' => '/site',
 			),
 			array(
-				'text'          => __( 'Menu', 'telepress' ),
+				'text'          => __( 'Menu', 'telepilot' ),
 				'callback_data' => '/menu',
 			),
 		);
@@ -85,11 +85,11 @@ class TelePress_Dashboard_Service {
 		if ( $wp_user instanceof WP_User && user_can( $wp_user, 'edit_posts' ) ) {
 			$rows[] = array(
 				array(
-					'text'          => __( 'Posts', 'telepress' ),
+					'text'          => __( 'Posts', 'telepilot' ),
 					'callback_data' => '/posts list',
 				),
 				array(
-					'text'          => __( 'Pages', 'telepress' ),
+					'text'          => __( 'Pages', 'telepilot' ),
 					'callback_data' => '/pages list',
 				),
 			);
@@ -98,11 +98,11 @@ class TelePress_Dashboard_Service {
 		if ( $wp_user instanceof WP_User && user_can( $wp_user, 'moderate_comments' ) ) {
 			$rows[] = array(
 				array(
-					'text'          => __( 'Comments', 'telepress' ),
+					'text'          => __( 'Comments', 'telepilot' ),
 					'callback_data' => '/comments pending',
 				),
 				array(
-					'text'          => __( 'Media', 'telepress' ),
+					'text'          => __( 'Media', 'telepilot' ),
 					'callback_data' => '/media list',
 				),
 			);
@@ -111,7 +111,7 @@ class TelePress_Dashboard_Service {
 		if ( $wp_user instanceof WP_User && user_can( $wp_user, 'list_users' ) ) {
 			$rows[] = array(
 				array(
-					'text'          => __( 'Users', 'telepress' ),
+					'text'          => __( 'Users', 'telepilot' ),
 					'callback_data' => '/users list',
 				),
 			);
@@ -119,21 +119,21 @@ class TelePress_Dashboard_Service {
 
 		$admin_row = array(
 			array(
-				'text' => __( 'Open wp-admin', 'telepress' ),
+				'text' => __( 'Open wp-admin', 'telepilot' ),
 				'url'  => admin_url(),
 			),
 		);
 
 		if ( $wp_user instanceof WP_User && user_can( $wp_user, 'manage_options' ) ) {
 			$admin_row[] = array(
-				'text' => __( 'TelePress Settings', 'telepress' ),
-				'url'  => admin_url( 'admin.php?page=telepress' ),
+				'text' => __( 'Telepilot Settings', 'telepilot' ),
+				'url'  => admin_url( 'admin.php?page=telepilot' ),
 			);
 		}
 
 		$rows[] = $admin_row;
 
-		return TelePress_Telegram_Response_Builder::keyboard( $rows );
+		return Telepilot_Telegram_Response_Builder::keyboard( $rows );
 	}
 
 	private function get_health_label() {
@@ -141,11 +141,11 @@ class TelePress_Dashboard_Service {
 			$tests = WP_Site_Health::get_instance()->get_tests();
 
 			if ( ! empty( $tests['direct'] ) ) {
-				return __( 'Checks available', 'telepress' );
+				return __( 'Checks available', 'telepilot' );
 			}
 		}
 
-		return __( 'Not evaluated', 'telepress' );
+		return __( 'Not evaluated', 'telepilot' );
 	}
 
 	private function get_plugin_counts() {

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Telegram_Response_Builder {
+class Telepilot_Telegram_Response_Builder {
 	public static function success( $message, $extra = array() ) {
 		return wp_parse_args(
 			$extra,

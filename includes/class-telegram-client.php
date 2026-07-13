@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Telegram_Client {
+class Telepilot_Telegram_Client {
 	private $bot_token = '';
 
 	public function __construct( $bot_token = '' ) {
@@ -13,7 +13,7 @@ class TelePress_Telegram_Client {
 			return;
 		}
 
-		$settings        = get_option( 'telepress_settings', array() );
+		$settings        = get_option( 'telepilot_settings', array() );
 		$this->bot_token = isset( $settings['bot_token'] ) ? (string) $settings['bot_token'] : '';
 	}
 
@@ -142,7 +142,7 @@ class TelePress_Telegram_Client {
 
 	public function request( $method, $payload = array() ) {
 		if ( '' === $this->bot_token ) {
-			return new WP_Error( 'telepress_missing_bot_token', __( 'TelePress bot token is not configured.', 'telepress' ) );
+			return new WP_Error( 'telepilot_missing_bot_token', __( 'Telepilot bot token is not configured.', 'telepilot' ) );
 		}
 
 		$url      = sprintf( 'https://api.telegram.org/bot%s/%s', rawurlencode( $this->bot_token ), rawurlencode( $method ) );
@@ -155,17 +155,17 @@ class TelePress_Telegram_Client {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return new WP_Error( 'telepress_telegram_request_failed', $response->get_error_message() );
+			return new WP_Error( 'telepilot_telegram_request_failed', $response->get_error_message() );
 		}
 
 		$status = (int) wp_remote_retrieve_response_code( $response );
 		$body   = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( $status < 200 || $status >= 300 || empty( $body['ok'] ) ) {
-			$message = isset( $body['description'] ) ? (string) $body['description'] : __( 'Telegram API request failed.', 'telepress' );
+			$message = isset( $body['description'] ) ? (string) $body['description'] : __( 'Telegram API request failed.', 'telepilot' );
 
 			return new WP_Error(
-				'telepress_telegram_api_error',
+				'telepilot_telegram_api_error',
 				$message,
 				array(
 					'status' => $status,

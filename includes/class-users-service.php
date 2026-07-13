@@ -4,13 +4,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Users_Service {
-	const META_DISABLED = '_telepress_disabled';
+class Telepilot_Users_Service {
+	const META_DISABLED = '_telepilot_disabled';
 	const PER_PAGE      = 5;
 
 	private $confirmation_service;
 
-	public function __construct( TelePress_Confirmation_Service $confirmation_service ) {
+	public function __construct( Telepilot_Confirmation_Service $confirmation_service ) {
 		$this->confirmation_service = $confirmation_service;
 	}
 
@@ -53,19 +53,19 @@ class TelePress_Users_Service {
 
 	public function render_list_message( $users, $heading ) {
 		if ( empty( $users ) ) {
-			return $heading . "\n" . __( 'No users matched that request.', 'telepress' );
+			return $heading . "\n" . __( 'No users matched that request.', 'telepilot' );
 		}
 
 		$lines = array( $heading );
 
 		foreach ( $users as $user ) {
 			$roles      = implode( ', ', array_map( 'sanitize_text_field', $user->roles ) );
-			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepress' ) : __( 'active', 'telepress' );
+			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepilot' ) : __( 'active', 'telepilot' );
 			$lines[]    = sprintf(
-				__( '#%1$d %2$s [%3$s] (%4$s)', 'telepress' ),
+				__( '#%1$d %2$s [%3$s] (%4$s)', 'telepilot' ),
 				$user->ID,
 				$user->user_login,
-				$roles ? $roles : __( 'no role', 'telepress' ),
+				$roles ? $roles : __( 'no role', 'telepilot' ),
 				$is_disabled
 			);
 		}
@@ -75,46 +75,46 @@ class TelePress_Users_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No users matched that request.', 'telepress' );
+			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No users matched that request.', 'telepilot' );
 		}
 
-		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
-		$lines[] = TelePress_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		$lines   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
 		$lines[] = '';
 
 		foreach ( $result['items'] as $user ) {
 			$roles       = implode( ', ', array_map( 'sanitize_text_field', $user->roles ) );
-			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepress' ) : __( 'active', 'telepress' );
+			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepilot' ) : __( 'active', 'telepilot' );
 			$lines[]     = sprintf(
-				__( '- #%1$d %2$s [%3$s] (%4$s)', 'telepress' ),
+				__( '- #%1$d %2$s [%3$s] (%4$s)', 'telepilot' ),
 				$user->ID,
-				TelePress_Telegram_Response_Builder::escape( $user->user_login ),
-				TelePress_Telegram_Response_Builder::escape( $roles ? $roles : __( 'no role', 'telepress' ) ),
-				TelePress_Telegram_Response_Builder::escape( $is_disabled )
+				Telepilot_Telegram_Response_Builder::escape( $user->user_login ),
+				Telepilot_Telegram_Response_Builder::escape( $roles ? $roles : __( 'no role', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::escape( $is_disabled )
 			);
 		}
 
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use /users help for examples and /users search keyword to jump to a person quickly.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use /users help for examples and /users search keyword to jump to a person quickly.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
 
 	public function render_help_message() {
 		$lines   = array();
-		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Users Commands', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'Users Commands', 'telepilot' ) );
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/users list' ) . ' ' . __( 'Show recent users', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/users search jane' ) . ' ' . __( 'Search by username, display name, or email', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/users create jane jane@example.com editor' ) . ' ' . __( 'Create a new user', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/users disable 123' ) . ' ' . __( 'Disable a user', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/users enable 123' ) . ' ' . __( 'Re-enable a user', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/users reset-password 123' ) . ' ' . __( 'Generate a password reset link', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/users role 123 editor' ) . ' ' . __( 'Change a user role', 'telepress' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users list' ) . ' ' . __( 'Show recent users', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users search jane' ) . ' ' . __( 'Search by username, display name, or email', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users create jane jane@example.com editor' ) . ' ' . __( 'Create a new user', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users disable 123' ) . ' ' . __( 'Disable a user', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users enable 123' ) . ' ' . __( 'Re-enable a user', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users reset-password 123' ) . ' ' . __( 'Generate a password reset link', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users role 123 editor' ) . ' ' . __( 'Change a user role', 'telepilot' );
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: user creation and other sensitive actions must be confirmed in a private chat.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: user creation and other sensitive actions must be confirmed in a private chat.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
@@ -125,23 +125,23 @@ class TelePress_Users_Service {
 		$role     = sanitize_key( $role );
 
 		if ( '' === $username || ! validate_username( $username ) ) {
-			return new WP_Error( 'telepress_invalid_username', __( 'The username is invalid.', 'telepress' ) );
+			return new WP_Error( 'telepilot_invalid_username', __( 'The username is invalid.', 'telepilot' ) );
 		}
 
 		if ( username_exists( $username ) ) {
-			return new WP_Error( 'telepress_username_exists', __( 'That username already exists.', 'telepress' ) );
+			return new WP_Error( 'telepilot_username_exists', __( 'That username already exists.', 'telepilot' ) );
 		}
 
 		if ( ! is_email( $email ) ) {
-			return new WP_Error( 'telepress_invalid_email', __( 'The email address is invalid.', 'telepress' ) );
+			return new WP_Error( 'telepilot_invalid_email', __( 'The email address is invalid.', 'telepilot' ) );
 		}
 
 		if ( email_exists( $email ) ) {
-			return new WP_Error( 'telepress_email_exists', __( 'That email address is already in use.', 'telepress' ) );
+			return new WP_Error( 'telepilot_email_exists', __( 'That email address is already in use.', 'telepilot' ) );
 		}
 
 		if ( ! get_role( $role ) ) {
-			return new WP_Error( 'telepress_invalid_role', __( 'That role does not exist.', 'telepress' ) );
+			return new WP_Error( 'telepilot_invalid_role', __( 'That role does not exist.', 'telepilot' ) );
 		}
 
 		$password = wp_generate_password( 24, true, true );
@@ -156,14 +156,14 @@ class TelePress_Users_Service {
 
 		return array(
 			'user'  => $user,
-			'label' => __( 'created', 'telepress' ),
+			'label' => __( 'created', 'telepilot' ),
 		);
 	}
 
 	public function disable_user( $user_id ) {
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
-			return new WP_Error( 'telepress_user_not_found', __( 'User not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
 		}
 
 		update_user_meta( $user_id, self::META_DISABLED, 1 );
@@ -172,14 +172,14 @@ class TelePress_Users_Service {
 			'user'         => $user,
 			'before_state' => array( 'disabled' => false ),
 			'after_state'  => array( 'disabled' => true ),
-			'label'        => __( 'disabled', 'telepress' ),
+			'label'        => __( 'disabled', 'telepilot' ),
 		);
 	}
 
 	public function enable_user( $user_id ) {
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
-			return new WP_Error( 'telepress_user_not_found', __( 'User not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
 		}
 
 		delete_user_meta( $user_id, self::META_DISABLED );
@@ -188,19 +188,19 @@ class TelePress_Users_Service {
 			'user'         => $user,
 			'before_state' => array( 'disabled' => true ),
 			'after_state'  => array( 'disabled' => false ),
-			'label'        => __( 'enabled', 'telepress' ),
+			'label'        => __( 'enabled', 'telepilot' ),
 		);
 	}
 
 	public function assign_role( $user_id, $role ) {
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
-			return new WP_Error( 'telepress_user_not_found', __( 'User not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
 		}
 
 		$role = sanitize_key( $role );
 		if ( ! get_role( $role ) ) {
-			return new WP_Error( 'telepress_invalid_role', __( 'That role does not exist.', 'telepress' ) );
+			return new WP_Error( 'telepilot_invalid_role', __( 'That role does not exist.', 'telepilot' ) );
 		}
 
 		$before_roles = $user->roles;
@@ -210,14 +210,14 @@ class TelePress_Users_Service {
 			'user'         => $user,
 			'before_state' => array( 'roles' => $before_roles ),
 			'after_state'  => array( 'roles' => $user->roles ),
-			'label'        => sprintf( __( 'assigned role %s', 'telepress' ), $role ),
+			'label'        => sprintf( __( 'assigned role %s', 'telepilot' ), $role ),
 		);
 	}
 
 	public function generate_reset_link( $user_id ) {
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
-			return new WP_Error( 'telepress_user_not_found', __( 'User not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
 		}
 
 		$key = get_password_reset_key( $user );
@@ -233,7 +233,7 @@ class TelePress_Users_Service {
 		return array(
 			'user'  => $user,
 			'url'   => $url,
-			'label' => __( 'password reset generated', 'telepress' ),
+			'label' => __( 'password reset generated', 'telepilot' ),
 		);
 	}
 
@@ -250,12 +250,12 @@ class TelePress_Users_Service {
 
 		$token = $this->confirmation_service->create_token( $payload );
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard(
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard(
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepress' ), ucfirst( str_replace( '-', ' ', $action ) ), $user_id ),
+							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepilot' ), ucfirst( str_replace( '-', ' ', $action ) ), $user_id ),
 							'callback_data' => 'tp:user:' . $action . ':' . (int) $user_id . ':' . $token,
 						),
 					),
@@ -275,18 +275,18 @@ class TelePress_Users_Service {
 
 			$row = array();
 			$row[] = array(
-				'text'          => sprintf( __( 'Reset #%d', 'telepress' ), $user->ID ),
+				'text'          => sprintf( __( 'Reset #%d', 'telepilot' ), $user->ID ),
 				'callback_data' => '/users reset-password ' . (int) $user->ID,
 			);
 
 			if ( $this->is_disabled( $user->ID ) ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Enable #%d', 'telepress' ), $user->ID ),
+					'text'          => sprintf( __( 'Enable #%d', 'telepilot' ), $user->ID ),
 					'callback_data' => '/users enable ' . (int) $user->ID,
 				);
 			} else {
 				$row[] = array(
-					'text'          => sprintf( __( 'Disable #%d', 'telepress' ), $user->ID ),
+					'text'          => sprintf( __( 'Disable #%d', 'telepilot' ), $user->ID ),
 					'callback_data' => '/users disable ' . (int) $user->ID,
 				);
 			}
@@ -299,8 +299,8 @@ class TelePress_Users_Service {
 			$rows[] = $pagination;
 		}
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard( $rows ),
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard( $rows ),
 			$this->navigation_rows()
 		);
 	}
@@ -314,14 +314,14 @@ class TelePress_Users_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepress' ),
+				'text'          => __( 'Prev', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepress' ),
+				'text'          => __( 'Next', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -340,7 +340,7 @@ class TelePress_Users_Service {
 	private function query_users_page( $args, $page, $limit ) {
 		$page      = max( 1, absint( $page ) );
 		$limit     = max( 1, absint( $limit ) );
-		$cache_key = 'telepress_users_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
+		$cache_key = 'telepilot_users_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
 		$cached    = get_transient( $cache_key );
 
 		if ( is_array( $cached ) ) {
@@ -379,7 +379,7 @@ class TelePress_Users_Service {
 		}
 
 		if ( $this->is_disabled( $user->ID ) ) {
-			return new WP_Error( 'telepress_user_disabled', __( 'This user account has been disabled by TelePress.', 'telepress' ) );
+			return new WP_Error( 'telepilot_user_disabled', __( 'This user account has been disabled by WP Telepilot.', 'telepilot' ) );
 		}
 
 		return $user;
@@ -407,11 +407,11 @@ class TelePress_Users_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepress' ),
+					'text'          => __( 'Menu', 'telepilot' ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepress' ),
+					'text'          => __( 'Site', 'telepilot' ),
 					'callback_data' => '/site',
 				),
 			),

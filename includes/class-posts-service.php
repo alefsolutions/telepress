@@ -4,11 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Posts_Service {
+class Telepilot_Posts_Service {
 	private $confirmation_service;
 	const PER_PAGE = 5;
 
-	public function __construct( TelePress_Confirmation_Service $confirmation_service ) {
+	public function __construct( Telepilot_Confirmation_Service $confirmation_service ) {
 		$this->confirmation_service = $confirmation_service;
 	}
 
@@ -106,13 +106,13 @@ class TelePress_Posts_Service {
 
 	public function render_list_message( $posts, $heading ) {
 		if ( empty( $posts ) ) {
-			return $heading . "\n" . __( 'No posts matched that request.', 'telepress' );
+			return $heading . "\n" . __( 'No posts matched that request.', 'telepilot' );
 		}
 
 		$lines   = array( $heading );
 		foreach ( $posts as $post ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s [%3$s]', 'telepress' ),
+				__( '#%1$d %2$s [%3$s]', 'telepilot' ),
 				$post->ID,
 				html_entity_decode( get_the_title( $post ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 				$post->post_status
@@ -124,26 +124,26 @@ class TelePress_Posts_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No posts matched that request.', 'telepress' );
+			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No posts matched that request.', 'telepilot' );
 		}
 
-		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
-		$lines[] = TelePress_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		$lines   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
 		$lines[] = '';
 
 		foreach ( $result['items'] as $post ) {
 			$lines[] = sprintf(
-				__( '- #%1$d %2$s [%3$s]', 'telepress' ),
+				__( '- #%1$d %2$s [%3$s]', 'telepilot' ),
 				$post->ID,
-				TelePress_Telegram_Response_Builder::escape( get_the_title( $post ) ),
-				TelePress_Telegram_Response_Builder::escape( $post->post_status )
+				Telepilot_Telegram_Response_Builder::escape( get_the_title( $post ) ),
+				Telepilot_Telegram_Response_Builder::escape( $post->post_status )
 			);
 		}
 
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use the buttons below, or run /posts search keyword for a targeted lookup.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use the buttons below, or run /posts search keyword for a targeted lookup.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
@@ -152,26 +152,26 @@ class TelePress_Posts_Service {
 		return implode(
 			"\n",
 			array(
-				__( 'Post Stats', 'telepress' ),
-				sprintf( __( 'Published: %d', 'telepress' ), $stats['publish'] ),
-				sprintf( __( 'Drafts: %d', 'telepress' ), $stats['draft'] ),
-				sprintf( __( 'Pending: %d', 'telepress' ), $stats['pending'] ),
-				sprintf( __( 'Scheduled: %d', 'telepress' ), $stats['future'] ),
-				sprintf( __( 'Trash: %d', 'telepress' ), $stats['trash'] ),
+				__( 'Post Stats', 'telepilot' ),
+				sprintf( __( 'Published: %d', 'telepilot' ), $stats['publish'] ),
+				sprintf( __( 'Drafts: %d', 'telepilot' ), $stats['draft'] ),
+				sprintf( __( 'Pending: %d', 'telepilot' ), $stats['pending'] ),
+				sprintf( __( 'Scheduled: %d', 'telepilot' ), $stats['future'] ),
+				sprintf( __( 'Trash: %d', 'telepilot' ), $stats['trash'] ),
 			)
 		);
 	}
 
 	public function render_help_message() {
 		$lines   = array();
-		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Posts Commands', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'Posts Commands', 'telepilot' ) );
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/posts list' ) . ' ' . __( 'Show recent posts', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/posts drafts' ) . ' ' . __( 'Show draft posts', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/posts search keyword' ) . ' ' . __( 'Search posts', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/posts stats' ) . ' ' . __( 'Show post counts', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/posts publish 123' ) . ' ' . __( 'Publish a post', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/posts unpublish 123' ) . ' ' . __( 'Move a post back to draft', 'telepress' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/posts list' ) . ' ' . __( 'Show recent posts', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/posts drafts' ) . ' ' . __( 'Show draft posts', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/posts search keyword' ) . ' ' . __( 'Search posts', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/posts stats' ) . ' ' . __( 'Show post counts', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/posts publish 123' ) . ' ' . __( 'Publish a post', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/posts unpublish 123' ) . ' ' . __( 'Move a post back to draft', 'telepilot' );
 
 		return implode( "\n", $lines );
 	}
@@ -187,7 +187,7 @@ class TelePress_Posts_Service {
 			if ( 'publish' === $post->post_status ) {
 				$rows[] = array(
 					array(
-						'text'          => sprintf( __( 'Unpublish #%d', 'telepress' ), $post->ID ),
+						'text'          => sprintf( __( 'Unpublish #%d', 'telepilot' ), $post->ID ),
 						'callback_data' => '/posts unpublish ' . (int) $post->ID,
 					),
 				);
@@ -196,7 +196,7 @@ class TelePress_Posts_Service {
 
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Publish #%d', 'telepress' ), $post->ID ),
+					'text'          => sprintf( __( 'Publish #%d', 'telepilot' ), $post->ID ),
 					'callback_data' => '/posts publish ' . (int) $post->ID,
 				),
 			);
@@ -207,8 +207,8 @@ class TelePress_Posts_Service {
 			$rows[] = $pagination;
 		}
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard( $rows ),
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard( $rows ),
 			$this->navigation_rows()
 		);
 	}
@@ -222,14 +222,14 @@ class TelePress_Posts_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepress' ),
+				'text'          => __( 'Prev', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepress' ),
+				'text'          => __( 'Next', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -248,7 +248,7 @@ class TelePress_Posts_Service {
 	private function query_posts_page( $args, $page, $limit ) {
 		$page      = max( 1, absint( $page ) );
 		$limit     = max( 1, absint( $limit ) );
-		$cache_key = 'telepress_posts_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
+		$cache_key = 'telepilot_posts_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
 		$cached    = get_transient( $cache_key );
 
 		if ( is_array( $cached ) ) {
@@ -286,7 +286,7 @@ class TelePress_Posts_Service {
 	public function publish( $post_id ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepress_post_not_found', __( 'Post not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
 		}
 
 		$before_status = $post->post_status;
@@ -306,14 +306,14 @@ class TelePress_Posts_Service {
 			'post'          => get_post( $post_id ),
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $post_id ),
-			'label'         => __( 'published', 'telepress' ),
+			'label'         => __( 'published', 'telepilot' ),
 		);
 	}
 
 	public function unpublish( $post_id ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepress_post_not_found', __( 'Post not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
 		}
 
 		$before_status = $post->post_status;
@@ -333,7 +333,7 @@ class TelePress_Posts_Service {
 			'post'          => get_post( $post_id ),
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $post_id ),
-			'label'         => __( 'moved back to draft', 'telepress' ),
+			'label'         => __( 'moved back to draft', 'telepilot' ),
 		);
 	}
 
@@ -346,12 +346,12 @@ class TelePress_Posts_Service {
 			)
 		);
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard(
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard(
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepress' ), ucfirst( $action ), $post_id ),
+							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepilot' ), ucfirst( $action ), $post_id ),
 							'callback_data' => 'tp:post:' . $action . ':' . (int) $post_id . ':' . $token,
 						),
 					),
@@ -365,11 +365,11 @@ class TelePress_Posts_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepress' ),
+					'text'          => __( 'Menu', 'telepilot' ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepress' ),
+					'text'          => __( 'Site', 'telepilot' ),
 					'callback_data' => '/site',
 				),
 			),

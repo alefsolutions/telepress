@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Permission_Service {
+class Telepilot_Permission_Service {
 	public function user_can( $wp_user, $capability, $object_id = null ) {
 		if ( ! ( $wp_user instanceof WP_User ) ) {
 			return false;
@@ -22,10 +22,10 @@ class TelePress_Permission_Service {
 			return true;
 		}
 
-		return TelePress_Telegram_Response_Builder::error(
-			__( 'Your Telegram account is not linked to a WordPress user. Generate a code in your profile and send `/link CODE`.', 'telepress' ),
+		return Telepilot_Telegram_Response_Builder::error(
+			__( 'Your Telegram account is not linked to a WordPress user. Generate a code in your profile and send `/link CODE`.', 'telepilot' ),
 			array(
-				'code' => 'telepress_link_required',
+				'code' => 'telepilot_link_required',
 			)
 		);
 	}
@@ -41,10 +41,10 @@ class TelePress_Permission_Service {
 			return true;
 		}
 
-		return TelePress_Telegram_Response_Builder::error(
-			__( 'You do not have permission to perform that action.', 'telepress' ),
+		return Telepilot_Telegram_Response_Builder::error(
+			__( 'You do not have permission to perform that action.', 'telepilot' ),
 			array(
-				'code'       => 'telepress_capability_denied',
+				'code'       => 'telepilot_capability_denied',
 				'capability' => $capability,
 			)
 		);
@@ -55,10 +55,10 @@ class TelePress_Permission_Service {
 			return true;
 		}
 
-		return TelePress_Telegram_Response_Builder::error(
-			__( 'This action is only available in a private chat with your TelePress bot.', 'telepress' ),
+		return Telepilot_Telegram_Response_Builder::error(
+			__( 'This action is only available in a private chat with your WP Telepilot bot.', 'telepilot' ),
 			array(
-				'code' => 'telepress_private_chat_required',
+				'code' => 'telepilot_private_chat_required',
 			)
 		);
 	}

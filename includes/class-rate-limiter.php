@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Rate_Limiter {
+class Telepilot_Rate_Limiter {
 	public function check( $identity, $limit_per_minute ) {
 		$limit_per_minute = max( 1, absint( $limit_per_minute ) );
 		$key              = $this->build_key( $identity );
@@ -16,10 +16,10 @@ class TelePress_Rate_Limiter {
 		$current = (int) get_transient( $key );
 
 		if ( $current >= $limit_per_minute ) {
-			return TelePress_Telegram_Response_Builder::error(
-				__( 'You are sending commands too quickly. Please wait a moment and try again.', 'telepress' ),
+			return Telepilot_Telegram_Response_Builder::error(
+				__( 'You are sending commands too quickly. Please wait a moment and try again.', 'telepilot' ),
 				array(
-					'code'  => 'telepress_rate_limited',
+					'code'  => 'telepilot_rate_limited',
 					'limit' => $limit_per_minute,
 				)
 			);
@@ -32,11 +32,11 @@ class TelePress_Rate_Limiter {
 
 	private function build_key( $identity ) {
 		if ( ! empty( $identity['telegram_user_id'] ) ) {
-			return 'telepress_rate_' . md5( (string) $identity['telegram_user_id'] ) . '_' . gmdate( 'YmdHi' );
+			return 'telepilot_rate_' . md5( (string) $identity['telegram_user_id'] ) . '_' . gmdate( 'YmdHi' );
 		}
 
 		if ( ! empty( $identity['chat_id'] ) ) {
-			return 'telepress_rate_chat_' . md5( (string) $identity['chat_id'] ) . '_' . gmdate( 'YmdHi' );
+			return 'telepilot_rate_chat_' . md5( (string) $identity['chat_id'] ) . '_' . gmdate( 'YmdHi' );
 		}
 
 		return '';

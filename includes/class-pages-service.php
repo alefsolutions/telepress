@@ -4,11 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Pages_Service {
+class Telepilot_Pages_Service {
 	private $confirmation_service;
 	const PER_PAGE = 5;
 
-	public function __construct( TelePress_Confirmation_Service $confirmation_service ) {
+	public function __construct( Telepilot_Confirmation_Service $confirmation_service ) {
 		$this->confirmation_service = $confirmation_service;
 	}
 
@@ -61,13 +61,13 @@ class TelePress_Pages_Service {
 
 	public function render_list_message( $pages, $heading ) {
 		if ( empty( $pages ) ) {
-			return $heading . "\n" . __( 'No pages matched that request.', 'telepress' );
+			return $heading . "\n" . __( 'No pages matched that request.', 'telepilot' );
 		}
 
 		$lines = array( $heading );
 		foreach ( $pages as $page ) {
 			$lines[] = sprintf(
-				__( '#%1$d %2$s [%3$s]', 'telepress' ),
+				__( '#%1$d %2$s [%3$s]', 'telepilot' ),
 				$page->ID,
 				html_entity_decode( get_the_title( $page ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 				$page->post_status
@@ -79,21 +79,21 @@ class TelePress_Pages_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return TelePress_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No pages matched that request.', 'telepress' );
+			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No pages matched that request.', 'telepilot' );
 		}
 
-		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
-		$lines[] = TelePress_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepress' ), $result['page'], $result['total_pages'] )
+		$lines   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic(
+			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
 		$lines[] = '';
 
 		foreach ( $result['items'] as $page ) {
 			$lines[] = sprintf(
-				__( '- #%1$d %2$s [%3$s]', 'telepress' ),
+				__( '- #%1$d %2$s [%3$s]', 'telepilot' ),
 				$page->ID,
-				TelePress_Telegram_Response_Builder::escape( get_the_title( $page ) ),
-				TelePress_Telegram_Response_Builder::escape( $page->post_status )
+				Telepilot_Telegram_Response_Builder::escape( get_the_title( $page ) ),
+				Telepilot_Telegram_Response_Builder::escape( $page->post_status )
 			);
 
 			$access_link = $this->describe_access_link( $page );
@@ -103,46 +103,46 @@ class TelePress_Pages_Service {
 		}
 
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use the buttons below, or run /pages search keyword to narrow the list.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use the buttons below, or run /pages search keyword to narrow the list.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
 
 	public function render_help_message() {
 		$lines   = array();
-		$lines[] = TelePress_Telegram_Response_Builder::bold( __( 'Pages Commands', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'Pages Commands', 'telepilot' ) );
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/pages list' ) . ' ' . __( 'Show recent pages', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/pages search about' ) . ' ' . __( 'Search pages', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/pages trashed' ) . ' ' . __( 'Show trashed pages', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/pages publish 123' ) . ' ' . __( 'Publish a page', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/pages draft 123' ) . ' ' . __( 'Move a page to draft', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/pages trash 123' ) . ' ' . __( 'Trash a page', 'telepress' );
-		$lines[] = TelePress_Telegram_Response_Builder::code( '/pages restore 123' ) . ' ' . __( 'Restore a trashed page', 'telepress' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages list' ) . ' ' . __( 'Show recent pages', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages search about' ) . ' ' . __( 'Search pages', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages trashed' ) . ' ' . __( 'Show trashed pages', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages publish 123' ) . ' ' . __( 'Publish a page', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages draft 123' ) . ' ' . __( 'Move a page to draft', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages trash 123' ) . ' ' . __( 'Trash a page', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages restore 123' ) . ' ' . __( 'Restore a trashed page', 'telepilot' );
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Published pages can be previewed directly from Telegram. Drafts are linked to wp-admin because browser preview for drafts normally requires WordPress authentication.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Published pages can be previewed directly from Telegram. Drafts are linked to wp-admin because browser preview for drafts normally requires WordPress authentication.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
 
 	public function publish( $page_id ) {
-		return $this->update_status( $page_id, 'publish', __( 'published', 'telepress' ) );
+		return $this->update_status( $page_id, 'publish', __( 'published', 'telepilot' ) );
 	}
 
 	public function draft( $page_id ) {
-		return $this->update_status( $page_id, 'draft', __( 'moved to draft', 'telepress' ) );
+		return $this->update_status( $page_id, 'draft', __( 'moved to draft', 'telepilot' ) );
 	}
 
 	public function trash( $page_id ) {
 		$page = get_post( $page_id );
 		if ( ! $page || 'page' !== $page->post_type ) {
-			return new WP_Error( 'telepress_page_not_found', __( 'Page not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_page_not_found', __( 'Page not found.', 'telepilot' ) );
 		}
 
 		$before_status = $page->post_status;
 		$result        = wp_trash_post( $page_id );
 		if ( false === $result || null === $result ) {
-			return new WP_Error( 'telepress_page_trash_failed', __( 'WordPress could not trash that page.', 'telepress' ) );
+			return new WP_Error( 'telepilot_page_trash_failed', __( 'WordPress could not trash that page.', 'telepilot' ) );
 		}
 
 		$this->bump_cache_version();
@@ -151,20 +151,20 @@ class TelePress_Pages_Service {
 			'post'          => get_post( $page_id ),
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $page_id ),
-			'label'         => __( 'trashed', 'telepress' ),
+			'label'         => __( 'trashed', 'telepilot' ),
 		);
 	}
 
 	public function restore( $page_id ) {
 		$page = get_post( $page_id );
 		if ( ! $page || 'page' !== $page->post_type ) {
-			return new WP_Error( 'telepress_page_not_found', __( 'Page not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_page_not_found', __( 'Page not found.', 'telepilot' ) );
 		}
 
 		$before_status = $page->post_status;
 		$result        = wp_untrash_post( $page_id );
 		if ( false === $result || null === $result ) {
-			return new WP_Error( 'telepress_page_restore_failed', __( 'WordPress could not restore that page.', 'telepress' ) );
+			return new WP_Error( 'telepilot_page_restore_failed', __( 'WordPress could not restore that page.', 'telepilot' ) );
 		}
 
 		$this->bump_cache_version();
@@ -173,7 +173,7 @@ class TelePress_Pages_Service {
 			'post'          => get_post( $page_id ),
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $page_id ),
-			'label'         => __( 'restored', 'telepress' ),
+			'label'         => __( 'restored', 'telepilot' ),
 		);
 	}
 
@@ -186,12 +186,12 @@ class TelePress_Pages_Service {
 			)
 		);
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard(
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard(
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepress' ), ucfirst( $action ), $page_id ),
+							'text'          => sprintf( __( 'Confirm %1$s #%2$d', 'telepilot' ), ucfirst( $action ), $page_id ),
 							'callback_data' => 'tp:page:' . $action . ':' . (int) $page_id . ':' . $token,
 						),
 					),
@@ -213,38 +213,38 @@ class TelePress_Pages_Service {
 
 			if ( 'publish' === $page_item->post_status ) {
 				$row[] = array(
-					'text' => sprintf( __( 'Preview #%d', 'telepress' ), $page_item->ID ),
+					'text' => sprintf( __( 'Preview #%d', 'telepilot' ), $page_item->ID ),
 					'url'  => $this->get_preview_url( $page_item ),
 				);
 			} else {
 				$row[] = array(
-					'text' => sprintf( __( 'Edit #%d', 'telepress' ), $page_item->ID ),
+					'text' => sprintf( __( 'Edit #%d', 'telepilot' ), $page_item->ID ),
 					'url'  => $this->get_admin_edit_url( $page_item->ID ),
 				);
 			}
 
 			if ( 'trash' === $page_item->post_status ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Restore #%d', 'telepress' ), $page_item->ID ),
+					'text'          => sprintf( __( 'Restore #%d', 'telepilot' ), $page_item->ID ),
 					'callback_data' => '/pages restore ' . (int) $page_item->ID,
 				);
 			} else {
 				if ( 'publish' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Publish #%d', 'telepress' ), $page_item->ID ),
+						'text'          => sprintf( __( 'Publish #%d', 'telepilot' ), $page_item->ID ),
 						'callback_data' => '/pages publish ' . (int) $page_item->ID,
 					);
 				}
 
 				if ( 'draft' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Draft #%d', 'telepress' ), $page_item->ID ),
+						'text'          => sprintf( __( 'Draft #%d', 'telepilot' ), $page_item->ID ),
 						'callback_data' => '/pages draft ' . (int) $page_item->ID,
 					);
 				}
 
 				$row[] = array(
-					'text'          => sprintf( __( 'Trash #%d', 'telepress' ), $page_item->ID ),
+					'text'          => sprintf( __( 'Trash #%d', 'telepilot' ), $page_item->ID ),
 					'callback_data' => '/pages trash ' . (int) $page_item->ID,
 				);
 			}
@@ -259,8 +259,8 @@ class TelePress_Pages_Service {
 			$rows[] = $pagination;
 		}
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard( $rows ),
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard( $rows ),
 			$this->navigation_rows()
 		);
 	}
@@ -274,14 +274,14 @@ class TelePress_Pages_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepress' ),
+				'text'          => __( 'Prev', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepress' ),
+				'text'          => __( 'Next', 'telepilot' ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -309,11 +309,11 @@ class TelePress_Pages_Service {
 		if ( 'publish' === $page->post_status ) {
 			$url = $this->get_preview_url( $page );
 			if ( '' !== $url ) {
-				return __( 'Preview:', 'telepress' ) . ' ' . TelePress_Telegram_Response_Builder::link( __( 'Open in browser', 'telepress' ), $url );
+				return __( 'Preview:', 'telepilot' ) . ' ' . Telepilot_Telegram_Response_Builder::link( __( 'Open in browser', 'telepilot' ), $url );
 			}
 		}
 
-		return __( 'Edit:', 'telepress' ) . ' ' . TelePress_Telegram_Response_Builder::link( __( 'Open in wp-admin', 'telepress' ), $this->get_admin_edit_url( $page->ID ) );
+		return __( 'Edit:', 'telepilot' ) . ' ' . Telepilot_Telegram_Response_Builder::link( __( 'Open in wp-admin', 'telepilot' ), $this->get_admin_edit_url( $page->ID ) );
 	}
 
 	private function get_preview_url( $page ) {
@@ -329,7 +329,7 @@ class TelePress_Pages_Service {
 	private function update_status( $page_id, $status, $label ) {
 		$page = get_post( $page_id );
 		if ( ! $page || 'page' !== $page->post_type ) {
-			return new WP_Error( 'telepress_page_not_found', __( 'Page not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_page_not_found', __( 'Page not found.', 'telepilot' ) );
 		}
 
 		$before_status = $page->post_status;
@@ -358,7 +358,7 @@ class TelePress_Pages_Service {
 	private function query_pages_page( $args, $page, $limit ) {
 		$page      = max( 1, absint( $page ) );
 		$limit     = max( 1, absint( $limit ) );
-		$cache_key = 'telepress_pages_' . $this->get_cache_version() . '_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
+		$cache_key = 'telepilot_pages_' . $this->get_cache_version() . '_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
 		$cached    = get_transient( $cache_key );
 
 		if ( is_array( $cached ) ) {
@@ -394,22 +394,22 @@ class TelePress_Pages_Service {
 	}
 
 	private function bump_cache_version() {
-		update_option( 'telepress_pages_cache_version', $this->get_cache_version() + 1, false );
+		update_option( 'telepilot_pages_cache_version', $this->get_cache_version() + 1, false );
 	}
 
 	private function get_cache_version() {
-		return max( 1, (int) get_option( 'telepress_pages_cache_version', 1 ) );
+		return max( 1, (int) get_option( 'telepilot_pages_cache_version', 1 ) );
 	}
 
 	private function navigation_rows() {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepress' ),
+					'text'          => __( 'Menu', 'telepilot' ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepress' ),
+					'text'          => __( 'Site', 'telepilot' ),
 					'callback_data' => '/site',
 				),
 			),

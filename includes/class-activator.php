@@ -4,11 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Activator {
+class Telepilot_Activator {
 	public static function activate() {
-		TelePress_Audit_Log_Repository::create_table();
-		TelePress_Jobs_Repository::create_table();
-		TelePress_Processed_Updates_Repository::create_table();
+		Telepilot_Audit_Log_Repository::create_table();
+		Telepilot_Jobs_Repository::create_table();
+		Telepilot_Processed_Updates_Repository::create_table();
 
 		$defaults = array(
 			'bot_token'             => '',
@@ -17,25 +17,25 @@ class TelePress_Activator {
 			'transport_mode'        => 'webhook',
 			'allowed_chat_ids'      => '',
 			'default_notifications' => array( 'new_comment', 'failed_login', 'plugin_updates', 'theme_updates', 'core_updates' ),
-			'stale_update_window'   => TelePress_Telegram_Service::DEFAULT_STALE_WINDOW,
+			'stale_update_window'   => Telepilot_Telegram_Service::DEFAULT_STALE_WINDOW,
 			'log_retention_days'    => 30,
 			'rate_limit_per_minute' => 20,
 			'linking_enabled'       => 1,
 		);
 
-		if ( ! get_option( 'telepress_settings' ) ) {
-			add_option( 'telepress_settings', $defaults );
+		if ( ! get_option( 'telepilot_settings' ) ) {
+			add_option( 'telepilot_settings', $defaults );
 		}
 
-		if ( ! get_option( TelePress_Telegram_Service::DIAGNOSTICS_OPTION ) ) {
+		if ( ! get_option( Telepilot_Telegram_Service::DIAGNOSTICS_OPTION ) ) {
 			add_option(
-				TelePress_Telegram_Service::DIAGNOSTICS_OPTION,
+				Telepilot_Telegram_Service::DIAGNOSTICS_OPTION,
 				array(
 					'stale_updates_dropped' => 0,
 				)
 			);
 		}
 
-		update_option( 'telepress_schema_version', TelePress_Bootstrap::SCHEMA_VERSION, false );
+		update_option( 'telepilot_schema_version', Telepilot_Bootstrap::SCHEMA_VERSION, false );
 	}
 }

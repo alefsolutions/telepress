@@ -4,10 +4,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Taxonomies_Service {
+class Telepilot_Taxonomies_Service {
 	private $confirmation_service;
 
-	public function __construct( TelePress_Confirmation_Service $confirmation_service ) {
+	public function __construct( Telepilot_Confirmation_Service $confirmation_service ) {
 		$this->confirmation_service = $confirmation_service;
 	}
 
@@ -16,7 +16,7 @@ class TelePress_Taxonomies_Service {
 		$page     = max( 1, absint( $page ) );
 		$limit    = max( 1, absint( $limit ) );
 		$search   = sanitize_text_field( $search );
-		$cache_key = 'telepress_terms_' . md5( wp_json_encode( array( $taxonomy, $page, $limit, $search ) ) );
+		$cache_key = 'telepilot_terms_' . md5( wp_json_encode( array( $taxonomy, $page, $limit, $search ) ) );
 		$cached    = get_transient( $cache_key );
 
 		if ( is_array( $cached ) ) {
@@ -76,16 +76,16 @@ class TelePress_Taxonomies_Service {
 			return implode(
 				"\n",
 				array(
-					TelePress_Telegram_Response_Builder::bold( $heading ),
-					__( 'No matching terms were found.', 'telepress' ),
+					Telepilot_Telegram_Response_Builder::bold( $heading ),
+					__( 'No matching terms were found.', 'telepilot' ),
 				)
 			);
 		}
 
-		$lines   = array( TelePress_Telegram_Response_Builder::bold( $heading ) );
-		$lines[] = TelePress_Telegram_Response_Builder::italic(
+		$lines   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf(
-				__( 'Page %1$d of %2$d', 'telepress' ),
+				__( 'Page %1$d of %2$d', 'telepilot' ),
 				$result['page'],
 				$result['total_pages']
 			)
@@ -94,15 +94,15 @@ class TelePress_Taxonomies_Service {
 
 		foreach ( $result['items'] as $term ) {
 			$lines[] = sprintf(
-				__( '- #%1$d %2$s (%3$d)', 'telepress' ),
+				__( '- #%1$d %2$s (%3$d)', 'telepilot' ),
 				$term->term_id,
-				TelePress_Telegram_Response_Builder::escape( $term->name ),
+				Telepilot_Telegram_Response_Builder::escape( $term->name ),
 				$term->count
 			);
 		}
 
 		$lines[] = '';
-		$lines[] = TelePress_Telegram_Response_Builder::italic( __( 'Tip: use search when your category or tag list grows large.', 'telepress' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use search when your category or tag list grows large.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
@@ -112,7 +112,7 @@ class TelePress_Taxonomies_Service {
 		$name     = sanitize_text_field( $name );
 
 		if ( '' === $name ) {
-			return new WP_Error( 'telepress_term_name_required', __( 'A term name is required.', 'telepress' ) );
+			return new WP_Error( 'telepilot_term_name_required', __( 'A term name is required.', 'telepilot' ) );
 		}
 
 		$result = wp_insert_term( $name, $taxonomy );
@@ -130,7 +130,7 @@ class TelePress_Taxonomies_Service {
 		$name     = sanitize_text_field( $name );
 
 		if ( ! $term_id || '' === $name ) {
-			return new WP_Error( 'telepress_term_update_invalid', __( 'A valid term ID and name are required.', 'telepress' ) );
+			return new WP_Error( 'telepilot_term_update_invalid', __( 'A valid term ID and name are required.', 'telepilot' ) );
 		}
 
 		$result = wp_update_term(
@@ -153,13 +153,13 @@ class TelePress_Taxonomies_Service {
 		$term     = get_term( absint( $term_id ), $taxonomy );
 
 		if ( ! $term || is_wp_error( $term ) ) {
-			return new WP_Error( 'telepress_term_not_found', __( 'Term not found.', 'telepress' ) );
+			return new WP_Error( 'telepilot_term_not_found', __( 'Term not found.', 'telepilot' ) );
 		}
 
 		$deleted = wp_delete_term( $term->term_id, $taxonomy );
 
 		if ( is_wp_error( $deleted ) || false === $deleted ) {
-			return is_wp_error( $deleted ) ? $deleted : new WP_Error( 'telepress_term_delete_failed', __( 'WordPress could not delete that term.', 'telepress' ) );
+			return is_wp_error( $deleted ) ? $deleted : new WP_Error( 'telepilot_term_delete_failed', __( 'WordPress could not delete that term.', 'telepilot' ) );
 		}
 
 		return $term;
@@ -172,7 +172,7 @@ class TelePress_Taxonomies_Service {
 		foreach ( $result['items'] as $term ) {
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Delete #%d', 'telepress' ), $term->term_id ),
+					'text'          => sprintf( __( 'Delete #%d', 'telepilot' ), $term->term_id ),
 					'callback_data' => '/' . $resource . ' delete ' . (int) $term->term_id,
 				),
 			);
@@ -183,8 +183,8 @@ class TelePress_Taxonomies_Service {
 			$rows[] = $pagination;
 		}
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard( $rows ),
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard( $rows ),
 			$this->navigation_rows()
 		);
 	}
@@ -200,12 +200,12 @@ class TelePress_Taxonomies_Service {
 			)
 		);
 
-		return TelePress_Telegram_Response_Builder::append_rows(
-			TelePress_Telegram_Response_Builder::keyboard(
+		return Telepilot_Telegram_Response_Builder::append_rows(
+			Telepilot_Telegram_Response_Builder::keyboard(
 				array(
 					array(
 						array(
-							'text'          => sprintf( __( 'Confirm delete #%d', 'telepress' ), $term_id ),
+							'text'          => sprintf( __( 'Confirm delete #%d', 'telepilot' ), $term_id ),
 							'callback_data' => 'tp:term:' . $taxonomy . ':delete:' . (int) $term_id . ':' . $token,
 						),
 					),
@@ -226,14 +226,14 @@ class TelePress_Taxonomies_Service {
 
 		if ( $result['page'] > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepress' ),
+				'text'          => __( 'Prev', 'telepilot' ),
 				'callback_data' => trim( $command . $mode . ' page:' . ( $result['page'] - 1 ) ),
 			);
 		}
 
 		if ( $result['page'] < $result['total_pages'] ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepress' ),
+				'text'          => __( 'Next', 'telepilot' ),
 				'callback_data' => trim( $command . $mode . ' page:' . ( $result['page'] + 1 ) ),
 			);
 		}
@@ -253,11 +253,11 @@ class TelePress_Taxonomies_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepress' ),
+					'text'          => __( 'Menu', 'telepilot' ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepress' ),
+					'text'          => __( 'Site', 'telepilot' ),
 					'callback_data' => '/site',
 				),
 			),

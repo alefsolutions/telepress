@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-  var tabs = document.querySelectorAll('.telepress-tab');
-  var panels = document.querySelectorAll('.telepress-tab-panel');
+  var tabs = document.querySelectorAll('.telepilot-tab');
+  var panels = document.querySelectorAll('.telepilot-tab-panel');
 
   if (!tabs.length || !panels.length) {
     return;

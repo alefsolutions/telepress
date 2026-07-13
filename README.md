@@ -1,10 +1,10 @@
-# TelePress
+# WP Telepilot
 
-![TelePress Header](assets/images/readme-header.png)
+![WP Telepilot Header](assets/images/readme-header.png)
 
-TelePress is a Telegram-first WordPress operations plugin. It lets authorized WordPress users link their Telegram account, inspect site state, and carry out short, structured operational tasks from chat without recreating all of `wp-admin` inside Telegram.
+WP Telepilot is a Telegram-first WordPress operations plugin. It lets authorized WordPress users link their Telegram account, inspect site state, and carry out short, structured operational tasks from chat without recreating all of `wp-admin` inside Telegram.
 
-## What TelePress does
+## What WP Telepilot does
 
 - Securely links a Telegram user to a WordPress user with a short-lived one-time code.
 - Supports both Telegram webhook mode and polling fallback mode.
@@ -20,12 +20,12 @@ TelePress is a Telegram-first WordPress operations plugin. It lets authorized Wo
   - tags
 - Supports search and pagination for the main content and user modules.
 - Formats Telegram responses for readability with clearer headings, spacing, inline tips, and code-style command examples.
-- Uses confirmations for destructive actions and writes activity to the TelePress audit log.
+- Uses confirmations for destructive actions and writes activity to the WP Telepilot audit log.
 
 ## Core commands
 
 - `/start` starts onboarding.
-- `/menu` opens the TelePress command hub.
+- `/menu` opens the WP Telepilot command hub.
 - `/site` shows the site overview and module shortcuts.
 - `/help` shows the available command surface.
 - `/users help` shows concrete user-management examples and syntax.
@@ -35,7 +35,7 @@ TelePress is a Telegram-first WordPress operations plugin. It lets authorized Wo
 
 ## Admin settings
 
-From `WordPress Admin -> TelePress`, you can:
+From `WordPress Admin -> WP Telepilot`, you can:
 
 - paste the Telegram bot token
 - choose webhook or polling transport
@@ -51,8 +51,8 @@ From `WordPress Admin -> TelePress`, you can:
 
 1. Install and activate the plugin.
 2. Create a Telegram bot in BotFather.
-3. Paste the bot token into TelePress settings.
-4. Save settings so TelePress can register webhook details or switch to polling fallback.
+3. Paste the bot token into WP Telepilot settings.
+4. Save settings so WP Telepilot can register webhook details or switch to polling fallback.
 5. Open your WordPress profile and generate a one-time link code.
 6. Open a private chat with the bot and send `/link CODE`.
 7. Use `/menu` or `/site` to begin operating the site.
@@ -86,6 +86,6 @@ From `WordPress Admin -> TelePress`, you can:
 
 ## Current direction
 
-TelePress is designed around one principle:
+WP Telepilot is designed around one principle:
 
 > Telegram is for awareness, decisions, and short actions. WordPress remains the place for long-form editing, visual design, and complex configuration.

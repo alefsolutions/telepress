@@ -4,4 +4,4 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-delete_option( 'telepress_settings' );
+delete_option( 'telepilot_settings' );

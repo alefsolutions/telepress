@@ -4,11 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_REST_Webhook_Controller {
-	const REST_NAMESPACE = 'telepress/v1';
+class Telepilot_REST_Webhook_Controller {
+	const REST_NAMESPACE = 'telepilot/v1';
 	const ROUTE          = '/webhook';
 	const WORKER_ROUTE   = '/process-jobs';
-	const WORKER_HEADER  = 'x-telepress-worker-secret';
+	const WORKER_HEADER  = 'x-telepilot-worker-secret';
 
 	public function register_routes() {
 		register_rest_route(
@@ -33,7 +33,7 @@ class TelePress_REST_Webhook_Controller {
 	}
 
 	public function handle_webhook( WP_REST_Request $request ) {
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$secret   = isset( $settings['webhook_secret'] ) ? (string) $settings['webhook_secret'] : '';
 		$mode     = isset( $settings['transport_mode'] ) ? (string) $settings['transport_mode'] : 'webhook';
 		$header   = $this->get_webhook_secret_header( $request );
@@ -50,7 +50,7 @@ class TelePress_REST_Webhook_Controller {
 			return new WP_REST_Response(
 				array(
 					'ok'      => true,
-					'message' => __( 'Webhook ignored because TelePress is currently using polling mode.', 'telepress' ),
+					'message' => __( 'Webhook ignored because Telepilot is currently using polling mode.', 'telepilot' ),
 				),
 				202
 			);
@@ -64,7 +64,7 @@ class TelePress_REST_Webhook_Controller {
 					'last_webhook_auth_error'  => 'Webhook secret mismatch.',
 				)
 			);
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'action_name'     => 'webhook_auth_failed',
 					'resource_type'   => 'webhook',
@@ -77,7 +77,7 @@ class TelePress_REST_Webhook_Controller {
 			return new WP_REST_Response(
 				array(
 					'ok'      => false,
-					'message' => __( 'Invalid webhook secret.', 'telepress' ),
+					'message' => __( 'Invalid webhook secret.', 'telepilot' ),
 				),
 				403
 			);
@@ -92,10 +92,10 @@ class TelePress_REST_Webhook_Controller {
 		);
 
 		$payload  = $request->get_json_params();
-		$telegram = new TelePress_Telegram_Service();
+		$telegram = new Telepilot_Telegram_Service();
 		$result   = $telegram->handle_webhook_update( is_array( $payload ) ? $payload : array() );
 
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'telegram_user_id' => isset( $payload['message']['from']['id'] ) ? (string) $payload['message']['from']['id'] : null,
 				'chat_id'          => isset( $payload['message']['chat']['id'] ) ? (string) $payload['message']['chat']['id'] : null,
@@ -115,7 +115,7 @@ class TelePress_REST_Webhook_Controller {
 	}
 
 	public function handle_process_jobs( WP_REST_Request $request ) {
-		$settings = get_option( 'telepress_settings', array() );
+		$settings = get_option( 'telepilot_settings', array() );
 		$secret   = isset( $settings['worker_secret'] ) ? (string) $settings['worker_secret'] : '';
 		$header   = (string) $request->get_header( self::WORKER_HEADER );
 
@@ -128,7 +128,7 @@ class TelePress_REST_Webhook_Controller {
 				)
 			);
 
-			TelePress_Audit_Log_Repository::log(
+			Telepilot_Audit_Log_Repository::log(
 				array(
 					'action_name'     => 'worker_auth_failed',
 					'resource_type'   => 'worker',
@@ -140,7 +140,7 @@ class TelePress_REST_Webhook_Controller {
 			return new WP_REST_Response(
 				array(
 					'ok'      => false,
-					'message' => __( 'Invalid worker secret.', 'telepress' ),
+					'message' => __( 'Invalid worker secret.', 'telepilot' ),
 				),
 				403
 			);
@@ -157,11 +157,11 @@ class TelePress_REST_Webhook_Controller {
 			)
 		);
 
-		$telegram = new TelePress_Telegram_Service();
+		$telegram = new Telepilot_Telegram_Service();
 		$jobs     = $telegram->process_jobs( $limit );
 		$count    = is_array( $jobs ) ? count( $jobs ) : 0;
 
-		TelePress_Audit_Log_Repository::log(
+		Telepilot_Audit_Log_Repository::log(
 			array(
 				'action_name'    => 'worker_processed_jobs',
 				'resource_type'  => 'worker',
@@ -189,7 +189,7 @@ class TelePress_REST_Webhook_Controller {
 			return $telegram_header;
 		}
 
-		return (string) $request->get_header( 'x-telepress-secret' );
+		return (string) $request->get_header( 'x-telepilot-secret' );
 	}
 
 	private function extract_update_command_text( $payload ) {
@@ -205,8 +205,8 @@ class TelePress_REST_Webhook_Controller {
 	}
 
 	private function update_diagnostics( $data ) {
-		$diagnostics = get_option( TelePress_Telegram_Service::DIAGNOSTICS_OPTION, array() );
+		$diagnostics = get_option( Telepilot_Telegram_Service::DIAGNOSTICS_OPTION, array() );
 		$diagnostics = array_merge( $diagnostics, $data );
-		update_option( TelePress_Telegram_Service::DIAGNOSTICS_OPTION, $diagnostics, false );
+		update_option( Telepilot_Telegram_Service::DIAGNOSTICS_OPTION, $diagnostics, false );
 	}
 }

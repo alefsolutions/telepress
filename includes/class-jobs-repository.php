@@ -4,11 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class TelePress_Jobs_Repository {
+class Telepilot_Jobs_Repository {
 	public static function table_name() {
 		global $wpdb;
 
-		return $wpdb->prefix . 'telepress_jobs';
+		return $wpdb->prefix . 'telepilot_jobs';
 	}
 
 	public static function create_table() {
@@ -70,7 +70,7 @@ class TelePress_Jobs_Repository {
 				return 'duplicate';
 			}
 
-			return new WP_Error( 'telepress_job_enqueue_failed', $wpdb->last_error ? $wpdb->last_error : __( 'Unable to enqueue Telegram job.', 'telepress' ) );
+			return new WP_Error( 'telepilot_job_enqueue_failed', $wpdb->last_error ? $wpdb->last_error : __( 'Unable to enqueue Telegram job.', 'telepilot' ) );
 		}
 
 		return (int) $wpdb->insert_id;
