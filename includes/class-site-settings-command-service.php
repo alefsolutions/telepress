@@ -9,10 +9,14 @@ class Telepilot_Site_Settings_Command_Service {
 		$settings = get_option( 'telepilot_settings', array() );
 
 		return array(
-			'transport_mode'      => isset( $settings['transport_mode'] ) ? (string) $settings['transport_mode'] : 'webhook',
-			'linking_enabled'     => ! empty( $settings['linking_enabled'] ),
-			'notifications_count' => isset( $settings['default_notifications'] ) && is_array( $settings['default_notifications'] ) ? count( $settings['default_notifications'] ) : 0,
-			'allowed_chat_count'  => $this->count_allowed_chats( isset( $settings['allowed_chat_ids'] ) ? (string) $settings['allowed_chat_ids'] : '' ),
+			'transport_mode'        => isset( $settings['transport_mode'] ) ? (string) $settings['transport_mode'] : 'webhook',
+			'linking_enabled'       => ! empty( $settings['linking_enabled'] ),
+			'cleanup_on_uninstall'  => ! empty( $settings['cleanup_on_uninstall'] ),
+			'notifications_count'   => isset( $settings['default_notifications'] ) && is_array( $settings['default_notifications'] ) ? count( $settings['default_notifications'] ) : 0,
+			'allowed_chat_count'    => $this->count_allowed_chats( isset( $settings['allowed_chat_ids'] ) ? (string) $settings['allowed_chat_ids'] : '' ),
+			'log_retention_days'    => isset( $settings['log_retention_days'] ) ? (int) $settings['log_retention_days'] : 30,
+			'rate_limit_per_minute' => isset( $settings['rate_limit_per_minute'] ) ? (int) $settings['rate_limit_per_minute'] : 20,
+			'stale_update_window' => isset( $settings['stale_update_window'] ) ? (int) $settings['stale_update_window'] : Telepilot_Telegram_Service::DEFAULT_STALE_WINDOW,
 			'blogname'            => (string) get_option( 'blogname', get_bloginfo( 'name' ) ),
 			'blogdescription'     => (string) get_option( 'blogdescription', get_bloginfo( 'description' ) ),
 			'admin_email'         => (string) get_option( 'admin_email', '' ),
@@ -30,8 +34,12 @@ class Telepilot_Site_Settings_Command_Service {
 		$lines[] = sprintf( __( 'Admin: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::link( __( 'Open settings', 'telepilot' ), $summary['settings_url'] ) );
 		$lines[] = sprintf( __( 'Transport: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( ucfirst( (string) $summary['transport_mode'] ) ) );
 		$lines[] = sprintf( __( 'Linking: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['linking_enabled'] ? __( 'Enabled', 'telepilot' ) : __( 'Disabled', 'telepilot' ) ) );
+		$lines[] = sprintf( __( 'Uninstall cleanup: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['cleanup_on_uninstall'] ? __( 'Enabled', 'telepilot' ) : __( 'Preserve data', 'telepilot' ) ) );
 		$lines[] = sprintf( __( 'Notification types enabled: %d', 'telepilot' ), (int) $summary['notifications_count'] );
 		$lines[] = sprintf( __( 'Allowed chats configured: %d', 'telepilot' ), (int) $summary['allowed_chat_count'] );
+		$lines[] = sprintf( __( 'Log retention: %d days', 'telepilot' ), (int) $summary['log_retention_days'] );
+		$lines[] = sprintf( __( 'Rate limit: %d commands/minute', 'telepilot' ), (int) $summary['rate_limit_per_minute'] );
+		$lines[] = sprintf( __( 'Stale update window: %d seconds', 'telepilot' ), (int) $summary['stale_update_window'] );
 		$lines[] = '';
 		$lines[] = sprintf( __( 'Site title: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['blogname'] ) );
 		$lines[] = sprintf( __( 'Tagline: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['blogdescription'] ) );
@@ -54,6 +62,11 @@ class Telepilot_Site_Settings_Command_Service {
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings timezone Pacific/Port_Moresby' ) . ' ' . __( 'Update the timezone string', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings date-format F j, Y' ) . ' ' . __( 'Update the WordPress date format', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings time-format g:i a' ) . ' ' . __( 'Update the WordPress time format', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings retention 45' ) . ' ' . __( 'Update audit log retention days', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings rate-limit 30' ) . ' ' . __( 'Update the per-minute command limit', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings stale-window 180' ) . ' ' . __( 'Update the stale update rejection window', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings linking off' ) . ' ' . __( 'Enable or disable new Telegram account linking', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/settings uninstall-cleanup on' ) . ' ' . __( 'Choose whether uninstall removes WP Telepilot data', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/notifications list' ) . ' ' . __( 'Manage Telegram notification types', 'telepilot' );
 
 		return implode( "\n", $lines );
@@ -123,13 +136,53 @@ class Telepilot_Site_Settings_Command_Service {
 					return new WP_Error( 'telepilot_settings_invalid_time_format', __( 'The time format cannot be empty.', 'telepilot' ) );
 				}
 
-				return $this->update_option_value( 'time_format', $format, __( 'time format updated', 'telepilot' ) );
+				return $this->update_option_value( 'time_format', $format );
+
+			case 'retention':
+				$days = absint( $value );
+				if ( $days < 1 ) {
+					return new WP_Error( 'telepilot_settings_invalid_retention', __( 'Log retention must be at least 1 day.', 'telepilot' ) );
+				}
+
+				return $this->update_plugin_setting( 'log_retention_days', $days );
+
+			case 'rate-limit':
+				$rate = absint( $value );
+				if ( $rate < 1 ) {
+					return new WP_Error( 'telepilot_settings_invalid_rate_limit', __( 'Rate limit must be at least 1 command per minute.', 'telepilot' ) );
+				}
+
+				return $this->update_plugin_setting( 'rate_limit_per_minute', $rate );
+
+			case 'stale-window':
+				$seconds = absint( $value );
+				if ( $seconds < 30 ) {
+					return new WP_Error( 'telepilot_settings_invalid_stale_window', __( 'The stale update window must be at least 30 seconds.', 'telepilot' ) );
+				}
+
+				return $this->update_plugin_setting( 'stale_update_window', $seconds );
+
+			case 'linking':
+				$enabled = $this->normalize_boolean_string( $value );
+				if ( null === $enabled ) {
+					return new WP_Error( 'telepilot_settings_invalid_linking', __( 'Use on/off, enable/disable, yes/no, or 1/0 for linking.', 'telepilot' ) );
+				}
+
+				return $this->update_plugin_setting( 'linking_enabled', $enabled ? 1 : 0, $enabled ? __( 'enabled', 'telepilot' ) : __( 'disabled', 'telepilot' ) );
+
+			case 'uninstall-cleanup':
+				$enabled = $this->normalize_boolean_string( $value );
+				if ( null === $enabled ) {
+					return new WP_Error( 'telepilot_settings_invalid_uninstall_cleanup', __( 'Use on/off, enable/disable, yes/no, or 1/0 for uninstall cleanup.', 'telepilot' ) );
+				}
+
+				return $this->update_plugin_setting( 'cleanup_on_uninstall', $enabled ? 1 : 0, $enabled ? __( 'enabled', 'telepilot' ) : __( 'disabled', 'telepilot' ) );
 		}
 
 		return new WP_Error( 'telepilot_settings_unsupported_field', __( 'That settings field is not supported.', 'telepilot' ) );
 	}
 
-	private function update_option_value( $option_name, $new_value, $label ) {
+	private function update_option_value( $option_name, $new_value, $unused_label = null ) {
 		$before = get_option( $option_name, '' );
 		update_option( $option_name, $new_value, false );
 		$after = get_option( $option_name, '' );
@@ -142,8 +195,44 @@ class Telepilot_Site_Settings_Command_Service {
 			'after_state'  => array(
 				'value' => is_scalar( $after ) ? (string) $after : '',
 			),
-			'label'        => $label,
+			'label_text'   => __( 'updated', 'telepilot' ),
 		);
+	}
+
+	private function update_plugin_setting( $setting_key, $new_value, $label_text = null ) {
+		$settings = get_option( 'telepilot_settings', array() );
+		$before   = isset( $settings[ $setting_key ] ) ? $settings[ $setting_key ] : null;
+
+		$settings[ $setting_key ] = $new_value;
+		update_option( 'telepilot_settings', $settings, false );
+
+		$updated_settings = get_option( 'telepilot_settings', array() );
+		$after            = isset( $updated_settings[ $setting_key ] ) ? $updated_settings[ $setting_key ] : null;
+
+		return array(
+			'field'        => $setting_key,
+			'before_state' => array(
+				'value' => is_scalar( $before ) ? (string) $before : wp_json_encode( $before ),
+			),
+			'after_state'  => array(
+				'value' => is_scalar( $after ) ? (string) $after : wp_json_encode( $after ),
+			),
+			'label_text'   => $label_text ? $label_text : __( 'updated', 'telepilot' ),
+		);
+	}
+
+	private function normalize_boolean_string( $value ) {
+		$value = strtolower( trim( (string) $value ) );
+
+		if ( in_array( $value, array( '1', 'on', 'yes', 'true', 'enable', 'enabled' ), true ) ) {
+			return true;
+		}
+
+		if ( in_array( $value, array( '0', 'off', 'no', 'false', 'disable', 'disabled' ), true ) ) {
+			return false;
+		}
+
+		return null;
 	}
 
 	private function count_allowed_chats( $allowed_chat_ids ) {

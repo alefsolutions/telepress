@@ -30,6 +30,7 @@ WP Telepilot is a Telegram-first WordPress operations plugin. It lets authorized
 - Supports structured post, page, media, and user management actions including draft creation, metadata updates, role changes, password reset flows, and controlled deletes.
 - Supports richer taxonomy and plugin operations including term detail/edit flows and plugin update refresh from Telegram.
 - Supports Telegram-side notification controls and safe site-setting updates for core fields like title, tagline, admin email, timezone, and date/time format.
+- Supports Phase 7 hardening controls for log retention, stale-update handling, inbound rate limits, linking toggles, and uninstall cleanup behavior.
 - Supports fuller comment workflows including status queues, search, detail views, reply posting, and safer destructive moderation flows.
 - Formats Telegram responses for readability with clearer headings, spacing, inline tips, and code-style command examples.
 - Uses confirmations for destructive actions and writes activity to the WP Telepilot audit log.
@@ -48,6 +49,7 @@ WP Telepilot is a Telegram-first WordPress operations plugin. It lets authorized
 ## Command reference
 
 - Full command documentation is available in [COMMANDS.md](COMMANDS.md).
+- A release-prep regression checklist is available in [QA-CHECKLIST.md](QA-CHECKLIST.md).
 - The reference is grouped by scope such as Core, Comments, Posts, Pages, Media, Users, Plugins, Categories, and Tags.
 - Each command entry includes syntax, an example, and expected behavior.
 
@@ -60,7 +62,9 @@ From `WordPress Admin -> WP Telepilot`, you can:
 - define the webhook secret
 - restrict allowed chat IDs
 - enable or disable user linking
+- choose whether plugin data is preserved or deleted on uninstall
 - inspect transport diagnostics
+- inspect cron, queue, schema, and database readiness diagnostics
 - manually poll Telegram
 - refresh webhook status
 - flush queued Telegram updates
@@ -83,6 +87,7 @@ From `WordPress Admin -> WP Telepilot`, you can:
 - Duplicate Telegram updates are ignored.
 - Stale Telegram updates are dropped.
 - Polling uses a lock to avoid overlapping workers.
+- Uninstall behavior is operator-controlled so site owners can preserve data by default or opt into full cleanup.
 - Audit records are captured for linking, moderation, content actions, and Telegram delivery.
 
 ## Usability highlights

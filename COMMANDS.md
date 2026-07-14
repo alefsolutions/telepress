@@ -11,6 +11,13 @@ Each command below includes:
 - example
 - behavior
 
+## Quick index
+
+- Core and linking: `/start`, `/help`, `/menu`, `/site`, `/dashboard`, `/settings`, `/chatid`, `/link`, `/unlink`
+- Notifications and comments: `/notifications`, `/comments`
+- Content: `/posts`, `/pages`, `/media`
+- Administration: `/users`, `/plugins`, `/categories`, `/tags`
+
 ## Core commands
 
 ### `/start`
@@ -103,6 +110,41 @@ Each command below includes:
 - Syntax: `/settings time-format FORMAT`
 - Example: `/settings time-format g:i a`
 - Behavior: updates the WordPress time format.
+
+### `/settings retention DAYS`
+
+- Scope: hardening
+- Syntax: `/settings retention DAYS`
+- Example: `/settings retention 45`
+- Behavior: updates how many days WP Telepilot keeps audit records before daily cleanup removes older entries.
+
+### `/settings rate-limit COMMANDS_PER_MINUTE`
+
+- Scope: hardening
+- Syntax: `/settings rate-limit COMMANDS_PER_MINUTE`
+- Example: `/settings rate-limit 30`
+- Behavior: updates the inbound per-minute Telegram command limit used for throttling.
+
+### `/settings stale-window SECONDS`
+
+- Scope: hardening
+- Syntax: `/settings stale-window SECONDS`
+- Example: `/settings stale-window 180`
+- Behavior: updates how old a delayed Telegram update can be before WP Telepilot drops it.
+
+### `/settings linking on|off`
+
+- Scope: hardening
+- Syntax: `/settings linking on|off`
+- Example: `/settings linking off`
+- Behavior: enables or disables generation and use of new Telegram linking codes.
+
+### `/settings uninstall-cleanup on|off`
+
+- Scope: hardening
+- Syntax: `/settings uninstall-cleanup on|off`
+- Example: `/settings uninstall-cleanup on`
+- Behavior: chooses whether plugin uninstall will remove WP Telepilot data or preserve it for a later reinstall.
 
 ### `/chatid`
 

@@ -122,12 +122,25 @@ class Telepilot_Bootstrap {
 
 	private function ensure_settings_defaults() {
 		$settings = get_option( 'telepilot_settings', array() );
+		$defaults = array(
+			'bot_token'             => '',
+			'transport_mode'        => 'webhook',
+			'allowed_chat_ids'      => '',
+			'default_notifications' => array( 'new_comment', 'failed_login', 'plugin_updates', 'theme_updates', 'core_updates' ),
+			'stale_update_window'   => Telepilot_Telegram_Service::DEFAULT_STALE_WINDOW,
+			'log_retention_days'    => 30,
+			'rate_limit_per_minute' => 20,
+			'linking_enabled'       => 1,
+			'cleanup_on_uninstall'  => 0,
+		);
 
 		if ( ! is_array( $settings ) ) {
 			$settings = array();
 		}
 
-		$updated = false;
+		$hydrated = wp_parse_args( $settings, $defaults );
+		$updated  = $hydrated !== $settings;
+		$settings = $hydrated;
 
 		if ( empty( $settings['webhook_secret'] ) ) {
 			$settings['webhook_secret'] = wp_generate_password( 32, false, false );

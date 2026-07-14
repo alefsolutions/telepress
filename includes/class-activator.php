@@ -21,6 +21,7 @@ class Telepilot_Activator {
 			'log_retention_days'    => 30,
 			'rate_limit_per_minute' => 20,
 			'linking_enabled'       => 1,
+			'cleanup_on_uninstall'  => 0,
 		);
 
 		if ( ! get_option( 'telepilot_settings' ) ) {

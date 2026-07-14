@@ -378,7 +378,7 @@ class Telepilot_Command_Router {
 		);
 
 		return Telepilot_Telegram_Response_Builder::success(
-			sprintf( __( 'Setting `%1$s` has been %2$s.', 'telepilot' ), $subcommand, $result['label'] ),
+			sprintf( __( 'Setting `%1$s` has been %2$s.', 'telepilot' ), $subcommand, isset( $result['label_text'] ) ? $result['label_text'] : __( 'updated', 'telepilot' ) ),
 			array(
 				'command' => '/settings',
 			)

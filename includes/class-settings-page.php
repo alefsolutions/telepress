@@ -73,6 +73,7 @@ class Telepilot_Settings_Page {
 		$output['log_retention_days']     = isset( $input['log_retention_days'] ) ? max( 1, absint( $input['log_retention_days'] ) ) : 30;
 		$output['rate_limit_per_minute']  = isset( $input['rate_limit_per_minute'] ) ? max( 1, absint( $input['rate_limit_per_minute'] ) ) : 20;
 		$output['linking_enabled']        = ! empty( $input['linking_enabled'] ) ? 1 : 0;
+		$output['cleanup_on_uninstall']   = ! empty( $input['cleanup_on_uninstall'] ) ? 1 : 0;
 		$output['default_notifications']  = isset( $input['default_notifications'] ) && is_array( $input['default_notifications'] )
 			? array_map( 'sanitize_text_field', $input['default_notifications'] )
 			: array();
@@ -104,6 +105,12 @@ class Telepilot_Settings_Page {
 		$dashboard_summary        = $dashboard_service->get_summary();
 		$job_counts               = Telepilot_Jobs_Repository::status_counts();
 		$queued_job_count         = (int) $job_counts['pending'] + (int) $job_counts['processing'];
+		$schema_version           = (string) get_option( 'telepilot_schema_version', __( 'Unknown', 'telepilot' ) );
+		$next_daily_maintenance   = wp_next_scheduled( 'telepilot_daily_maintenance' );
+		$next_poll_run            = wp_next_scheduled( 'telepilot_poll_updates' );
+		$next_job_run             = wp_next_scheduled( 'telepilot_process_jobs' );
+		$poll_lock_active         = (bool) get_transient( Telepilot_Telegram_Service::POLL_LOCK_TRANSIENT );
+		$table_status             = $this->get_database_table_status();
 		$logo_url                 = $this->get_logo_url();
 		$product_name             = __( 'WP Telepilot', 'telepilot' );
 		$product_version          = TELEPILOT_VERSION;
@@ -225,6 +232,10 @@ class Telepilot_Settings_Page {
 										<input type="number" min="1" name="telepilot_settings[log_retention_days]" value="<?php echo esc_attr( (string) $settings['log_retention_days'] ); ?>" />
 										<small><?php esc_html_e( 'Controls how long audit records should be retained before cleanup.', 'telepilot' ); ?></small>
 									</label>
+									<label class="telepilot-check telepilot-check-inline">
+										<input type="checkbox" name="telepilot_settings[cleanup_on_uninstall]" value="1" <?php checked( ! empty( $settings['cleanup_on_uninstall'] ) ); ?> />
+										<span><?php esc_html_e( 'Delete WP Telepilot data when the plugin is uninstalled', 'telepilot' ); ?></span>
+									</label>
 								</div>
 							</div>
 
@@ -310,6 +321,62 @@ class Telepilot_Settings_Page {
 						<p class="telepilot-inline-note">
 							<?php esc_html_e( 'Webhook mode is preferred for real-time replies. Polling fallback depends on WP-Cron and can delay messages if your host does not trigger cron promptly.', 'telepilot' ); ?>
 						</p>
+					</section>
+
+					<section class="telepilot-panel">
+						<div class="telepilot-panel-heading">
+							<div>
+								<p class="telepilot-section-label"><?php esc_html_e( 'Release Prep', 'telepilot' ); ?></p>
+								<h2><?php esc_html_e( 'Hardening Readiness', 'telepilot' ); ?></h2>
+							</div>
+						</div>
+						<ul class="telepilot-status-list">
+							<li class="is-good">
+								<span><?php esc_html_e( 'Plugin schema version', 'telepilot' ); ?></span>
+								<strong><?php echo esc_html( $schema_version ); ?></strong>
+							</li>
+							<li class="<?php echo (int) $table_status['ready_count'] === (int) $table_status['total_count'] ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Database tables ready', 'telepilot' ); ?></span>
+								<strong><?php echo esc_html( sprintf( __( '%1$d/%2$d', 'telepilot' ), (int) $table_status['ready_count'], (int) $table_status['total_count'] ) ); ?></strong>
+							</li>
+							<li class="is-good">
+								<span><?php esc_html_e( 'Direct-chat-only sensitive actions', 'telepilot' ); ?></span>
+								<strong><?php esc_html_e( 'Enforced', 'telepilot' ); ?></strong>
+							</li>
+							<li class="<?php echo ! empty( $settings['cleanup_on_uninstall'] ) ? 'is-warn' : 'is-good'; ?>">
+								<span><?php esc_html_e( 'Uninstall behavior', 'telepilot' ); ?></span>
+								<strong><?php echo ! empty( $settings['cleanup_on_uninstall'] ) ? esc_html__( 'Delete data', 'telepilot' ) : esc_html__( 'Preserve data', 'telepilot' ); ?></strong>
+							</li>
+							<li class="<?php echo $next_daily_maintenance ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Next daily maintenance', 'telepilot' ); ?></span>
+								<strong><?php echo esc_html( $this->format_schedule_timestamp( $next_daily_maintenance, __( 'Not scheduled', 'telepilot' ) ) ); ?></strong>
+							</li>
+							<li class="<?php echo 'polling' !== $settings['transport_mode'] || $next_poll_run ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Next polling run', 'telepilot' ); ?></span>
+								<strong><?php echo esc_html( 'polling' === $settings['transport_mode'] ? $this->format_schedule_timestamp( $next_poll_run, __( 'Not scheduled', 'telepilot' ) ) : __( 'Webhook mode', 'telepilot' ) ); ?></strong>
+							</li>
+							<li class="<?php echo $next_job_run ? 'is-warn' : 'is-good'; ?>">
+								<span><?php esc_html_e( 'Background worker schedule', 'telepilot' ); ?></span>
+								<strong><?php echo esc_html( $this->format_schedule_timestamp( $next_job_run, __( 'Idle', 'telepilot' ) ) ); ?></strong>
+							</li>
+							<li class="<?php echo $poll_lock_active ? 'is-warn' : 'is-good'; ?>">
+								<span><?php esc_html_e( 'Polling lock', 'telepilot' ); ?></span>
+								<strong><?php echo $poll_lock_active ? esc_html__( 'Active', 'telepilot' ) : esc_html__( 'Clear', 'telepilot' ); ?></strong>
+							</li>
+						</ul>
+						<?php if ( ! empty( $table_status['missing'] ) ) : ?>
+							<p class="telepilot-inline-note">
+								<?php
+								echo esc_html(
+									sprintf(
+										/* translators: %s: comma-separated table names. */
+										__( 'Missing database tables: %s', 'telepilot' ),
+										implode( ', ', $table_status['missing'] )
+									)
+								);
+								?>
+							</p>
+						<?php endif; ?>
 					</section>
 
 					<section class="telepilot-panel">
@@ -807,6 +874,7 @@ class Telepilot_Settings_Page {
 			'log_retention_days'    => 30,
 			'rate_limit_per_minute' => 20,
 			'linking_enabled'       => 1,
+			'cleanup_on_uninstall'  => 0,
 		);
 
 		return wp_parse_args( get_option( 'telepilot_settings', array() ), $defaults );
@@ -826,6 +894,44 @@ class Telepilot_Settings_Page {
 
 	private function notification_options() {
 		return Telepilot_Notification_Service::option_labels();
+	}
+
+	private function get_database_table_status() {
+		global $wpdb;
+
+		$tables = array(
+			Telepilot_Audit_Log_Repository::table_name(),
+			Telepilot_Jobs_Repository::table_name(),
+			Telepilot_Processed_Updates_Repository::table_name(),
+		);
+
+		$ready   = array();
+		$missing = array();
+
+		foreach ( $tables as $table_name ) {
+			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+
+			if ( $found === $table_name ) {
+				$ready[] = $table_name;
+				continue;
+			}
+
+			$missing[] = $table_name;
+		}
+
+		return array(
+			'ready_count' => count( $ready ),
+			'total_count' => count( $tables ),
+			'missing'     => $missing,
+		);
+	}
+
+	private function format_schedule_timestamp( $timestamp, $fallback ) {
+		if ( empty( $timestamp ) ) {
+			return $fallback;
+		}
+
+		return $this->format_timestamp( (int) $timestamp );
 	}
 
 	private function telegram_commands() {
