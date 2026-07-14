@@ -80,12 +80,54 @@ Each command below includes:
 
 ## Comments commands
 
+### `/comments help`
+
+- Scope: comments
+- Syntax: `/comments help`
+- Example: `/comments help`
+- Behavior: shows the comments command cheat sheet.
+
 ### `/comments pending`
 
 - Scope: comments
 - Syntax: `/comments pending`
 - Example: `/comments pending`
 - Behavior: lists recent pending comments and presents moderation buttons.
+
+### `/comments approved`
+
+- Scope: comments
+- Syntax: `/comments approved`
+- Example: `/comments approved`
+- Behavior: lists approved comments with moderation actions and pagination.
+
+### `/comments spam`
+
+- Scope: comments
+- Syntax: `/comments spam`
+- Example: `/comments spam`
+- Behavior: lists spam comments with recovery and delete actions.
+
+### `/comments trash`
+
+- Scope: comments
+- Syntax: `/comments trash`
+- Example: `/comments trash`
+- Behavior: lists trashed comments with restore and permanent delete actions.
+
+### `/comments search KEYWORD`
+
+- Scope: comments
+- Syntax: `/comments search KEYWORD`
+- Example: `/comments search checkout`
+- Behavior: searches comments by author, email, URL, or content with paginated results.
+
+### `/comments details COMMENT_ID`
+
+- Scope: comments
+- Syntax: `/comments details COMMENT_ID`
+- Example: `/comments details 123`
+- Behavior: shows full comment context including status, post, author, admin link, and content excerpt.
 
 ### `/comments approve COMMENT_ID`
 
@@ -114,6 +156,41 @@ Each command below includes:
 - Syntax: `/comments trash COMMENT_ID`
 - Example: `/comments trash 123`
 - Behavior: moves a comment to trash after confirmation.
+
+### `/comments restore COMMENT_ID`
+
+- Scope: comments
+- Syntax: `/comments restore COMMENT_ID`
+- Example: `/comments restore 123`
+- Behavior: restores a trashed comment immediately.
+
+### `/comments unspam COMMENT_ID`
+
+- Scope: comments
+- Syntax: `/comments unspam COMMENT_ID`
+- Example: `/comments unspam 123`
+- Behavior: removes a comment from spam immediately.
+
+### `/comments delete COMMENT_ID`
+
+- Scope: comments
+- Syntax: `/comments delete COMMENT_ID`
+- Example: `/comments delete 123`
+- Behavior: permanently deletes a comment after confirmation.
+
+### `/comments reply COMMENT_ID MESSAGE`
+
+- Scope: comments
+- Syntax: `/comments reply COMMENT_ID MESSAGE`
+- Example: `/comments reply 123 Thanks for the feedback`
+- Behavior: posts an approved reply as the linked WordPress user.
+
+### Comments pagination
+
+- Scope: comments
+- Syntax: `/comments pending page:N`
+- Example: `/comments pending page:2`
+- Behavior: opens a specific result page. The same pattern also works for `/comments approved`, `/comments spam`, `/comments trash`, and `/comments search`.
 
 ## Posts commands
 

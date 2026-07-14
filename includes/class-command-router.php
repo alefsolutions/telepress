@@ -450,21 +450,87 @@ class Telepilot_Command_Router {
 			return $permission_result;
 		}
 
-		$subcommand = ! empty( $command['args'][0] ) ? strtolower( (string) $command['args'][0] ) : 'pending';
+		list( $args, $page ) = $this->extract_page_from_args( $command['args'] );
+		$subcommand = ! empty( $args[0] ) ? strtolower( (string) $args[0] ) : 'pending';
+		$comment_id = ! empty( $args[1] ) ? absint( $args[1] ) : 0;
 
-		if ( 'pending' === $subcommand ) {
-			$comments = $this->comments_service->list_pending( 5 );
+		if ( 'help' === $subcommand ) {
+			return Telepilot_Telegram_Response_Builder::success_html(
+				$this->comments_service->render_help_message(),
+				array(
+					'command'      => '/comments',
+					'reply_markup' => $this->safe_home_keyboard( $identity ),
+				)
+			);
+		}
+
+		if ( in_array( $subcommand, array( 'pending', 'approved', 'spam', 'trash' ), true ) && ! $comment_id ) {
+			switch ( $subcommand ) {
+				case 'approved':
+					$result  = $this->comments_service->approved_page( $page );
+					$heading = __( 'Approved Comments', 'telepilot' );
+					break;
+				case 'spam':
+					$result  = $this->comments_service->spam_page( $page );
+					$heading = __( 'Spam Comments', 'telepilot' );
+					break;
+				case 'trash':
+					$result  = $this->comments_service->trash_page( $page );
+					$heading = __( 'Trashed Comments', 'telepilot' );
+					break;
+				default:
+					$result  = $this->comments_service->pending_page( $page );
+					$heading = __( 'Pending Comments', 'telepilot' );
+					break;
+			}
 
 			return Telepilot_Telegram_Response_Builder::success_html(
-				$this->comments_service->render_pending_message( $comments ),
+				$this->comments_service->render_page_message( $result, $heading ),
 				array(
 					'command'      => '/comments',
 					'reply_markup' => $this->safe_reply_markup(
-						function() use ( $comments, $identity ) {
-							return $this->comments_service->build_pending_keyboard( $comments, $identity['telegram_user_id'] );
+						function() use ( $result, $subcommand ) {
+							return $this->comments_service->build_list_keyboard( $result['items'], $subcommand, '', $result['page'], $result['total_pages'] );
 						},
-						'comments_pending'
+						'comments_list'
 					),
+				)
+			);
+		}
+
+		if ( 'search' === $subcommand ) {
+			$term = implode( ' ', array_slice( $args, 1 ) );
+			if ( '' === trim( $term ) ) {
+				return Telepilot_Telegram_Response_Builder::error( __( 'Usage: `/comments search keyword`', 'telepilot' ) );
+			}
+
+			$result = $this->comments_service->search_page( $term, $page );
+
+			return Telepilot_Telegram_Response_Builder::success_html(
+				$this->comments_service->render_page_message( $result, sprintf( __( 'Comment Search: %s', 'telepilot' ), $term ) ),
+				array(
+					'command'      => '/comments',
+					'reply_markup' => $this->safe_reply_markup(
+						function() use ( $result, $term ) {
+							return $this->comments_service->build_list_keyboard( $result['items'], 'search', $term, $result['page'], $result['total_pages'] );
+						},
+						'comments_search'
+					),
+				)
+			);
+		}
+
+		if ( 'details' === $subcommand && $comment_id ) {
+			$comment = $this->comments_service->get_comment_details( $comment_id );
+
+			if ( is_wp_error( $comment ) ) {
+				return Telepilot_Telegram_Response_Builder::error( $comment->get_error_message() );
+			}
+
+			return Telepilot_Telegram_Response_Builder::success_html(
+				$this->comments_service->render_comment_details_message( $comment ),
+				array(
+					'command' => '/comments',
 				)
 			);
 		}
@@ -475,32 +541,56 @@ class Telepilot_Command_Router {
 			return $private_chat_result;
 		}
 
-		$comment_id = ! empty( $command['args'][1] ) ? absint( $command['args'][1] ) : 0;
-
-		if ( ! in_array( $subcommand, array( 'approve', 'reject', 'spam', 'trash' ), true ) || ! $comment_id ) {
-			return Telepilot_Telegram_Response_Builder::error(
-				__( 'Supported comments commands: `/comments pending`, `/comments approve 123`, `/comments reject 123`, `/comments spam 123`, `/comments trash 123`', 'telepilot' ),
+		if ( ! $comment_id ) {
+			return Telepilot_Telegram_Response_Builder::error_html(
+				$this->comments_service->render_help_message(),
 				array(
 					'command' => '/comments',
 				)
 			);
 		}
 
-		if ( 'approve' === $subcommand ) {
+		if ( 'reply' === $subcommand ) {
+			$content = implode( ' ', array_slice( $args, 2 ) );
+			if ( '' === trim( $content ) ) {
+				return Telepilot_Telegram_Response_Builder::error( __( 'Usage: `/comments reply 123 Thank you for your comment`', 'telepilot' ) );
+			}
+
+			$result = $this->comments_service->reply_to_comment( $comment_id, $content, $identity['wp_user'] );
+			if ( is_wp_error( $result ) ) {
+				return Telepilot_Telegram_Response_Builder::error( $result->get_error_message() );
+			}
+
+			$this->log_comment_activity( $identity, 'comment_replied', $comment_id, 'reply', $result );
+
+			return Telepilot_Telegram_Response_Builder::success(
+				sprintf( __( 'Reply [%1$d] has been posted to comment [%2$d].', 'telepilot' ), $result['reply']->comment_ID, $comment_id ),
+				array(
+					'command' => '/comments',
+				)
+			);
+		}
+
+		if ( ! in_array( $subcommand, array( 'approve', 'reject', 'spam', 'trash', 'restore', 'unspam', 'delete' ), true ) ) {
+			return Telepilot_Telegram_Response_Builder::error_html(
+				$this->comments_service->render_help_message(),
+				array(
+					'command' => '/comments',
+				)
+			);
+		}
+
+		if ( in_array( $subcommand, array( 'approve', 'restore', 'unspam' ), true ) ) {
 			$result = $this->comments_service->moderate_comment( $comment_id, $subcommand );
 
 			if ( is_wp_error( $result ) ) {
 				return Telepilot_Telegram_Response_Builder::error( $result->get_error_message() );
 			}
 
-			$this->log_comment_moderation( $identity, $comment_id, $subcommand, $result );
+			$this->log_comment_activity( $identity, 'comment_moderated', $comment_id, $subcommand, $result );
 
 			return Telepilot_Telegram_Response_Builder::success(
-				sprintf(
-					__( 'Comment #%1$d has been %2$s.', 'telepilot' ),
-					$comment_id,
-					$result['label']
-				),
+				sprintf( __( 'Comment #%1$d has been %2$s.', 'telepilot' ), $comment_id, $result['label'] ),
 				array(
 					'command' => '/comments',
 				)
@@ -508,11 +598,7 @@ class Telepilot_Command_Router {
 		}
 
 		return Telepilot_Telegram_Response_Builder::success(
-			sprintf(
-				__( 'Confirm moderation for comment #%1$d: %2$s', 'telepilot' ),
-				$comment_id,
-				$subcommand
-			),
+			sprintf( __( 'Confirm moderation for comment [%1$d]: %2$s', 'telepilot' ), $comment_id, $subcommand ),
 			array(
 				'command'      => '/comments',
 				'reply_markup' => $this->safe_reply_markup(
@@ -558,7 +644,7 @@ class Telepilot_Command_Router {
 			return Telepilot_Telegram_Response_Builder::error( $result->get_error_message() );
 		}
 
-		$this->log_comment_moderation( $identity, $comment_id, $action, $result );
+		$this->log_comment_activity( $identity, 'comment_moderated', $comment_id, $action, $result );
 
 		return Telepilot_Telegram_Response_Builder::success(
 			sprintf(
@@ -573,17 +659,36 @@ class Telepilot_Command_Router {
 		);
 	}
 
-	private function log_comment_moderation( $identity, $comment_id, $action, $result ) {
+	private function log_comment_activity( $identity, $action_name, $comment_id, $action, $result ) {
+		$before_state = array();
+		$after_state  = array();
+
+		if ( isset( $result['before_status'] ) ) {
+			$before_state['status'] = $result['before_status'];
+		}
+
+		if ( isset( $result['after_status'] ) ) {
+			$after_state['status'] = $result['after_status'];
+		}
+
+		if ( isset( $result['reply'] ) && $result['reply'] instanceof WP_Comment ) {
+			$after_state['reply_id'] = (int) $result['reply']->comment_ID;
+		}
+
+		if ( '' !== $action ) {
+			$after_state['action'] = $action;
+		}
+
 		Telepilot_Audit_Log_Repository::log(
 			array(
 				'wp_user_id'       => $identity['wp_user']->ID,
 				'telegram_user_id' => $identity['telegram_user_id'],
 				'chat_id'          => $identity['chat_id'],
-				'action_name'      => 'comment_moderated',
+				'action_name'      => $action_name,
 				'resource_type'    => 'comment',
 				'resource_id'      => (string) $comment_id,
-				'before_state'     => array( 'status' => $result['before_status'] ),
-				'after_state'      => array( 'status' => $result['after_status'], 'action' => $action ),
+				'before_state'     => $before_state,
+				'after_state'      => $after_state,
 			)
 		);
 	}
