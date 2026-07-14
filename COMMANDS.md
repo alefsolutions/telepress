@@ -152,6 +152,55 @@ Each command below includes:
 - Example: `/posts stats`
 - Behavior: shows post counts by status.
 
+### `/posts create TITLE`
+
+- Scope: posts
+- Syntax: `/posts create TITLE`
+- Example: `/posts create Launch checklist`
+- Behavior: creates a new draft post.
+
+### `/posts title POST_ID NEW_TITLE`
+
+- Scope: posts
+- Syntax: `/posts title POST_ID NEW_TITLE`
+- Example: `/posts title 321 Launch checklist v2`
+- Behavior: updates the title of an existing post.
+
+### `/posts excerpt POST_ID NEW_EXCERPT`
+
+- Scope: posts
+- Syntax: `/posts excerpt POST_ID NEW_EXCERPT`
+- Example: `/posts excerpt 321 Short launch summary`
+- Behavior: updates the post excerpt.
+
+### `/posts categories POST_ID ID_LIST`
+
+- Scope: posts
+- Syntax: `/posts categories POST_ID ID_LIST`
+- Example: `/posts categories 321 4,8`
+- Behavior: replaces the post category assignment using comma-separated term IDs.
+
+### `/posts tags POST_ID ID_LIST`
+
+- Scope: posts
+- Syntax: `/posts tags POST_ID ID_LIST`
+- Example: `/posts tags 321 5,9`
+- Behavior: replaces the post tag assignment using comma-separated term IDs.
+
+### `/posts schedule POST_ID YYYY-MM-DD HH:MM`
+
+- Scope: posts
+- Syntax: `/posts schedule POST_ID YYYY-MM-DD HH:MM`
+- Example: `/posts schedule 321 2026-07-20 14:30`
+- Behavior: schedules a post in the site’s local timezone.
+
+### `/posts open POST_ID`
+
+- Scope: posts
+- Syntax: `/posts open POST_ID`
+- Example: `/posts open 321`
+- Behavior: generates a secure temporary browser editor link for long-form post editing.
+
 ### `/posts publish POST_ID`
 
 - Scope: posts
@@ -165,6 +214,34 @@ Each command below includes:
 - Syntax: `/posts unpublish POST_ID`
 - Example: `/posts unpublish 321`
 - Behavior: moves a published post back to draft after confirmation.
+
+### `/posts trashed`
+
+- Scope: posts
+- Syntax: `/posts trashed`
+- Example: `/posts trashed`
+- Behavior: lists trashed posts with restore and permanent delete actions.
+
+### `/posts restore POST_ID`
+
+- Scope: posts
+- Syntax: `/posts restore POST_ID`
+- Example: `/posts restore 321`
+- Behavior: restores a trashed post after confirmation.
+
+### `/posts trash POST_ID`
+
+- Scope: posts
+- Syntax: `/posts trash POST_ID`
+- Example: `/posts trash 321`
+- Behavior: moves a post to trash after confirmation.
+
+### `/posts delete POST_ID`
+
+- Scope: posts
+- Syntax: `/posts delete POST_ID`
+- Example: `/posts delete 321`
+- Behavior: permanently deletes a post after confirmation.
 
 ### Posts pagination
 
@@ -195,6 +272,34 @@ Each command below includes:
 - Syntax: `/pages search KEYWORD`
 - Example: `/pages search about`
 - Behavior: searches pages by keyword with paginated results.
+
+### `/pages create TITLE`
+
+- Scope: pages
+- Syntax: `/pages create TITLE`
+- Example: `/pages create About Us`
+- Behavior: creates a new draft page.
+
+### `/pages title PAGE_ID NEW_TITLE`
+
+- Scope: pages
+- Syntax: `/pages title PAGE_ID NEW_TITLE`
+- Example: `/pages title 45 About Telepilot`
+- Behavior: updates a page title.
+
+### `/pages slug PAGE_ID NEW_SLUG`
+
+- Scope: pages
+- Syntax: `/pages slug PAGE_ID NEW_SLUG`
+- Example: `/pages slug 45 about-telepilot`
+- Behavior: updates a page slug.
+
+### `/pages status PAGE_ID STATUS`
+
+- Scope: pages
+- Syntax: `/pages status PAGE_ID STATUS`
+- Example: `/pages status 45 private`
+- Behavior: changes a page status to `draft`, `publish`, or `private`.
 
 ### `/pages trashed`
 
@@ -231,6 +336,13 @@ Each command below includes:
 - Example: `/pages restore 45`
 - Behavior: restores a trashed page immediately.
 
+### `/pages delete PAGE_ID`
+
+- Scope: pages
+- Syntax: `/pages delete PAGE_ID`
+- Example: `/pages delete 45`
+- Behavior: permanently deletes a page after confirmation.
+
 ### Pages pagination
 
 - Scope: pages
@@ -260,6 +372,34 @@ Each command below includes:
 - Syntax: `/media search KEYWORD`
 - Example: `/media search logo`
 - Behavior: searches media by title with paginated results.
+
+### `/media details ATTACHMENT_ID`
+
+- Scope: media
+- Syntax: `/media details ATTACHMENT_ID`
+- Example: `/media details 88`
+- Behavior: shows attachment metadata, alt text, caption, dimensions, size, and preview link when available.
+
+### `/media rename ATTACHMENT_ID NEW_TITLE`
+
+- Scope: media
+- Syntax: `/media rename ATTACHMENT_ID NEW_TITLE`
+- Example: `/media rename 88 Homepage hero image`
+- Behavior: updates the attachment title.
+
+### `/media alt ATTACHMENT_ID NEW_ALT_TEXT`
+
+- Scope: media
+- Syntax: `/media alt ATTACHMENT_ID NEW_ALT_TEXT`
+- Example: `/media alt 88 Homepage banner showing team`
+- Behavior: updates the attachment alt text.
+
+### `/media caption ATTACHMENT_ID NEW_CAPTION`
+
+- Scope: media
+- Syntax: `/media caption ATTACHMENT_ID NEW_CAPTION`
+- Example: `/media caption 88 Homepage hero for July campaign`
+- Behavior: updates the attachment caption.
 
 ### `/media delete ATTACHMENT_ID`
 
@@ -312,6 +452,20 @@ Each command below includes:
 - Example: `/users create jane jane@example.com editor`
 - Behavior: creates a new WordPress user after confirmation.
 
+### `/users email USER_ID EMAIL`
+
+- Scope: users
+- Syntax: `/users email USER_ID EMAIL`
+- Example: `/users email 17 jane@example.com`
+- Behavior: updates a user email address.
+
+### `/users display-name USER_ID DISPLAY_NAME`
+
+- Scope: users
+- Syntax: `/users display-name USER_ID DISPLAY_NAME`
+- Example: `/users display-name 17 Jane Doe`
+- Behavior: updates a user display name.
+
 ### `/users disable USER_ID`
 
 - Scope: users
@@ -340,12 +494,26 @@ Each command below includes:
 - Example: `/users send-reset 17`
 - Behavior: sends the official WordPress password reset email to the selected user after confirmation.
 
+### `/users send-welcome USER_ID`
+
+- Scope: users
+- Syntax: `/users send-welcome USER_ID`
+- Example: `/users send-welcome 17`
+- Behavior: re-sends the WordPress welcome email to the selected user after confirmation.
+
 ### `/users role USER_ID ROLE`
 
 - Scope: users
 - Syntax: `/users role USER_ID ROLE`
 - Example: `/users role 17 editor`
 - Behavior: changes the target user’s role after confirmation.
+
+### `/users delete USER_ID [REASSIGN_USER_ID]`
+
+- Scope: users
+- Syntax: `/users delete USER_ID [REASSIGN_USER_ID]`
+- Example: `/users delete 17 1`
+- Behavior: deletes a user after confirmation and can optionally reassign their content to another user ID.
 
 ### Users pagination
 

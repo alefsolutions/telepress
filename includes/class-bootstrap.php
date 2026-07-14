@@ -11,12 +11,14 @@ class Telepilot_Bootstrap {
 	private $rest_controller;
 	private $notification_service;
 	private $users_service;
+	private $post_editor_service;
 
 	public function __construct() {
 		$this->settings_page        = new Telepilot_Settings_Page();
 		$this->rest_controller      = new Telepilot_REST_Webhook_Controller();
 		$this->notification_service = new Telepilot_Notification_Service();
 		$this->users_service        = new Telepilot_Users_Service( new Telepilot_Confirmation_Service() );
+		$this->post_editor_service  = new Telepilot_Post_Editor_Service();
 	}
 
 	public function boot() {
@@ -30,6 +32,8 @@ class Telepilot_Bootstrap {
 		add_action( 'telepilot_daily_maintenance', array( $this, 'run_daily_maintenance' ) );
 		add_action( 'telepilot_poll_updates', array( $this, 'poll_updates' ) );
 		add_action( 'telepilot_process_jobs', array( $this, 'process_jobs' ) );
+		add_action( 'admin_post_' . Telepilot_Post_Editor_Service::HANDLER_ACTION, array( $this->post_editor_service, 'handle_request' ) );
+		add_action( 'admin_post_nopriv_' . Telepilot_Post_Editor_Service::HANDLER_ACTION, array( $this->post_editor_service, 'handle_request' ) );
 		add_action( 'comment_post', array( $this->notification_service, 'handle_new_comment' ), 10, 3 );
 		add_action( 'wp_set_comment_status', array( $this->notification_service, 'handle_comment_status_change' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this->notification_service, 'handle_post_transition' ), 10, 3 );

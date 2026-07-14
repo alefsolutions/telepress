@@ -109,11 +109,15 @@ class Telepilot_Users_Service {
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users list' ) . ' ' . __( 'Show recent users', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users search jane' ) . ' ' . __( 'Search by username, display name, or email', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users create jane jane@example.com editor' ) . ' ' . __( 'Create a new user', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users email 123 jane@example.com' ) . ' ' . __( 'Update a user email address', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users display-name 123 Jane Doe' ) . ' ' . __( 'Update a display name', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users disable 123' ) . ' ' . __( 'Disable a user', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users enable 123' ) . ' ' . __( 'Re-enable a user', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users reset-password 123' ) . ' ' . __( 'Generate a password reset link', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users send-reset 123' ) . ' ' . __( 'Email the official WordPress reset link to the user', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users send-welcome 123' ) . ' ' . __( 'Re-send the WordPress welcome email to the user', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users role 123 editor' ) . ' ' . __( 'Change a user role', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/users delete 123 1' ) . ' ' . __( 'Delete a user and optionally reassign their content', 'telepilot' );
 		$lines[] = '';
 		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: user creation and other sensitive actions must be confirmed in a private chat.', 'telepilot' ) );
 
@@ -155,6 +159,8 @@ class Telepilot_Users_Service {
 		$user = get_user_by( 'id', $user_id );
 		$user->set_role( $role );
 
+		$this->bump_cache_version();
+
 		return array(
 			'user'  => $user,
 			'label' => __( 'created', 'telepilot' ),
@@ -168,6 +174,7 @@ class Telepilot_Users_Service {
 		}
 
 		update_user_meta( $user_id, self::META_DISABLED, 1 );
+		$this->bump_cache_version();
 
 		return array(
 			'user'         => $user,
@@ -184,6 +191,7 @@ class Telepilot_Users_Service {
 		}
 
 		delete_user_meta( $user_id, self::META_DISABLED );
+		$this->bump_cache_version();
 
 		return array(
 			'user'         => $user,
@@ -206,6 +214,7 @@ class Telepilot_Users_Service {
 
 		$before_roles = $user->roles;
 		$user->set_role( $role );
+		$this->bump_cache_version();
 
 		return array(
 			'user'         => $user,
@@ -252,6 +261,147 @@ class Telepilot_Users_Service {
 		return array(
 			'user'  => $user,
 			'label' => __( 'password reset emailed', 'telepilot' ),
+		);
+	}
+
+	public function update_email( $user_id, $email ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
+		}
+
+		$email = sanitize_email( $email );
+		if ( ! is_email( $email ) ) {
+			return new WP_Error( 'telepilot_invalid_email', __( 'The email address is invalid.', 'telepilot' ) );
+		}
+
+		$existing = email_exists( $email );
+		if ( $existing && (int) $existing !== (int) $user_id ) {
+			return new WP_Error( 'telepilot_email_exists', __( 'That email address is already in use.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'user_email' => (string) $user->user_email,
+		);
+
+		$result = wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => $email,
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$this->bump_cache_version();
+		$updated = get_user_by( 'id', $user_id );
+
+		return array(
+			'user'         => $updated,
+			'before_state' => $before_state,
+			'after_state'  => array(
+				'user_email' => (string) $updated->user_email,
+			),
+			'label'        => __( 'email updated', 'telepilot' ),
+		);
+	}
+
+	public function update_display_name( $user_id, $display_name ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
+		}
+
+		$display_name = sanitize_text_field( $display_name );
+		if ( '' === $display_name ) {
+			return new WP_Error( 'telepilot_invalid_display_name', __( 'The display name cannot be empty.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'display_name' => (string) $user->display_name,
+		);
+
+		$result = wp_update_user(
+			array(
+				'ID'           => $user_id,
+				'display_name' => $display_name,
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$this->bump_cache_version();
+		$updated = get_user_by( 'id', $user_id );
+
+		return array(
+			'user'         => $updated,
+			'before_state' => $before_state,
+			'after_state'  => array(
+				'display_name' => (string) $updated->display_name,
+			),
+			'label'        => __( 'display name updated', 'telepilot' ),
+		);
+	}
+
+	public function send_welcome_email( $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
+		}
+
+		if ( ! function_exists( 'wp_send_new_user_notifications' ) ) {
+			return new WP_Error( 'telepilot_welcome_unsupported', __( 'WordPress welcome email notifications are not available on this site.', 'telepilot' ) );
+		}
+
+		wp_send_new_user_notifications( $user_id, 'user' );
+
+		return array(
+			'user'  => $user,
+			'label' => __( 'welcome email sent', 'telepilot' ),
+		);
+	}
+
+	public function delete_user( $user_id, $reassign_id = 0 ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
+		}
+
+		$reassign_id = absint( $reassign_id );
+		if ( $reassign_id && $reassign_id === $user_id ) {
+			return new WP_Error( 'telepilot_user_reassign_invalid', __( 'A user cannot be reassigned to themselves.', 'telepilot' ) );
+		}
+
+		if ( $reassign_id && ! get_user_by( 'id', $reassign_id ) ) {
+			return new WP_Error( 'telepilot_user_reassign_missing', __( 'The reassignment user could not be found.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'user_login'   => (string) $user->user_login,
+			'user_email'   => (string) $user->user_email,
+			'display_name' => (string) $user->display_name,
+			'roles'        => array_values( array_map( 'sanitize_text_field', (array) $user->roles ) ),
+		);
+
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+		$result = wp_delete_user( $user_id, $reassign_id ? $reassign_id : null );
+
+		if ( ! $result ) {
+			return new WP_Error( 'telepilot_user_delete_failed', __( 'WordPress could not delete that user.', 'telepilot' ) );
+		}
+
+		$this->bump_cache_version();
+
+		return array(
+			'before_state' => $before_state,
+			'after_state'  => array(
+				'reassign_to' => $reassign_id,
+			),
+			'label'        => __( 'deleted', 'telepilot' ),
 		);
 	}
 
@@ -362,7 +512,7 @@ class Telepilot_Users_Service {
 	private function query_users_page( $args, $page, $limit ) {
 		$page      = max( 1, absint( $page ) );
 		$limit     = max( 1, absint( $limit ) );
-		$cache_key = 'telepilot_users_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
+		$cache_key = 'telepilot_users_' . $this->get_cache_version() . '_' . md5( wp_json_encode( array( $args, $page, $limit ) ) );
 		$cached    = get_transient( $cache_key );
 
 		if ( is_array( $cached ) ) {
@@ -423,6 +573,14 @@ class Telepilot_Users_Service {
 		}
 
 		return true;
+	}
+
+	private function bump_cache_version() {
+		update_option( 'telepilot_users_cache_version', $this->get_cache_version() + 1, false );
+	}
+
+	private function get_cache_version() {
+		return max( 1, (int) get_option( 'telepilot_users_cache_version', 1 ) );
 	}
 
 	private function navigation_rows() {

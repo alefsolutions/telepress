@@ -19,6 +19,7 @@ class Telepilot_Telegram_Service {
 	private $media_service;
 	private $users_service;
 	private $plugins_service;
+	private $post_editor_service;
 	private $confirmation_service;
 
 	public function __construct() {
@@ -30,12 +31,14 @@ class Telepilot_Telegram_Service {
 		$this->media_service      = new Telepilot_Media_Service( $this->confirmation_service, $this->client );
 		$this->users_service      = new Telepilot_Users_Service( $this->confirmation_service );
 		$this->plugins_service    = new Telepilot_Plugins_Service( $this->confirmation_service );
+		$this->post_editor_service = new Telepilot_Post_Editor_Service();
 		$this->command_router     = new Telepilot_Command_Router(
 			new Telepilot_User_Linking_Service(),
 			$this->permission_service,
 			new Telepilot_Dashboard_Service(),
 			new Telepilot_Comments_Service( $this->confirmation_service ),
 			new Telepilot_Posts_Service( $this->confirmation_service ),
+			$this->post_editor_service,
 			new Telepilot_Pages_Service( $this->confirmation_service ),
 			$this->media_service,
 			$this->users_service,

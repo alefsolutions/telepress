@@ -122,11 +122,129 @@ class Telepilot_Media_Service {
 		$lines[] = '';
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media list' ) . ' ' . __( 'Show recent media items', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media search logo' ) . ' ' . __( 'Search media by title', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media details 123' ) . ' ' . __( 'Show media metadata and preview links', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media rename 123 New filename label' ) . ' ' . __( 'Rename a media item title', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media alt 123 Better alt text' ) . ' ' . __( 'Update attachment alt text', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media caption 123 New caption' ) . ' ' . __( 'Update attachment caption', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/media delete 123' ) . ' ' . __( 'Delete a media item after confirmation', 'telepilot' );
 		$lines[] = '';
 		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: send a photo or document directly to the bot in a private chat to upload it to WordPress.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
+	}
+
+	public function get_item_details( $attachment_id ) {
+		$item = get_post( $attachment_id );
+		if ( ! $item || 'attachment' !== $item->post_type ) {
+			return new WP_Error( 'telepilot_media_not_found', __( 'Media item not found.', 'telepilot' ) );
+		}
+
+		$file_path = get_attached_file( $attachment_id );
+		$metadata  = wp_get_attachment_metadata( $attachment_id );
+		$file_size = ( $file_path && file_exists( $file_path ) ) ? size_format( (int) filesize( $file_path ) ) : '';
+
+		return array(
+			'item'      => $item,
+			'title'     => get_the_title( $item ),
+			'url'       => wp_get_attachment_url( $attachment_id ),
+			'mime_type' => (string) get_post_mime_type( $item ),
+			'alt_text'  => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			'caption'   => (string) $item->post_excerpt,
+			'file_size' => $file_size,
+			'metadata'  => is_array( $metadata ) ? $metadata : array(),
+		);
+	}
+
+	public function rename( $attachment_id, $title ) {
+		$item = get_post( $attachment_id );
+		if ( ! $item || 'attachment' !== $item->post_type ) {
+			return new WP_Error( 'telepilot_media_not_found', __( 'Media item not found.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'title' => (string) $item->post_title,
+		);
+
+		$result = wp_update_post(
+			array(
+				'ID'         => $attachment_id,
+				'post_title' => sanitize_text_field( $title ),
+			),
+			true
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$this->bump_cache_version();
+		$updated = get_post( $attachment_id );
+
+		return array(
+			'item'         => $updated,
+			'before_state' => $before_state,
+			'after_state'  => array(
+				'title' => (string) $updated->post_title,
+			),
+			'label'        => __( 'renamed', 'telepilot' ),
+		);
+	}
+
+	public function update_alt_text( $attachment_id, $alt_text ) {
+		$item = get_post( $attachment_id );
+		if ( ! $item || 'attachment' !== $item->post_type ) {
+			return new WP_Error( 'telepilot_media_not_found', __( 'Media item not found.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'alt_text' => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+		);
+
+		update_post_meta( $attachment_id, '_wp_attachment_image_alt', sanitize_text_field( $alt_text ) );
+
+		return array(
+			'item'         => get_post( $attachment_id ),
+			'before_state' => $before_state,
+			'after_state'  => array(
+				'alt_text' => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			),
+			'label'        => __( 'alt text updated', 'telepilot' ),
+		);
+	}
+
+	public function update_caption( $attachment_id, $caption ) {
+		$item = get_post( $attachment_id );
+		if ( ! $item || 'attachment' !== $item->post_type ) {
+			return new WP_Error( 'telepilot_media_not_found', __( 'Media item not found.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'caption' => (string) $item->post_excerpt,
+		);
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $attachment_id,
+				'post_excerpt' => sanitize_textarea_field( $caption ),
+			),
+			true
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$this->bump_cache_version();
+		$updated = get_post( $attachment_id );
+
+		return array(
+			'item'         => $updated,
+			'before_state' => $before_state,
+			'after_state'  => array(
+				'caption' => (string) $updated->post_excerpt,
+			),
+			'label'        => __( 'caption updated', 'telepilot' ),
+		);
 	}
 
 	public function delete( $attachment_id ) {
@@ -186,6 +304,10 @@ class Telepilot_Media_Service {
 			}
 
 			$rows[] = array(
+				array(
+					'text'          => sprintf( __( 'Details [%d]', 'telepilot' ), $item->ID ),
+					'callback_data' => '/media details ' . (int) $item->ID,
+				),
 				array(
 					'text' => sprintf( __( 'Open [%d]', 'telepilot' ), $item->ID ),
 					'url'  => wp_get_attachment_url( $item->ID ),

@@ -34,6 +34,7 @@ require_once TELEPILOT_PATH . 'includes/class-confirmation-service.php';
 require_once TELEPILOT_PATH . 'includes/class-dashboard-service.php';
 require_once TELEPILOT_PATH . 'includes/class-comments-service.php';
 require_once TELEPILOT_PATH . 'includes/class-posts-service.php';
+require_once TELEPILOT_PATH . 'includes/class-post-editor-service.php';
 require_once TELEPILOT_PATH . 'includes/class-pages-service.php';
 require_once TELEPILOT_PATH . 'includes/class-media-service.php';
 require_once TELEPILOT_PATH . 'includes/class-users-service.php';

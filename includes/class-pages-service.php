@@ -114,15 +114,82 @@ class Telepilot_Pages_Service {
 		$lines[] = '';
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages list' ) . ' ' . __( 'Show recent pages', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages search about' ) . ' ' . __( 'Search pages', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages create About Us' ) . ' ' . __( 'Create a new draft page', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages title 123 New title' ) . ' ' . __( 'Update a page title', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages slug 123 about-us' ) . ' ' . __( 'Update a page slug', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages status 123 private' ) . ' ' . __( 'Set page status to draft, publish, or private', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages trashed' ) . ' ' . __( 'Show trashed pages', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages publish 123' ) . ' ' . __( 'Publish a page', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages draft 123' ) . ' ' . __( 'Move a page to draft', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages trash 123' ) . ' ' . __( 'Trash a page', 'telepilot' );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages restore 123' ) . ' ' . __( 'Restore a trashed page', 'telepilot' );
+		$lines[] = Telepilot_Telegram_Response_Builder::code( '/pages delete 123' ) . ' ' . __( 'Permanently delete a page after confirmation', 'telepilot' );
 		$lines[] = '';
 		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Published pages can be previewed directly from Telegram. Drafts are linked to wp-admin because browser preview for drafts normally requires WordPress authentication.', 'telepilot' ) );
 
 		return implode( "\n", $lines );
+	}
+
+	public function create_page( $title ) {
+		$page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'draft',
+				'post_title'  => sanitize_text_field( $title ),
+			),
+			true
+		);
+
+		if ( is_wp_error( $page_id ) ) {
+			return $page_id;
+		}
+
+		$this->bump_cache_version();
+
+		return array(
+			'post'  => get_post( $page_id ),
+			'label' => __( 'created as draft', 'telepilot' ),
+		);
+	}
+
+	public function update_title( $page_id, $title ) {
+		return $this->update_fields(
+			$page_id,
+			array(
+				'post_title' => sanitize_text_field( $title ),
+			),
+			__( 'title updated', 'telepilot' )
+		);
+	}
+
+	public function update_slug( $page_id, $slug ) {
+		$slug = sanitize_title( $slug );
+		if ( '' === $slug ) {
+			return new WP_Error( 'telepilot_page_invalid_slug', __( 'That page slug is invalid.', 'telepilot' ) );
+		}
+
+		return $this->update_fields(
+			$page_id,
+			array(
+				'post_name' => $slug,
+			),
+			__( 'slug updated', 'telepilot' )
+		);
+	}
+
+	public function set_status( $page_id, $status ) {
+		$allowed_statuses = array(
+			'draft'   => __( 'moved to draft', 'telepilot' ),
+			'publish' => __( 'published', 'telepilot' ),
+			'private' => __( 'made private', 'telepilot' ),
+		);
+
+		$status = sanitize_key( $status );
+		if ( ! isset( $allowed_statuses[ $status ] ) ) {
+			return new WP_Error( 'telepilot_page_invalid_status', __( 'That page status is not supported.', 'telepilot' ) );
+		}
+
+		return $this->update_status( $page_id, $status, $allowed_statuses[ $status ] );
 	}
 
 	public function publish( $page_id ) {
@@ -177,6 +244,31 @@ class Telepilot_Pages_Service {
 		);
 	}
 
+	public function delete( $page_id ) {
+		$page = get_post( $page_id );
+		if ( ! $page || 'page' !== $page->post_type ) {
+			return new WP_Error( 'telepilot_page_not_found', __( 'Page not found.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'title'  => get_the_title( $page ),
+			'status' => $page->post_status,
+			'slug'   => (string) $page->post_name,
+		);
+
+		$result = wp_delete_post( $page_id, true );
+		if ( ! $result ) {
+			return new WP_Error( 'telepilot_page_delete_failed', __( 'WordPress could not delete that page.', 'telepilot' ) );
+		}
+
+		$this->bump_cache_version();
+
+		return array(
+			'before_state' => $before_state,
+			'label'        => __( 'deleted', 'telepilot' ),
+		);
+	}
+
 	public function build_action_confirmation_keyboard( $page_id, $action, $telegram_user_id ) {
 		$token = $this->confirmation_service->create_token(
 			array(
@@ -227,6 +319,10 @@ class Telepilot_Pages_Service {
 				$row[] = array(
 					'text'          => sprintf( __( 'Restore [%d]', 'telepilot' ), $page_item->ID ),
 					'callback_data' => '/pages restore ' . (int) $page_item->ID,
+				);
+				$row[] = array(
+					'text'          => sprintf( __( 'Delete [%d]', 'telepilot' ), $page_item->ID ),
+					'callback_data' => '/pages delete ' . (int) $page_item->ID,
 				);
 			} else {
 				if ( 'publish' !== $page_item->post_status ) {
@@ -352,6 +448,47 @@ class Telepilot_Pages_Service {
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $page_id ),
 			'label'         => $label,
+		);
+	}
+
+	private function update_fields( $page_id, $fields, $label ) {
+		$page = get_post( $page_id );
+		if ( ! $page || 'page' !== $page->post_type ) {
+			return new WP_Error( 'telepilot_page_not_found', __( 'Page not found.', 'telepilot' ) );
+		}
+
+		$before_state = array(
+			'post_title' => (string) $page->post_title,
+			'post_name'  => (string) $page->post_name,
+			'post_status'=> (string) $page->post_status,
+		);
+
+		$result = wp_update_post(
+			array_merge(
+				array(
+					'ID' => $page_id,
+				),
+				$fields
+			),
+			true
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$updated = get_post( $page_id );
+		$this->bump_cache_version();
+
+		return array(
+			'post'         => $updated,
+			'before_state' => $before_state,
+			'after_state'  => array(
+				'post_title'  => (string) $updated->post_title,
+				'post_name'   => (string) $updated->post_name,
+				'post_status' => (string) $updated->post_status,
+			),
+			'label'        => $label,
 		);
 	}
 
