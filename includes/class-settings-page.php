@@ -102,6 +102,8 @@ class Telepilot_Settings_Page {
 		$last_delivery_failure    = Telepilot_Audit_Log_Repository::latest_log_by_action( 'telegram_response_failed' );
 		$dashboard_service        = new Telepilot_Dashboard_Service();
 		$dashboard_summary        = $dashboard_service->get_summary();
+		$job_counts               = Telepilot_Jobs_Repository::status_counts();
+		$queued_job_count         = (int) $job_counts['pending'] + (int) $job_counts['processing'];
 		$logo_url                 = $this->get_logo_url();
 		$product_name             = __( 'WP Telepilot', 'telepilot' );
 		$product_version          = TELEPILOT_VERSION;
@@ -375,9 +377,25 @@ class Telepilot_Settings_Page {
 									?>
 								</strong>
 							</li>
-							<li class="<?php echo empty( $diagnostics['queued_updates'] ) ? 'is-good' : 'is-warn'; ?>">
-								<span><?php esc_html_e( 'Queued background updates', 'telepilot' ); ?></span>
-								<strong><?php echo esc_html( (string) ( isset( $diagnostics['queued_updates'] ) ? (int) $diagnostics['queued_updates'] : 0 ) ); ?></strong>
+							<li class="<?php echo 0 === $queued_job_count ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Queued background jobs', 'telepilot' ); ?></span>
+								<strong><?php echo esc_html( (string) $queued_job_count ); ?></strong>
+							</li>
+							<li class="<?php echo empty( $job_counts['failed'] ) ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Failed background jobs', 'telepilot' ); ?></span>
+								<strong><?php echo esc_html( (string) $job_counts['failed'] ); ?></strong>
+							</li>
+							<li class="<?php echo ! empty( $diagnostics['last_worker_trigger_status'] ) && 'success' === $diagnostics['last_worker_trigger_status'] ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Last worker trigger', 'telepilot' ); ?></span>
+								<strong><?php echo ! empty( $diagnostics['last_worker_trigger_status'] ) ? esc_html( ucfirst( (string) $diagnostics['last_worker_trigger_status'] ) ) : esc_html__( 'Unknown', 'telepilot' ); ?></strong>
+							</li>
+							<li class="<?php echo empty( $diagnostics['last_background_job_status'] ) || 'success' === $diagnostics['last_background_job_status'] ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Last background job', 'telepilot' ); ?></span>
+								<strong><?php echo ! empty( $diagnostics['last_background_job_status'] ) ? esc_html( ucfirst( (string) $diagnostics['last_background_job_status'] ) ) : esc_html__( 'Unknown', 'telepilot' ); ?></strong>
+							</li>
+							<li class="<?php echo ! empty( $diagnostics['last_transport_self_test_status'] ) && 'success' === $diagnostics['last_transport_self_test_status'] ? 'is-good' : 'is-warn'; ?>">
+								<span><?php esc_html_e( 'Last transport self-test', 'telepilot' ); ?></span>
+								<strong><?php echo ! empty( $diagnostics['last_transport_self_test_at'] ) ? esc_html( $this->format_timestamp( (int) $diagnostics['last_transport_self_test_at'] ) ) : esc_html__( 'Never', 'telepilot' ); ?></strong>
 							</li>
 							<li class="<?php echo empty( $diagnostics['slow_commands'] ) ? 'is-good' : 'is-warn'; ?>">
 								<span><?php esc_html_e( 'Slow command count', 'telepilot' ); ?></span>
@@ -416,11 +434,32 @@ class Telepilot_Settings_Page {
 						<?php if ( ! empty( $diagnostics['last_link_attempt_detail'] ) ) : ?>
 							<p class="telepilot-inline-note"><?php echo esc_html( sprintf( __( 'Last link attempt detail: %s', 'telepilot' ), $diagnostics['last_link_attempt_detail'] ) ); ?></p>
 						<?php endif; ?>
+						<?php if ( ! empty( $diagnostics['last_worker_trigger_error'] ) ) : ?>
+							<p class="telepilot-inline-note"><?php echo esc_html( sprintf( __( 'Last worker trigger error: %s', 'telepilot' ), $diagnostics['last_worker_trigger_error'] ) ); ?></p>
+						<?php endif; ?>
+						<?php if ( ! empty( $diagnostics['last_background_job_error'] ) ) : ?>
+							<p class="telepilot-inline-note"><?php echo esc_html( sprintf( __( 'Last background job error: %s', 'telepilot' ), $diagnostics['last_background_job_error'] ) ); ?></p>
+						<?php endif; ?>
+						<?php if ( ! empty( $diagnostics['last_transport_self_test_status'] ) ) : ?>
+							<p class="telepilot-inline-note">
+								<?php
+								echo esc_html(
+									sprintf(
+										/* translators: 1: webhook status message, 2: worker status message. */
+										__( 'Last self-test results: webhook route %1$s; worker route %2$s.', 'telepilot' ),
+										! empty( $diagnostics['last_transport_self_test_webhook'] ) ? $diagnostics['last_transport_self_test_webhook'] : __( 'not checked', 'telepilot' ),
+										! empty( $diagnostics['last_transport_self_test_worker'] ) ? $diagnostics['last_transport_self_test_worker'] : __( 'not checked', 'telepilot' )
+									)
+								);
+								?>
+							</p>
+						<?php endif; ?>
 						<div class="telepilot-actions">
 							<form method="post">
 								<?php wp_nonce_field( 'telepilot_tools_actions', 'telepilot_tools_nonce' ); ?>
 								<button class="button button-secondary" type="submit" name="telepilot_poll_now" value="1"><?php esc_html_e( 'Poll Now', 'telepilot' ); ?></button>
 								<button class="button button-secondary" type="submit" name="telepilot_process_jobs_now" value="1"><?php esc_html_e( 'Process Queue', 'telepilot' ); ?></button>
+								<button class="button button-secondary" type="submit" name="telepilot_run_transport_self_test" value="1"><?php esc_html_e( 'Run Transport Self-Test', 'telepilot' ); ?></button>
 								<button class="button button-secondary" type="submit" name="telepilot_refresh_webhook_status" value="1"><?php esc_html_e( 'Refresh Webhook Status', 'telepilot' ); ?></button>
 								<button class="button button-secondary" type="submit" name="telepilot_flush_updates" value="1"><?php esc_html_e( 'Flush Old Updates', 'telepilot' ); ?></button>
 							</form>
@@ -957,6 +996,24 @@ class Telepilot_Settings_Page {
 					/* translators: %d: number of jobs claimed for processing. */
 					__( 'WP Telepilot processed %d queued background job(s).', 'telepilot' ),
 					is_array( $jobs ) ? count( $jobs ) : 0
+				)
+			);
+			return;
+		}
+
+		if ( ! empty( $_POST['telepilot_run_transport_self_test'] ) ) {
+			$telegram = new Telepilot_Telegram_Service();
+			$result   = $telegram->run_transport_self_test();
+			$webhook  = ! empty( $result['results']['webhook'] ) ? $result['results']['webhook'] : array();
+			$worker   = ! empty( $result['results']['worker'] ) ? $result['results']['worker'] : array();
+
+			$this->set_tools_notice(
+				! empty( $result['ok'] ) ? 'success' : 'error',
+				sprintf(
+					/* translators: 1: webhook route result, 2: worker route result. */
+					__( 'Transport self-test finished. Webhook route: %1$s. Worker route: %2$s.', 'telepilot' ),
+					! empty( $webhook['message'] ) ? $webhook['message'] : __( 'Unknown', 'telepilot' ),
+					! empty( $worker['message'] ) ? $worker['message'] : __( 'Unknown', 'telepilot' )
 				)
 			);
 			return;

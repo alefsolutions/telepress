@@ -10,6 +10,7 @@ class Telepilot_Telegram_Service {
 	const STALE_UPDATE_WINDOW_OPTION = 'stale_update_window';
 	const DEFAULT_STALE_WINDOW       = 180;
 	const POLL_LOCK_TRANSIENT        = 'telepilot_poll_lock';
+	const QUEUE_FALLBACK_DELAY       = 15;
 	private $client;
 	private $user_resolver;
 	private $permission_service;
@@ -72,11 +73,9 @@ class Telepilot_Telegram_Service {
 			array(
 				'last_queued_at'      => time(),
 				'last_queued_command' => ! empty( $command['name'] ) ? $command['name'] : '',
-			),
-			array(
-				'queued_updates' => 'duplicate' === $queue_result ? 0 : 1,
 			)
 		);
+		$this->refresh_queue_diagnostics();
 
 		if ( 'duplicate' !== $queue_result ) {
 			$this->schedule_job_processing();
@@ -128,23 +127,28 @@ class Telepilot_Telegram_Service {
 			return false;
 		}
 
-		if ( '/posts' === $command['name'] && 'search' === $first_arg ) {
-			return true;
-		}
+		return $this->should_defer_read_command(
+			! empty( $command['name'] ) ? (string) $command['name'] : '',
+			$first_arg
+		);
+	}
 
-		if ( '/media' === $command['name'] && 'search' === $first_arg ) {
-			return true;
-		}
+	private function should_defer_read_command( $command_name, $first_arg ) {
+		$subcommand = '' !== $first_arg ? $first_arg : 'default';
+		$deferred   = array(
+			'/site'      => array( 'default' ),
+			'/dashboard' => array( 'default' ),
+			'/comments'  => array( 'default', 'pending' ),
+			'/posts'     => array( 'default', 'list', 'latest', 'drafts', 'search', 'stats' ),
+			'/pages'     => array( 'default', 'list', 'search', 'trashed' ),
+			'/media'     => array( 'default', 'list', 'recent', 'search' ),
+			'/users'     => array( 'default', 'list', 'search' ),
+			'/plugins'   => array( 'default', 'list', 'search', 'updates' ),
+			'/categories' => array( 'default', 'list', 'search' ),
+			'/tags'      => array( 'default', 'list', 'search' ),
+		);
 
-		if ( '/pages' === $command['name'] && 'search' === $first_arg ) {
-			return true;
-		}
-
-		if ( '/plugins' === $command['name'] && in_array( $first_arg, array( 'search', 'updates' ), true ) ) {
-			return true;
-		}
-
-		return false;
+		return ! empty( $deferred[ $command_name ] ) && in_array( $subcommand, $deferred[ $command_name ], true );
 	}
 
 	private function send_processing_placeholder( $update, $command ) {
@@ -205,6 +209,7 @@ class Telepilot_Telegram_Service {
 
 	private function schedule_job_processing() {
 		$worker_result = $this->trigger_async_worker();
+		$fallback_scheduled = false;
 
 		$this->update_diagnostics(
 			array(
@@ -215,10 +220,20 @@ class Telepilot_Telegram_Service {
 		);
 
 		if ( ! wp_next_scheduled( 'telepilot_process_jobs' ) ) {
-			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'telepilot_process_jobs' );
+			wp_schedule_single_event( time() + self::QUEUE_FALLBACK_DELAY, 'telepilot_process_jobs' );
+			$fallback_scheduled = true;
 		}
 
-		if ( is_wp_error( $worker_result ) && function_exists( 'spawn_cron' ) ) {
+		if ( is_wp_error( $worker_result ) ) {
+			$this->update_diagnostics(
+				array(
+					'last_worker_fallback_at'    => time(),
+					'last_worker_fallback_delay' => self::QUEUE_FALLBACK_DELAY,
+				)
+			);
+		}
+
+		if ( ( $fallback_scheduled || is_wp_error( $worker_result ) ) && function_exists( 'spawn_cron' ) ) {
 			spawn_cron();
 		}
 	}
@@ -227,6 +242,7 @@ class Telepilot_Telegram_Service {
 		$jobs = Telepilot_Jobs_Repository::claim_pending_jobs( $limit );
 
 		if ( empty( $jobs ) ) {
+			$this->refresh_queue_diagnostics();
 			return array();
 		}
 
@@ -239,9 +255,6 @@ class Telepilot_Telegram_Service {
 					array(
 						'last_background_job_at'     => time(),
 						'last_background_job_status' => 'failed',
-					),
-					array(
-						'queued_updates' => -1,
 					)
 				);
 				continue;
@@ -270,9 +283,6 @@ class Telepilot_Telegram_Service {
 						'last_background_job_at'     => time(),
 						'last_background_job_status' => 'failed',
 						'last_background_job_error'  => (string) $result['dispatch_error'],
-					),
-					array(
-						'queued_updates' => -1,
 					)
 				);
 				continue;
@@ -284,14 +294,77 @@ class Telepilot_Telegram_Service {
 					'last_background_job_at'     => time(),
 					'last_background_job_status' => 'success',
 					'last_background_job_error'  => '',
-				),
-				array(
-					'queued_updates' => -1,
 				)
 			);
 		}
 
+		$this->refresh_queue_diagnostics();
+
 		return $jobs;
+	}
+
+	public function run_transport_self_test() {
+		$settings      = get_option( 'telepilot_settings', array() );
+		$webhook_url   = rest_url( Telepilot_REST_Webhook_Controller::REST_NAMESPACE . Telepilot_REST_Webhook_Controller::ROUTE );
+		$worker_url    = rest_url( Telepilot_REST_Webhook_Controller::REST_NAMESPACE . Telepilot_REST_Webhook_Controller::WORKER_ROUTE );
+		$webhook_test  = $this->perform_route_self_test(
+			$webhook_url,
+			array(
+				'headers'       => array(
+					'Content-Type'                        => 'application/json',
+					'X-Telegram-Bot-Api-Secret-Token'     => isset( $settings['webhook_secret'] ) ? (string) $settings['webhook_secret'] : '',
+				),
+				'body'          => wp_json_encode(
+					array(
+						'update_id' => time(),
+					)
+				),
+				'success_codes' => array( 200, 202 ),
+			)
+		);
+		$worker_secret = isset( $settings['worker_secret'] ) ? (string) $settings['worker_secret'] : '';
+		$worker_test   = '' === $worker_secret
+			? array(
+				'ok'          => false,
+				'status_code' => 0,
+				'duration_ms' => 0,
+				'message'     => __( 'Worker secret is missing.', 'telepilot' ),
+			)
+			: $this->perform_route_self_test(
+				$worker_url,
+				array(
+					'headers'       => array(
+						'X-Telepilot-Worker-Secret' => $worker_secret,
+					),
+					'body'          => array(
+						'limit' => 1,
+					),
+					'success_codes' => array( 200 ),
+				)
+			);
+
+		$overall_ok = ! empty( $webhook_test['ok'] ) && ! empty( $worker_test['ok'] );
+
+		$this->update_diagnostics(
+			array(
+				'last_transport_self_test_at'          => time(),
+				'last_transport_self_test_status'      => $overall_ok ? 'success' : 'failed',
+				'last_transport_self_test_webhook'     => isset( $webhook_test['message'] ) ? (string) $webhook_test['message'] : '',
+				'last_transport_self_test_worker'      => isset( $worker_test['message'] ) ? (string) $worker_test['message'] : '',
+				'last_webhook_self_test_duration_ms'   => isset( $webhook_test['duration_ms'] ) ? (int) $webhook_test['duration_ms'] : 0,
+				'last_worker_self_test_duration_ms'    => isset( $worker_test['duration_ms'] ) ? (int) $worker_test['duration_ms'] : 0,
+				'last_webhook_self_test_status_code'   => isset( $webhook_test['status_code'] ) ? (int) $webhook_test['status_code'] : 0,
+				'last_worker_self_test_status_code'    => isset( $worker_test['status_code'] ) ? (int) $worker_test['status_code'] : 0,
+			)
+		);
+
+		return array(
+			'ok'      => $overall_ok,
+			'results' => array(
+				'webhook' => $webhook_test,
+				'worker'  => $worker_test,
+			),
+		);
 	}
 
 	private function process_update( $update, $transport = 'webhook', $options = array() ) {
@@ -734,15 +807,16 @@ class Telepilot_Telegram_Service {
 
 		$response = wp_remote_post(
 			rest_url( Telepilot_REST_Webhook_Controller::REST_NAMESPACE . Telepilot_REST_Webhook_Controller::WORKER_ROUTE ),
-			array(
-				'timeout'  => 1,
-				'blocking' => false,
-				'headers'  => array(
+			$this->build_loopback_request_args(
+				rest_url( Telepilot_REST_Webhook_Controller::REST_NAMESPACE . Telepilot_REST_Webhook_Controller::WORKER_ROUTE ),
+				1,
+				false,
+				array(
 					'X-Telepilot-Worker-Secret' => $secret,
 				),
-				'body'     => array(
+				array(
 					'limit' => max( 1, absint( $limit ) ),
-				),
+				)
 			)
 		);
 
@@ -926,6 +1000,78 @@ class Telepilot_Telegram_Service {
 		}
 
 		update_option( self::DIAGNOSTICS_OPTION, $diagnostics, false );
+	}
+
+	private function refresh_queue_diagnostics() {
+		$counts = Telepilot_Jobs_Repository::status_counts();
+
+		$this->update_diagnostics(
+			array(
+				'queued_updates'  => (int) $counts['pending'] + (int) $counts['processing'],
+				'failed_jobs'     => (int) $counts['failed'],
+				'processing_jobs' => (int) $counts['processing'],
+			)
+		);
+	}
+
+	private function perform_route_self_test( $url, $args ) {
+		$start_time   = microtime( true );
+		$response     = wp_remote_post(
+			$url,
+			$this->build_loopback_request_args(
+				$url,
+				8,
+				true,
+				! empty( $args['headers'] ) ? $args['headers'] : array(),
+				isset( $args['body'] ) ? $args['body'] : array()
+			)
+		);
+		$duration_ms  = (int) round( max( 0, microtime( true ) - $start_time ) * 1000 );
+		$success_codes = ! empty( $args['success_codes'] ) && is_array( $args['success_codes'] ) ? $args['success_codes'] : array( 200 );
+
+		if ( is_wp_error( $response ) ) {
+			return array(
+				'ok'          => false,
+				'status_code' => 0,
+				'duration_ms' => $duration_ms,
+				'message'     => $response->get_error_message(),
+			);
+		}
+
+		$status_code = (int) wp_remote_retrieve_response_code( $response );
+		$body        = json_decode( wp_remote_retrieve_body( $response ), true );
+		$message     = is_array( $body ) && ! empty( $body['message'] )
+			? (string) $body['message']
+			: sprintf( __( 'HTTP %d response received.', 'telepilot' ), $status_code );
+
+		return array(
+			'ok'          => in_array( $status_code, $success_codes, true ),
+			'status_code' => $status_code,
+			'duration_ms' => $duration_ms,
+			'message'     => $message,
+		);
+	}
+
+	private function build_loopback_request_args( $url, $timeout, $blocking, $headers, $body ) {
+		$args = array(
+			'timeout'  => max( 1, (int) $timeout ),
+			'blocking' => (bool) $blocking,
+			'headers'  => is_array( $headers ) ? $headers : array(),
+			'body'     => $body,
+		);
+
+		if ( $this->is_local_loopback_url( $url ) ) {
+			$args['sslverify'] = (bool) apply_filters( 'https_local_ssl_verify', false );
+		}
+
+		return $args;
+	}
+
+	private function is_local_loopback_url( $url ) {
+		$target_host = wp_parse_url( (string) $url, PHP_URL_HOST );
+		$site_host   = wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+
+		return ! empty( $target_host ) && ! empty( $site_host ) && strtolower( (string) $target_host ) === strtolower( (string) $site_host );
 	}
 
 	private function record_command_timing( $command_name, $transport, $start_time, $dispatch_error = '' ) {

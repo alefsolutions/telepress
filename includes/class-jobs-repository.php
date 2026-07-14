@@ -158,6 +158,31 @@ class Telepilot_Jobs_Repository {
 		);
 	}
 
+	public static function status_counts() {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			'SELECT status, COUNT(*) AS total FROM ' . self::table_name() . ' GROUP BY status',
+			ARRAY_A
+		);
+
+		$counts = array(
+			'pending'    => 0,
+			'processing' => 0,
+			'failed'     => 0,
+			'complete'   => 0,
+		);
+
+		foreach ( $rows as $row ) {
+			$status = ! empty( $row['status'] ) ? sanitize_key( (string) $row['status'] ) : '';
+			if ( isset( $counts[ $status ] ) ) {
+				$counts[ $status ] = (int) $row['total'];
+			}
+		}
+
+		return $counts;
+	}
+
 	private static function update_status( $job_id, $status, $error_message ) {
 		global $wpdb;
 
