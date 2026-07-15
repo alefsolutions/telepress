@@ -38,10 +38,10 @@ class Telepilot_Notifications_Command_Service {
 
 	public function render_page_message( $result ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( __( 'Notifications', 'telepilot' ) ) . "\n\n" . __( 'No notification options were found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'telepilot' ) ) ) . "\n\n" . __( 'No notification options were found.', 'telepilot' );
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( __( 'Notifications', 'telepilot' ) ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'telepilot' ) ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
@@ -50,11 +50,14 @@ class Telepilot_Notifications_Command_Service {
 			$blocks[] = implode(
 				"\n",
 				array(
-					sprintf(
-						__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
-						isset( $item['list_number'] ) ? (int) $item['list_number'] : 0,
-						Telepilot_Telegram_Response_Builder::escape( $item['label'] ),
-						Telepilot_Telegram_Response_Builder::escape( $item['enabled'] ? __( 'enabled', 'telepilot' ) : __( 'disabled', 'telepilot' ) )
+					Telepilot_Telegram_Response_Builder::label(
+						'notifications',
+						sprintf(
+							__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
+							isset( $item['list_number'] ) ? (int) $item['list_number'] : 0,
+							Telepilot_Telegram_Response_Builder::escape( $item['label'] ),
+							Telepilot_Telegram_Response_Builder::escape( $item['enabled'] ? __( 'enabled', 'telepilot' ) : __( 'disabled', 'telepilot' ) )
+						)
 					),
 					sprintf(
 						__( 'Key: [%s]', 'telepilot' ),
@@ -80,7 +83,7 @@ class Telepilot_Notifications_Command_Service {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array_merge(
 				array(
-					Telepilot_Telegram_Response_Builder::bold( __( 'Notification Commands', 'telepilot' ) ),
+					Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notification Commands', 'telepilot' ) ) ),
 				),
 				$entries
 			)
@@ -133,8 +136,10 @@ class Telepilot_Notifications_Command_Service {
 			$rows[]      = array(
 				array(
 					'text'          => sprintf(
-						$item['enabled'] ? __( 'Disable [%d]', 'telepilot' ) : __( 'Enable [%d]', 'telepilot' ),
-						$list_number
+						Telepilot_Telegram_Response_Builder::label(
+							$item['enabled'] ? 'disable' : 'enable',
+							sprintf( $item['enabled'] ? __( 'Disable [%d]', 'telepilot' ) : __( 'Enable [%d]', 'telepilot' ), $list_number )
+						)
 					),
 					'callback_data' => '/notifications ' . ( $item['enabled'] ? 'disable ' : 'enable ' ) . $item['key'],
 				),
@@ -174,14 +179,14 @@ class Telepilot_Notifications_Command_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
 				'callback_data' => '/notifications list page:' . ( $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
 				'callback_data' => '/notifications list page:' . ( $page + 1 ),
 			);
 		}
@@ -193,11 +198,11 @@ class Telepilot_Notifications_Command_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Settings', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Settings', 'telepilot' ) ),
 					'callback_data' => '/settings',
 				),
 				array(
-					'text'          => __( 'Menu', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 			),

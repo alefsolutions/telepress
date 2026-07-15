@@ -219,7 +219,7 @@ class Telepilot_Command_Router {
 			$commands[] = '';
 		}
 
-		$commands[] = Telepilot_Telegram_Response_Builder::bold( __( 'Core Commands', 'telepilot' ) );
+		$commands[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Core Commands', 'telepilot' ) ) );
 		$commands[] = Telepilot_Telegram_Response_Builder::code( '/start' ) . ' ' . __( 'Onboarding', 'telepilot' );
 		$commands[] = Telepilot_Telegram_Response_Builder::code( '/help' ) . ' ' . __( 'Show commands', 'telepilot' );
 		$commands[] = Telepilot_Telegram_Response_Builder::code( '/menu' ) . ' ' . __( 'Open the command hub', 'telepilot' );
@@ -299,7 +299,7 @@ class Telepilot_Command_Router {
 		}
 
 		return Telepilot_Telegram_Response_Builder::success_html(
-			Telepilot_Telegram_Response_Builder::bold( __( 'WP Telepilot Menu', 'telepilot' ) ) .
+			Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'menu', __( 'WP Telepilot Menu', 'telepilot' ) ) ) .
 			"\n\n" .
 			__(
 				'Choose an area below. Only the sections your linked WordPress account can access are shown here.',
@@ -528,7 +528,7 @@ class Telepilot_Command_Router {
 		return Telepilot_Telegram_Response_Builder::success_html(
 			Telepilot_Telegram_Response_Builder::join_blocks(
 				array(
-					Telepilot_Telegram_Response_Builder::bold( __( 'Current Chat Details', 'telepilot' ) ),
+					Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'link', __( 'Current Chat Details', 'telepilot' ) ) ),
 					implode( "\n", $detail_lines ),
 					$linked_status,
 					__( 'Add the chat ID to Allowed Chat IDs if you want this conversation to be authorized.', 'telepilot' ),
@@ -3316,11 +3316,11 @@ class Telepilot_Command_Router {
 		$rows   = array();
 		$rows[] = array(
 			array(
-				'text'          => __( 'Site Overview', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site Overview', 'telepilot' ) ),
 				'callback_data' => '/site',
 			),
 			array(
-				'text'          => __( 'Menu', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 				'callback_data' => '/menu',
 			),
 		);
@@ -3329,13 +3329,13 @@ class Telepilot_Command_Router {
 			$content_row = array();
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'edit_posts' ) ) {
 				$content_row[] = array(
-					'text'          => __( 'Posts', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'posts', __( 'Posts', 'telepilot' ) ),
 					'callback_data' => '/posts list',
 				);
 			}
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'edit_pages' ) ) {
 				$content_row[] = array(
-					'text'          => __( 'Pages', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'pages', __( 'Pages', 'telepilot' ) ),
 					'callback_data' => '/pages list',
 				);
 			}
@@ -3346,13 +3346,13 @@ class Telepilot_Command_Router {
 			$editorial_row = array();
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'moderate_comments' ) ) {
 				$editorial_row[] = array(
-					'text'          => __( 'Comments', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comments', 'telepilot' ) ),
 					'callback_data' => '/comments pending',
 				);
 			}
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'upload_files' ) ) {
 				$editorial_row[] = array(
-					'text'          => __( 'Media', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'media', __( 'Media', 'telepilot' ) ),
 					'callback_data' => '/media list',
 				);
 			}
@@ -3363,11 +3363,11 @@ class Telepilot_Command_Router {
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'manage_categories' ) ) {
 				$rows[] = array(
 					array(
-						'text'          => __( 'Categories', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'categories', __( 'Categories', 'telepilot' ) ),
 						'callback_data' => '/categories list',
 					),
 					array(
-						'text'          => __( 'Tags', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'tags', __( 'Tags', 'telepilot' ) ),
 						'callback_data' => '/tags list',
 					),
 				);
@@ -3376,13 +3376,13 @@ class Telepilot_Command_Router {
 			$admin_tools_row = array();
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'list_users' ) ) {
 				$admin_tools_row[] = array(
-					'text'          => __( 'Users', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'users', __( 'Users', 'telepilot' ) ),
 					'callback_data' => '/users list',
 				);
 			}
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'activate_plugins' ) || $this->permission_service->user_can( $identity['wp_user'], 'update_plugins' ) || $this->permission_service->user_can( $identity['wp_user'], 'delete_plugins' ) ) {
 				$admin_tools_row[] = array(
-					'text'          => __( 'Plugins', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugins', 'telepilot' ) ),
 					'callback_data' => '/plugins list',
 				);
 			}
@@ -3393,11 +3393,11 @@ class Telepilot_Command_Router {
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'manage_options' ) ) {
 				$rows[] = array(
 					array(
-						'text'          => __( 'Notifications', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'telepilot' ) ),
 						'callback_data' => '/notifications list',
 					),
 					array(
-						'text'          => __( 'Settings', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Settings', 'telepilot' ) ),
 						'callback_data' => '/settings',
 					),
 				);
@@ -3405,14 +3405,14 @@ class Telepilot_Command_Router {
 
 			$admin_row = array(
 				array(
-					'text' => __( 'Open wp-admin', 'telepilot' ),
+					'text' => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Open wp-admin', 'telepilot' ) ),
 					'url'  => admin_url(),
 				),
 			);
 
 			if ( $this->permission_service->user_can( $identity['wp_user'], 'manage_options' ) ) {
 				$admin_row[] = array(
-					'text' => __( 'Settings', 'telepilot' ),
+					'text' => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Settings', 'telepilot' ) ),
 					'url'  => admin_url( 'admin.php?page=telepilot' ),
 				);
 			}

@@ -136,20 +136,23 @@ class Telepilot_Posts_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No posts matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', $heading ) ) . "\n\n" . __( 'No posts matched that request.', 'telepilot' );
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
 
 		foreach ( $result['items'] as $post ) {
-			$blocks[] = sprintf(
-				__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
-				$post->ID,
-				Telepilot_Telegram_Response_Builder::escape( get_the_title( $post ) ),
-				Telepilot_Telegram_Response_Builder::escape( $post->post_status )
+			$blocks[] = Telepilot_Telegram_Response_Builder::label(
+				'posts',
+				sprintf(
+					__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
+					$post->ID,
+					Telepilot_Telegram_Response_Builder::escape( get_the_title( $post ) ),
+					Telepilot_Telegram_Response_Builder::escape( $post->post_status )
+				)
 			);
 		}
 
@@ -175,7 +178,7 @@ class Telepilot_Posts_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( __( 'Posts Commands', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', __( 'Posts Commands', 'telepilot' ) ) ),
 				Telepilot_Telegram_Response_Builder::code( '/posts list' ) . ' ' . __( 'Show recent posts', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/posts drafts' ) . ' ' . __( 'Show draft posts', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/posts search keyword' ) . ' ' . __( 'Search posts', 'telepilot' ),
@@ -208,11 +211,11 @@ class Telepilot_Posts_Service {
 			if ( 'trash' === $post->post_status || 'trashed' === $subcommand ) {
 				$rows[] = array(
 					array(
-						'text'          => sprintf( __( 'Restore [%d]', 'telepilot' ), $post->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Restore [%d]', 'telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts restore ' . (int) $post->ID,
 					),
 					array(
-						'text'          => sprintf( __( 'Delete [%d]', 'telepilot' ), $post->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts delete ' . (int) $post->ID,
 					),
 				);
@@ -222,15 +225,15 @@ class Telepilot_Posts_Service {
 			if ( 'publish' === $post->post_status ) {
 				$rows[] = array(
 					array(
-						'text'          => sprintf( __( 'Open Editor [%d]', 'telepilot' ), $post->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'edit', sprintf( __( 'Open Editor [%d]', 'telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts open ' . (int) $post->ID,
 					),
 					array(
-						'text'          => sprintf( __( 'Draft [%d]', 'telepilot' ), $post->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'draft', sprintf( __( 'Draft [%d]', 'telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts draft ' . (int) $post->ID,
 					),
 					array(
-						'text'          => sprintf( __( 'Trash [%d]', 'telepilot' ), $post->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts trash ' . (int) $post->ID,
 					),
 				);
@@ -239,15 +242,15 @@ class Telepilot_Posts_Service {
 
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Open Editor [%d]', 'telepilot' ), $post->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'edit', sprintf( __( 'Open Editor [%d]', 'telepilot' ), $post->ID ) ),
 					'callback_data' => '/posts open ' . (int) $post->ID,
 				),
 				array(
-					'text'          => sprintf( __( 'Publish [%d]', 'telepilot' ), $post->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'publish', sprintf( __( 'Publish [%d]', 'telepilot' ), $post->ID ) ),
 					'callback_data' => '/posts publish ' . (int) $post->ID,
 				),
 				array(
-					'text'          => sprintf( __( 'Trash [%d]', 'telepilot' ), $post->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'telepilot' ), $post->ID ) ),
 					'callback_data' => '/posts trash ' . (int) $post->ID,
 				),
 			);
@@ -273,14 +276,14 @@ class Telepilot_Posts_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -636,11 +639,11 @@ class Telepilot_Posts_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

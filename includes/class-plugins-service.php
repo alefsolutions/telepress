@@ -27,10 +27,10 @@ class Telepilot_Plugins_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No plugins matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', $heading ) ) . "\n\n" . __( 'No plugins matched that request.', 'telepilot' );
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
@@ -38,12 +38,15 @@ class Telepilot_Plugins_Service {
 		foreach ( $result['items'] as $plugin ) {
 			$status = $plugin['is_active'] ? __( 'active', 'telepilot' ) : __( 'inactive', 'telepilot' );
 			$line   = array(
-				sprintf(
-					__( '[%1$d] %2$s [%3$s] v%4$s', 'telepilot' ),
-					isset( $plugin['list_number'] ) ? (int) $plugin['list_number'] : 0,
-					Telepilot_Telegram_Response_Builder::escape( $plugin['name'] ),
-					Telepilot_Telegram_Response_Builder::escape( $status ),
-					Telepilot_Telegram_Response_Builder::escape( $plugin['version'] )
+				Telepilot_Telegram_Response_Builder::label(
+					'plugins',
+					sprintf(
+						__( '[%1$d] %2$s [%3$s] v%4$s', 'telepilot' ),
+						isset( $plugin['list_number'] ) ? (int) $plugin['list_number'] : 0,
+						Telepilot_Telegram_Response_Builder::escape( $plugin['name'] ),
+						Telepilot_Telegram_Response_Builder::escape( $status ),
+						Telepilot_Telegram_Response_Builder::escape( $plugin['version'] )
+					)
 				),
 				sprintf(
 					__( 'Identifier: [%s]', 'telepilot' ),
@@ -68,12 +71,12 @@ class Telepilot_Plugins_Service {
 
 	public function render_details_message( $plugin ) {
 		if ( empty( $plugin ) || ! is_array( $plugin ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( __( 'Plugin Details', 'telepilot' ) ) . "\n\n" . __( 'Plugin not found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugin Details', 'telepilot' ) ) ) . "\n\n" . __( 'Plugin not found.', 'telepilot' );
 		}
 
 		$status = $plugin['is_active'] ? __( 'Active', 'telepilot' ) : __( 'Inactive', 'telepilot' );
 		$lines  = array(
-			Telepilot_Telegram_Response_Builder::bold( __( 'Plugin Details', 'telepilot' ) ),
+			Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugin Details', 'telepilot' ) ) ),
 			'',
 			sprintf( __( 'Name: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['name'] ) ),
 			sprintf( __( 'Identifier: [%s]', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['identifier'] ) ),
@@ -100,7 +103,7 @@ class Telepilot_Plugins_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( __( 'Plugins Commands', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugins Commands', 'telepilot' ) ) ),
 				Telepilot_Telegram_Response_Builder::code( '/plugins list' ) . ' ' . __( 'Show installed plugins', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/plugins search seo' ) . ' ' . __( 'Search installed plugins', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/plugins updates' ) . ' ' . __( 'Show plugins with available updates', 'telepilot' ),
@@ -140,7 +143,7 @@ class Telepilot_Plugins_Service {
 			$list_number = isset( $plugin['list_number'] ) ? (int) $plugin['list_number'] : 0;
 			$row         = array(
 				array(
-					'text'          => sprintf( __( 'Details [%d]', 'telepilot' ), $list_number ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins details ' . $identifier,
 				),
 			);
@@ -152,23 +155,23 @@ class Telepilot_Plugins_Service {
 
 			if ( ! empty( $plugin['update_version'] ) ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Update [%d]', 'telepilot' ), $list_number ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'update', sprintf( __( 'Update [%d]', 'telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins update ' . $identifier,
 				);
 			} elseif ( $plugin['is_active'] ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Deactivate [%d]', 'telepilot' ), $list_number ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'disable', sprintf( __( 'Deactivate [%d]', 'telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins deactivate ' . $identifier,
 				);
 			} else {
 				$row[] = array(
-					'text'          => sprintf( __( 'Activate [%d]', 'telepilot' ), $list_number ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'enable', sprintf( __( 'Activate [%d]', 'telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins activate ' . $identifier,
 				);
 			}
 
 			$row[] = array(
-				'text'          => sprintf( __( 'Delete [%d]', 'telepilot' ), $list_number ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $list_number ) ),
 				'callback_data' => '/plugins delete ' . $identifier,
 			);
 
@@ -579,14 +582,14 @@ class Telepilot_Plugins_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -610,11 +613,11 @@ class Telepilot_Plugins_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

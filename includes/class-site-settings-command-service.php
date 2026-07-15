@@ -29,7 +29,7 @@ class Telepilot_Site_Settings_Command_Service {
 
 	public function render_summary_message( $summary ) {
 		$lines   = array();
-		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'WP Telepilot Settings', 'telepilot' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'settings', __( 'WP Telepilot Settings', 'telepilot' ) ) );
 		$lines[] = '';
 		$lines[] = sprintf( __( 'Admin: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::link( __( 'Open settings', 'telepilot' ), $summary['settings_url'] ) );
 		$lines[] = sprintf( __( 'Transport: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( ucfirst( (string) $summary['transport_mode'] ) ) );
@@ -54,7 +54,7 @@ class Telepilot_Site_Settings_Command_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( __( 'Settings Commands', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Settings Commands', 'telepilot' ) ) ),
 				Telepilot_Telegram_Response_Builder::code( '/settings' ) . ' ' . __( 'Show the current WP Telepilot and safe site settings summary', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/settings title My Site' ) . ' ' . __( 'Update the site title', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/settings tagline Telegram-first operations' ) . ' ' . __( 'Update the site tagline', 'telepilot' ),
@@ -82,7 +82,7 @@ class Telepilot_Site_Settings_Command_Service {
 			case 'timezone':
 				return Telepilot_Telegram_Response_Builder::join_blocks(
 					array(
-						Telepilot_Telegram_Response_Builder::bold( __( 'Timezone Help', 'telepilot' ) ),
+						Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Timezone Help', 'telepilot' ) ) ),
 						__( 'Use a valid PHP timezone identifier from the WordPress timezone list.', 'telepilot' ),
 						Telepilot_Telegram_Response_Builder::code( '/settings timezone Pacific/Port_Moresby' ),
 						Telepilot_Telegram_Response_Builder::code( '/settings timezone Australia/Sydney' ),
@@ -92,7 +92,7 @@ class Telepilot_Site_Settings_Command_Service {
 			case 'date-format':
 				return Telepilot_Telegram_Response_Builder::join_blocks(
 					array(
-						Telepilot_Telegram_Response_Builder::bold( __( 'Date Format Help', 'telepilot' ) ),
+						Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Date Format Help', 'telepilot' ) ) ),
 						__( 'Use a standard WordPress/PHP date format string.', 'telepilot' ),
 						Telepilot_Telegram_Response_Builder::code( '/settings date-format F j, Y' ),
 						Telepilot_Telegram_Response_Builder::code( '/settings date-format Y-m-d' ),
@@ -102,7 +102,7 @@ class Telepilot_Site_Settings_Command_Service {
 			case 'time-format':
 				return Telepilot_Telegram_Response_Builder::join_blocks(
 					array(
-						Telepilot_Telegram_Response_Builder::bold( __( 'Time Format Help', 'telepilot' ) ),
+						Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Time Format Help', 'telepilot' ) ) ),
 						__( 'Use a standard WordPress/PHP time format string.', 'telepilot' ),
 						Telepilot_Telegram_Response_Builder::code( '/settings time-format g:i a' ),
 						Telepilot_Telegram_Response_Builder::code( '/settings time-format H:i' ),
@@ -118,17 +118,17 @@ class Telepilot_Site_Settings_Command_Service {
 			array(
 				array(
 					array(
-						'text'          => __( 'Notifications', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'telepilot' ) ),
 						'callback_data' => '/notifications list',
 					),
 					array(
-						'text'          => __( 'Site', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
 						'callback_data' => '/site',
 					),
 				),
 				array(
 					array(
-						'text' => __( 'Open wp-admin', 'telepilot' ),
+						'text' => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Open wp-admin', 'telepilot' ) ),
 						'url'  => admin_url( 'admin.php?page=telepilot' ),
 					),
 				),

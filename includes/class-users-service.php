@@ -75,10 +75,10 @@ class Telepilot_Users_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No users matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'users', $heading ) ) . "\n\n" . __( 'No users matched that request.', 'telepilot' );
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'users', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
@@ -86,12 +86,15 @@ class Telepilot_Users_Service {
 		foreach ( $result['items'] as $user ) {
 			$roles       = implode( ', ', array_map( 'sanitize_text_field', $user->roles ) );
 			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'telepilot' ) : __( 'active', 'telepilot' );
-			$blocks[]    = sprintf(
-				__( '[%1$d] %2$s [%3$s] (%4$s)', 'telepilot' ),
-				$user->ID,
-				Telepilot_Telegram_Response_Builder::escape( $user->user_login ),
-				Telepilot_Telegram_Response_Builder::escape( $roles ? $roles : __( 'no role', 'telepilot' ) ),
-				Telepilot_Telegram_Response_Builder::escape( $is_disabled )
+			$blocks[]    = Telepilot_Telegram_Response_Builder::label(
+				'users',
+				sprintf(
+					__( '[%1$d] %2$s [%3$s] (%4$s)', 'telepilot' ),
+					$user->ID,
+					Telepilot_Telegram_Response_Builder::escape( $user->user_login ),
+					Telepilot_Telegram_Response_Builder::escape( $roles ? $roles : __( 'no role', 'telepilot' ) ),
+					Telepilot_Telegram_Response_Builder::escape( $is_disabled )
+				)
 			);
 		}
 
@@ -103,7 +106,7 @@ class Telepilot_Users_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( __( 'Users Commands', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'users', __( 'Users Commands', 'telepilot' ) ) ),
 				Telepilot_Telegram_Response_Builder::code( '/users list' ) . ' ' . __( 'Show recent users', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/users search jane' ) . ' ' . __( 'Search by username, display name, or email', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/users details 123' ) . ' ' . __( 'Show a user summary and Telegram link status', 'telepilot' ),
@@ -134,7 +137,7 @@ class Telepilot_Users_Service {
 
 	public function render_details_message( $user ) {
 		if ( ! ( $user instanceof WP_User ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( __( 'User Details', 'telepilot' ) ) . "\n\n" . __( 'User not found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'users', __( 'User Details', 'telepilot' ) ) ) . "\n\n" . __( 'User not found.', 'telepilot' );
 		}
 
 		$roles            = implode( ', ', array_map( 'sanitize_text_field', (array) $user->roles ) );
@@ -142,7 +145,7 @@ class Telepilot_Users_Service {
 		$telegram_chat_id = (string) get_user_meta( $user->ID, Telepilot_User_Linking_Service::META_TELEGRAM_CHAT, true );
 		$telegram_name    = (string) get_user_meta( $user->ID, Telepilot_User_Linking_Service::META_TELEGRAM_NAME, true );
 		$lines            = array(
-			Telepilot_Telegram_Response_Builder::bold( __( 'User Details', 'telepilot' ) ),
+			Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'users', __( 'User Details', 'telepilot' ) ) ),
 			implode(
 				"\n",
 				array(
@@ -493,15 +496,15 @@ class Telepilot_Users_Service {
 
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Details [%d]', 'telepilot' ), $user->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'telepilot' ), $user->ID ) ),
 					'callback_data' => '/users details ' . (int) $user->ID,
 				),
 				array(
-					'text'          => sprintf( __( 'Reset [%d]', 'telepilot' ), $user->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'reset', sprintf( __( 'Reset [%d]', 'telepilot' ), $user->ID ) ),
 					'callback_data' => '/users reset-password ' . (int) $user->ID,
 				),
 				array(
-					'text'          => sprintf( __( 'Email Reset [%d]', 'telepilot' ), $user->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'email', sprintf( __( 'Email Reset [%d]', 'telepilot' ), $user->ID ) ),
 					'callback_data' => '/users email-reset-password ' . (int) $user->ID,
 				),
 			);
@@ -509,15 +512,15 @@ class Telepilot_Users_Service {
 			$rows[] = array(
 				$this->is_disabled( $user->ID )
 					? array(
-						'text'          => sprintf( __( 'Enable [%d]', 'telepilot' ), $user->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'enable', sprintf( __( 'Enable [%d]', 'telepilot' ), $user->ID ) ),
 						'callback_data' => '/users enable ' . (int) $user->ID,
 					)
 					: array(
-						'text'          => sprintf( __( 'Disable [%d]', 'telepilot' ), $user->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'disable', sprintf( __( 'Disable [%d]', 'telepilot' ), $user->ID ) ),
 						'callback_data' => '/users disable ' . (int) $user->ID,
 					),
 				array(
-					'text'          => sprintf( __( 'Welcome [%d]', 'telepilot' ), $user->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'welcome', sprintf( __( 'Welcome [%d]', 'telepilot' ), $user->ID ) ),
 					'callback_data' => '/users welcome-email ' . (int) $user->ID,
 				),
 			);
@@ -543,14 +546,14 @@ class Telepilot_Users_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -644,11 +647,11 @@ class Telepilot_Users_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

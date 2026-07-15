@@ -90,21 +90,24 @@ class Telepilot_Pages_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No pages matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'pages', $heading ) ) . "\n\n" . __( 'No pages matched that request.', 'telepilot' );
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'pages', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
 
 		foreach ( $result['items'] as $page ) {
 			$block_lines = array(
-				sprintf(
-					__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
-					$page->ID,
-					Telepilot_Telegram_Response_Builder::escape( get_the_title( $page ) ),
-					Telepilot_Telegram_Response_Builder::escape( $page->post_status )
+				Telepilot_Telegram_Response_Builder::label(
+					'pages',
+					sprintf(
+						__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
+						$page->ID,
+						Telepilot_Telegram_Response_Builder::escape( get_the_title( $page ) ),
+						Telepilot_Telegram_Response_Builder::escape( $page->post_status )
+					)
 				),
 			);
 
@@ -124,7 +127,7 @@ class Telepilot_Pages_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( __( 'Pages Commands', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'pages', __( 'Pages Commands', 'telepilot' ) ) ),
 				Telepilot_Telegram_Response_Builder::code( '/pages list' ) . ' ' . __( 'Show recent pages', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/pages latest' ) . ' ' . __( 'Alias for the recent pages list', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/pages drafts' ) . ' ' . __( 'Show draft pages only', 'telepilot' ),
@@ -156,11 +159,11 @@ class Telepilot_Pages_Service {
 
 	public function render_details_message( $page ) {
 		if ( ! ( $page instanceof WP_Post ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( __( 'Page Details', 'telepilot' ) ) . "\n\n" . __( 'Page not found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'pages', __( 'Page Details', 'telepilot' ) ) ) . "\n\n" . __( 'Page not found.', 'telepilot' );
 		}
 
 		$blocks   = array();
-		$blocks[] = Telepilot_Telegram_Response_Builder::bold( __( 'Page Details', 'telepilot' ) );
+		$blocks[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'pages', __( 'Page Details', 'telepilot' ) ) );
 		$blocks[] = implode(
 			"\n",
 			array(
@@ -345,42 +348,42 @@ class Telepilot_Pages_Service {
 
 			if ( 'publish' === $page_item->post_status ) {
 				$row[] = array(
-					'text' => sprintf( __( 'Preview [%d]', 'telepilot' ), $page_item->ID ),
+					'text' => Telepilot_Telegram_Response_Builder::label( 'preview', sprintf( __( 'Preview [%d]', 'telepilot' ), $page_item->ID ) ),
 					'url'  => $this->get_preview_url( $page_item ),
 				);
 			} else {
 				$row[] = array(
-					'text' => sprintf( __( 'Edit [%d]', 'telepilot' ), $page_item->ID ),
+					'text' => Telepilot_Telegram_Response_Builder::label( 'edit', sprintf( __( 'Edit [%d]', 'telepilot' ), $page_item->ID ) ),
 					'url'  => $this->get_admin_edit_url( $page_item->ID ),
 				);
 			}
 
 			if ( 'trash' === $page_item->post_status ) {
 				$row[] = array(
-					'text'          => sprintf( __( 'Restore [%d]', 'telepilot' ), $page_item->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Restore [%d]', 'telepilot' ), $page_item->ID ) ),
 					'callback_data' => '/pages restore ' . (int) $page_item->ID,
 				);
 				$row[] = array(
-					'text'          => sprintf( __( 'Delete [%d]', 'telepilot' ), $page_item->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $page_item->ID ) ),
 					'callback_data' => '/pages delete ' . (int) $page_item->ID,
 				);
 			} else {
 				if ( 'publish' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Publish [%d]', 'telepilot' ), $page_item->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'publish', sprintf( __( 'Publish [%d]', 'telepilot' ), $page_item->ID ) ),
 						'callback_data' => '/pages publish ' . (int) $page_item->ID,
 					);
 				}
 
 				if ( 'draft' !== $page_item->post_status ) {
 					$row[] = array(
-						'text'          => sprintf( __( 'Draft [%d]', 'telepilot' ), $page_item->ID ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'draft', sprintf( __( 'Draft [%d]', 'telepilot' ), $page_item->ID ) ),
 						'callback_data' => '/pages draft ' . (int) $page_item->ID,
 					);
 				}
 
 				$row[] = array(
-					'text'          => sprintf( __( 'Trash [%d]', 'telepilot' ), $page_item->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'telepilot' ), $page_item->ID ) ),
 					'callback_data' => '/pages trash ' . (int) $page_item->ID,
 				);
 			}
@@ -410,14 +413,14 @@ class Telepilot_Pages_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -586,11 +589,11 @@ class Telepilot_Pages_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

@@ -83,10 +83,10 @@ class Telepilot_Media_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( $heading ) . "\n\n" . __( 'No media items matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'media', $heading ) ) . "\n\n" . __( 'No media items matched that request.', 'telepilot' );
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'media', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
 		);
@@ -98,10 +98,13 @@ class Telepilot_Media_Service {
 			}
 
 			$block_lines = array(
-				sprintf(
-					__( '[%1$d] %2$s', 'telepilot' ),
-					$item->ID,
-					Telepilot_Telegram_Response_Builder::escape( $title )
+				Telepilot_Telegram_Response_Builder::label(
+					'media',
+					sprintf(
+						__( '[%1$d] %2$s', 'telepilot' ),
+						$item->ID,
+						Telepilot_Telegram_Response_Builder::escape( $title )
+					)
 				),
 			);
 
@@ -121,7 +124,7 @@ class Telepilot_Media_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( __( 'Media Commands', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'media', __( 'Media Commands', 'telepilot' ) ) ),
 				Telepilot_Telegram_Response_Builder::code( '/media list' ) . ' ' . __( 'Show recent media items', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/media search logo' ) . ' ' . __( 'Search media by title', 'telepilot' ),
 				Telepilot_Telegram_Response_Builder::code( '/media details 123' ) . ' ' . __( 'Show media metadata and preview links', 'telepilot' ),
@@ -155,11 +158,11 @@ class Telepilot_Media_Service {
 
 	public function render_details_message( $details ) {
 		if ( empty( $details['item'] ) || ! $details['item'] instanceof WP_Post ) {
-			return Telepilot_Telegram_Response_Builder::bold( __( 'Media Details', 'telepilot' ) ) . "\n\n" . __( 'Media item not found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'media', __( 'Media Details', 'telepilot' ) ) ) . "\n\n" . __( 'Media item not found.', 'telepilot' );
 		}
 
 		$blocks   = array();
-		$blocks[] = Telepilot_Telegram_Response_Builder::bold( __( 'Media Details', 'telepilot' ) );
+		$blocks[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'media', __( 'Media Details', 'telepilot' ) ) );
 
 		$detail_lines   = array();
 		$detail_lines[] = sprintf(
@@ -344,7 +347,7 @@ class Telepilot_Media_Service {
 
 			$row = array(
 				array(
-					'text'          => sprintf( __( 'Details [%d]', 'telepilot' ), $item->ID ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'telepilot' ), $item->ID ) ),
 					'callback_data' => '/media details ' . (int) $item->ID,
 				),
 			);
@@ -352,7 +355,7 @@ class Telepilot_Media_Service {
 			$attachment_url = wp_get_attachment_url( $item->ID );
 			if ( $attachment_url ) {
 				$row[] = array(
-					'text' => sprintf( __( 'Open [%d]', 'telepilot' ), $item->ID ),
+					'text' => Telepilot_Telegram_Response_Builder::label( 'open', sprintf( __( 'Open [%d]', 'telepilot' ), $item->ID ) ),
 					'url'  => $attachment_url,
 				);
 			}
@@ -380,14 +383,14 @@ class Telepilot_Media_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -406,14 +409,14 @@ class Telepilot_Media_Service {
 	public function build_item_keyboard( $attachment_id, $attachment_url = '' ) {
 		$row = array(
 			array(
-				'text'          => sprintf( __( 'Details [%d]', 'telepilot' ), $attachment_id ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'telepilot' ), $attachment_id ) ),
 				'callback_data' => '/media details ' . (int) $attachment_id,
 			),
 		);
 
 		if ( '' !== (string) $attachment_url ) {
 			$row[] = array(
-				'text' => sprintf( __( 'Open [%d]', 'telepilot' ), $attachment_id ),
+				'text' => Telepilot_Telegram_Response_Builder::label( 'open', sprintf( __( 'Open [%d]', 'telepilot' ), $attachment_id ) ),
 				'url'  => (string) $attachment_url,
 			);
 		}
@@ -551,11 +554,11 @@ class Telepilot_Media_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

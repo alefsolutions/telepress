@@ -5,6 +5,58 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Telepilot_Telegram_Response_Builder {
+	public static function icon( $key ) {
+		$icons = array(
+			'confirm'       => '✅',
+			'cancel'        => '❌',
+			'menu'          => '🧭',
+			'site'          => '🌐',
+			'refresh'       => '🔄',
+			'posts'         => '📝',
+			'pages'         => '📄',
+			'comments'      => '💬',
+			'media'         => '🖼️',
+			'users'         => '👤',
+			'plugins'       => '🔌',
+			'notifications' => '🔔',
+			'settings'      => '⚙️',
+			'categories'    => '🗂️',
+			'category'      => '🗂️',
+			'tags'          => '🏷️',
+			'tag'           => '🏷️',
+			'details'       => 'ℹ️',
+			'open'          => '🔗',
+			'preview'       => '👁️',
+			'edit'          => '✏️',
+			'publish'       => '📤',
+			'draft'         => '📥',
+			'trash'         => '🗑️',
+			'delete'        => '🗑️',
+			'restore'       => '♻️',
+			'enable'        => '✅',
+			'disable'       => '⛔',
+			'update'        => '⬆️',
+			'email'         => '✉️',
+			'reset'         => '🔑',
+			'welcome'       => '👋',
+			'prev'          => '◀️',
+			'next'          => '▶️',
+			'stats'         => '📊',
+			'link'          => '🔗',
+		);
+
+		$key = sanitize_key( (string) $key );
+
+		return isset( $icons[ $key ] ) ? $icons[ $key ] : '';
+	}
+
+	public static function label( $icon_key, $text ) {
+		$icon = self::icon( $icon_key );
+		$text = (string) $text;
+
+		return '' !== $icon ? $icon . ' ' . $text : $text;
+	}
+
 	public static function success( $message, $extra = array() ) {
 		return wp_parse_args(
 			$extra,
@@ -119,11 +171,11 @@ class Telepilot_Telegram_Response_Builder {
 			array(
 				array(
 					array(
-						'text'          => (string) $confirm_text,
+						'text'          => self::label( 'confirm', $confirm_text ),
 						'callback_data' => (string) $confirm_callback,
 					),
 					array(
-						'text'          => (string) $cancel_text,
+						'text'          => self::label( 'cancel', $cancel_text ),
 						'callback_data' => (string) $cancel_callback,
 					),
 				),

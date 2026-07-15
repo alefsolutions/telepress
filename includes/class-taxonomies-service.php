@@ -74,17 +74,19 @@ class Telepilot_Taxonomies_Service {
 	}
 
 	public function render_terms_message( $result, $heading ) {
+		$icon_key = 'post_tag' === $result['taxonomy'] ? 'tags' : 'categories';
+
 		if ( empty( $result['items'] ) ) {
 			return implode(
 				"\n",
 				array(
-					Telepilot_Telegram_Response_Builder::bold( $heading ),
+					Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( $icon_key, $heading ) ),
 					__( 'No matching terms were found.', 'telepilot' ),
 				)
 			);
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( $heading ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( $icon_key, $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf(
 				__( 'Page %1$d of %2$d', 'telepilot' ),
@@ -94,11 +96,14 @@ class Telepilot_Taxonomies_Service {
 		);
 
 		foreach ( $result['items'] as $term ) {
-			$blocks[] = sprintf(
-				__( '[%1$d] %2$s (%3$d)', 'telepilot' ),
-				$term->term_id,
-				Telepilot_Telegram_Response_Builder::escape( $term->name ),
-				$term->count
+			$blocks[] = Telepilot_Telegram_Response_Builder::label(
+				$icon_key,
+				sprintf(
+					__( '[%1$d] %2$s (%3$d)', 'telepilot' ),
+					$term->term_id,
+					Telepilot_Telegram_Response_Builder::escape( $term->name ),
+					$term->count
+				)
 			);
 		}
 
@@ -112,7 +117,7 @@ class Telepilot_Taxonomies_Service {
 		$singular = $this->resource_singular( $resource );
 		$lines    = array();
 
-		$lines[] = Telepilot_Telegram_Response_Builder::bold( sprintf( __( '%s Commands', 'telepilot' ), ucfirst( $resource ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( $resource, sprintf( __( '%s Commands', 'telepilot' ), ucfirst( $resource ) ) ) );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/' . $resource . ' list' ) . ' ' . sprintf( __( 'Show %s', 'telepilot' ), $resource );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/' . $resource . ' search keyword' ) . ' ' . sprintf( __( 'Search %s', 'telepilot' ), $resource );
 		$lines[] = Telepilot_Telegram_Response_Builder::code( '/' . $resource . ' details 12' ) . ' ' . sprintf( __( 'Show %s details', 'telepilot' ), $singular );
@@ -133,12 +138,12 @@ class Telepilot_Taxonomies_Service {
 
 	public function render_term_details_message( $term, $resource ) {
 		if ( ! ( $term instanceof WP_Term ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( __( 'Term Details', 'telepilot' ) ) . "\n\n" . __( 'Term not found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( $resource, __( 'Term Details', 'telepilot' ) ) ) . "\n\n" . __( 'Term not found.', 'telepilot' );
 		}
 
 		$resource = $this->normalize_resource( $resource );
 		$lines    = array(
-			Telepilot_Telegram_Response_Builder::bold( sprintf( __( '%s Details', 'telepilot' ), ucfirst( $this->resource_singular( $resource ) ) ) ),
+			Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( $resource, sprintf( __( '%s Details', 'telepilot' ), ucfirst( $this->resource_singular( $resource ) ) ) ) ),
 			'',
 			sprintf( __( 'Name: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $term->name ) ),
 			sprintf( __( 'ID: [%d]', 'telepilot' ), $term->term_id ),
@@ -302,11 +307,11 @@ class Telepilot_Taxonomies_Service {
 		foreach ( $result['items'] as $term ) {
 			$rows[] = array(
 				array(
-					'text'          => sprintf( __( 'Details [%d]', 'telepilot' ), $term->term_id ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'telepilot' ), $term->term_id ) ),
 					'callback_data' => '/' . $resource . ' details ' . (int) $term->term_id,
 				),
 				array(
-					'text'          => sprintf( __( 'Delete [%d]', 'telepilot' ), $term->term_id ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $term->term_id ) ),
 					'callback_data' => '/' . $resource . ' delete ' . (int) $term->term_id,
 				),
 			);
@@ -357,14 +362,14 @@ class Telepilot_Taxonomies_Service {
 
 		if ( $result['page'] > 1 ) {
 			$buttons[] = array(
-				'text'          => __( 'Prev', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
 				'callback_data' => trim( $command . $mode . ' page:' . ( $result['page'] - 1 ) ),
 			);
 		}
 
 		if ( $result['page'] < $result['total_pages'] ) {
 			$buttons[] = array(
-				'text'          => __( 'Next', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
 				'callback_data' => trim( $command . $mode . ' page:' . ( $result['page'] + 1 ) ),
 			);
 		}
@@ -416,11 +421,11 @@ class Telepilot_Taxonomies_Service {
 		return array(
 			array(
 				array(
-					'text'          => __( 'Menu', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => __( 'Site', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

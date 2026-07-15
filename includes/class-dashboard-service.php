@@ -46,25 +46,25 @@ class Telepilot_Dashboard_Service {
 
 	public function render_summary_message( $summary ) {
 		$lines   = array();
-		$lines[] = Telepilot_Telegram_Response_Builder::bold( __( 'Site Overview', 'telepilot' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site Overview', 'telepilot' ) ) );
 		$lines[] = '';
-		$lines[] = sprintf( __( 'Site: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_name'] ) );
-		$lines[] = sprintf( __( 'URL: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_url'] ) );
-		$lines[] = sprintf( __( 'WordPress: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['wordpress_version'] ) );
-		$lines[] = sprintf( __( 'PHP: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['php_version'] ) );
-		$lines[] = sprintf( __( 'Database: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['database_version'] ) );
-		$lines[] = sprintf( __( 'Theme: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['active_theme'] ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'site', sprintf( __( 'Site: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_name'] ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'link', sprintf( __( 'URL: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_url'] ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'site', sprintf( __( 'WordPress: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['wordpress_version'] ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'settings', sprintf( __( 'PHP: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['php_version'] ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'settings', sprintf( __( 'Database: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['database_version'] ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'pages', sprintf( __( 'Theme: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['active_theme'] ) ) );
 		$lines[] = '';
-		$lines[] = sprintf( __( 'Posts in draft: %d', 'telepilot' ), $summary['draft_posts_count'] );
-		$lines[] = sprintf( __( 'Pending comments: %d', 'telepilot' ), $summary['pending_comments'] );
-		$lines[] = sprintf( __( 'Active plugins: %d', 'telepilot' ), $summary['active_plugins_count'] );
-		$lines[] = sprintf( __( 'Site health: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_health'] ) );
-		$lines[] = sprintf(
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'posts', sprintf( __( 'Posts in draft: %d', 'telepilot' ), $summary['draft_posts_count'] ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'comments', sprintf( __( 'Pending comments: %d', 'telepilot' ), $summary['pending_comments'] ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'plugins', sprintf( __( 'Active plugins: %d', 'telepilot' ), $summary['active_plugins_count'] ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'stats', sprintf( __( 'Site health: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $summary['site_health'] ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::label( 'update', sprintf(
 			__( 'Updates: core %1$d, plugins %2$d, themes %3$d', 'telepilot' ),
 			$summary['pending_updates']['core'],
 			$summary['pending_updates']['plugins'],
 			$summary['pending_updates']['themes']
-		);
+		) );
 
 		return implode( "\n", $lines );
 	}
@@ -73,11 +73,11 @@ class Telepilot_Dashboard_Service {
 		$rows   = array();
 		$rows[] = array(
 			array(
-				'text'          => __( 'Refresh', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'refresh', __( 'Refresh', 'telepilot' ) ),
 				'callback_data' => '/site',
 			),
 			array(
-				'text'          => __( 'Menu', 'telepilot' ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
 				'callback_data' => '/menu',
 			),
 		);
@@ -86,13 +86,13 @@ class Telepilot_Dashboard_Service {
 			$content_row = array();
 			if ( user_can( $wp_user, 'edit_posts' ) ) {
 				$content_row[] = array(
-					'text'          => __( 'Posts', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'posts', __( 'Posts', 'telepilot' ) ),
 					'callback_data' => '/posts list',
 				);
 			}
 			if ( user_can( $wp_user, 'edit_pages' ) ) {
 				$content_row[] = array(
-					'text'          => __( 'Pages', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'pages', __( 'Pages', 'telepilot' ) ),
 					'callback_data' => '/pages list',
 				);
 			}
@@ -103,13 +103,13 @@ class Telepilot_Dashboard_Service {
 			$editorial_row = array();
 			if ( user_can( $wp_user, 'moderate_comments' ) ) {
 				$editorial_row[] = array(
-					'text'          => __( 'Comments', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comments', 'telepilot' ) ),
 					'callback_data' => '/comments pending',
 				);
 			}
 			if ( user_can( $wp_user, 'upload_files' ) ) {
 				$editorial_row[] = array(
-					'text'          => __( 'Media', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'media', __( 'Media', 'telepilot' ) ),
 					'callback_data' => '/media list',
 				);
 			}
@@ -120,11 +120,11 @@ class Telepilot_Dashboard_Service {
 			if ( user_can( $wp_user, 'manage_categories' ) ) {
 				$rows[] = array(
 					array(
-						'text'          => __( 'Categories', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'categories', __( 'Categories', 'telepilot' ) ),
 						'callback_data' => '/categories list',
 					),
 					array(
-						'text'          => __( 'Tags', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'tags', __( 'Tags', 'telepilot' ) ),
 						'callback_data' => '/tags list',
 					),
 				);
@@ -133,13 +133,13 @@ class Telepilot_Dashboard_Service {
 			$admin_tools_row = array();
 			if ( user_can( $wp_user, 'list_users' ) ) {
 				$admin_tools_row[] = array(
-					'text'          => __( 'Users', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'users', __( 'Users', 'telepilot' ) ),
 					'callback_data' => '/users list',
 				);
 			}
 			if ( user_can( $wp_user, 'activate_plugins' ) || user_can( $wp_user, 'update_plugins' ) || user_can( $wp_user, 'delete_plugins' ) ) {
 				$admin_tools_row[] = array(
-					'text'          => __( 'Plugins', 'telepilot' ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugins', 'telepilot' ) ),
 					'callback_data' => '/plugins list',
 				);
 			}
@@ -150,11 +150,11 @@ class Telepilot_Dashboard_Service {
 			if ( user_can( $wp_user, 'manage_options' ) ) {
 				$rows[] = array(
 					array(
-						'text'          => __( 'Notifications', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'telepilot' ) ),
 						'callback_data' => '/notifications list',
 					),
 					array(
-						'text'          => __( 'Settings', 'telepilot' ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Settings', 'telepilot' ) ),
 						'callback_data' => '/settings',
 					),
 				);
@@ -163,14 +163,14 @@ class Telepilot_Dashboard_Service {
 
 		$admin_row = array(
 			array(
-				'text' => __( 'Open wp-admin', 'telepilot' ),
+				'text' => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Open wp-admin', 'telepilot' ) ),
 				'url'  => admin_url(),
 			),
 		);
 
 		if ( $wp_user instanceof WP_User && user_can( $wp_user, 'manage_options' ) ) {
 			$admin_row[] = array(
-				'text' => __( 'Telepilot Settings', 'telepilot' ),
+				'text' => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Telepilot Settings', 'telepilot' ) ),
 				'url'  => admin_url( 'admin.php?page=telepilot' ),
 			);
 		}
