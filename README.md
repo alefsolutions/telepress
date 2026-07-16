@@ -4,7 +4,7 @@
 [![Release Workflow](https://img.shields.io/github/actions/workflow/status/alefsolutions/wp-telepilot/release-plugin.yml?branch=main&label=release&color=0ea5d3)](https://github.com/alefsolutions/wp-telepilot/actions/workflows/release-plugin.yml)
 [![WordPress](https://img.shields.io/badge/WordPress-6.6%2B-1f2933)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-8.0%2B-1f2933)](https://www.php.net)
-[![License](https://img.shields.io/github/license/alefsolutions/wp-telepilot?color=0ea5d3)](LICENSE)
+[![License: GPLv2 or later](https://img.shields.io/badge/License-GPLv2%20or%20later-0ea5d3)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 ![WP Telepilot Header](assets/images/readme-header.png)
 
@@ -118,4 +118,4 @@ WP Telepilot is designed around one principle:
 
 ## License
 
-WP Telepilot is licensed under GPLv2 or later, the same license family used by WordPress.
+WP Telepilot is licensed under the GNU General Public License, version 2 or later, which is the same license used by WordPress.
