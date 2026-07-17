@@ -28,7 +28,7 @@ class Telepilot_Telegram_Client {
 			$payload['parse_mode'] = (string) $args['parse_mode'];
 		}
 
-		if ( ! empty( $args['reply_markup'] ) ) {
+		if ( array_key_exists( 'reply_markup', $args ) ) {
 			$payload['reply_markup'] = wp_json_encode( $args['reply_markup'] );
 		}
 
@@ -73,7 +73,7 @@ class Telepilot_Telegram_Client {
 			$payload['parse_mode'] = (string) $args['parse_mode'];
 		}
 
-		if ( ! empty( $args['reply_markup'] ) ) {
+		if ( array_key_exists( 'reply_markup', $args ) ) {
 			$payload['reply_markup'] = wp_json_encode( $args['reply_markup'] );
 		}
 

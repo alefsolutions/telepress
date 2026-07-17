@@ -172,6 +172,12 @@ class Telepilot_Telegram_Response_Builder {
 		);
 	}
 
+	public static function empty_keyboard() {
+		return array(
+			'inline_keyboard' => array(),
+		);
+	}
+
 	public static function confirmation_keyboard( $confirm_text, $confirm_callback, $cancel_callback = '/menu', $cancel_text = '' ) {
 		if ( '' === $cancel_text ) {
 			$cancel_text = __( 'Cancel', 'wp-telepilot' );

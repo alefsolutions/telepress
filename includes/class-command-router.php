@@ -3312,7 +3312,19 @@ class Telepilot_Command_Router {
 		);
 	}
 
+	public function get_home_keyboard( $identity ) {
+		return $this->safe_home_keyboard( $identity );
+	}
+
 	private function build_home_keyboard( $identity ) {
+		if ( ! $this->is_chat_allowed_for_menu( $identity ) ) {
+			return array();
+		}
+
+		if ( empty( $identity['wp_user'] ) || ! $identity['wp_user'] instanceof WP_User ) {
+			return Telepilot_Telegram_Response_Builder::keyboard( $this->build_onboarding_keyboard_rows() );
+		}
+
 		$rows   = array();
 		$rows[] = array(
 			array(
@@ -3421,5 +3433,44 @@ class Telepilot_Command_Router {
 		}
 
 		return Telepilot_Telegram_Response_Builder::keyboard( $rows );
+	}
+
+	private function build_onboarding_keyboard_rows() {
+		return array(
+			array(
+				array(
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Start', 'wp-telepilot' ) ),
+					'callback_data' => '/start',
+				),
+				array(
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'link', __( 'Chat ID', 'wp-telepilot' ) ),
+					'callback_data' => '/chatid',
+				),
+			),
+			array(
+				array(
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Help', 'wp-telepilot' ) ),
+					'callback_data' => '/help',
+				),
+			),
+		);
+	}
+
+	private function is_chat_allowed_for_menu( $identity ) {
+		$chat_id = ! empty( $identity['chat_id'] ) ? (string) $identity['chat_id'] : '';
+
+		if ( '' === $chat_id ) {
+			return true;
+		}
+
+		$settings = get_option( 'telepilot_settings', array() );
+		$allowed  = isset( $settings['allowed_chat_ids'] ) ? (string) $settings['allowed_chat_ids'] : '';
+		$chat_ids = array_filter( array_map( 'trim', explode( "\n", str_replace( ',', "\n", $allowed ) ) ) );
+
+		if ( empty( $chat_ids ) ) {
+			return true;
+		}
+
+		return in_array( $chat_id, $chat_ids, true );
 	}
 }

@@ -462,6 +462,7 @@ class Telepilot_Telegram_Service {
 				)
 			);
 
+			$result = $this->apply_contextual_reply_markup( $result, $identity );
 			$this->dispatch_response( $identity, $update, $result, $transport );
 			$this->mark_update_processed( $update, $transport, 'rejected' );
 
@@ -539,6 +540,7 @@ class Telepilot_Telegram_Service {
 			update_user_meta( $identity['wp_user']->ID, '_telepilot_last_command_at', time() );
 		}
 
+		$result = $this->apply_contextual_reply_markup( $result, $identity );
 		$dispatch_error = $this->dispatch_response( $identity, $update, $result, $transport, $options );
 
 		if ( ! empty( $result['code'] ) && 'telepilot_capability_denied' === $result['code'] ) {
@@ -742,9 +744,11 @@ class Telepilot_Telegram_Service {
 			$this->client->answer_callback_query( (string) $update['callback_query']['id'] );
 		}
 
-		$args = array(
-			'reply_markup' => ! empty( $result['reply_markup'] ) ? $result['reply_markup'] : array(),
-		);
+		$args = array();
+
+		if ( array_key_exists( 'reply_markup', $result ) ) {
+			$args['reply_markup'] = $result['reply_markup'];
+		}
 
 		if ( ! empty( $result['parse_mode'] ) ) {
 			$args['parse_mode'] = (string) $result['parse_mode'];
@@ -972,6 +976,28 @@ class Telepilot_Telegram_Service {
 		}
 
 		return $raw;
+	}
+
+	private function apply_contextual_reply_markup( $result, $identity ) {
+		if ( ! is_array( $result ) ) {
+			return $result;
+		}
+
+		$code = ! empty( $result['code'] ) ? (string) $result['code'] : '';
+
+		switch ( $code ) {
+			case 'telepilot_chat_not_allowed':
+				$result['reply_markup'] = Telepilot_Telegram_Response_Builder::empty_keyboard();
+				break;
+
+			case 'telepilot_link_required':
+			case 'telepilot_capability_denied':
+			case 'telepilot_private_chat_required':
+				$result['reply_markup'] = $this->command_router->get_home_keyboard( $identity );
+				break;
+		}
+
+		return $result;
 	}
 
 	private function get_job_priority( $command, $update ) {
