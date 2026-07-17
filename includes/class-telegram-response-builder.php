@@ -57,6 +57,10 @@ class Telepilot_Telegram_Response_Builder {
 		return '' !== $icon ? $icon . ' ' . $text : $text;
 	}
 
+	public static function button_label( $icon_key, $text ) {
+		return self::normalize_button_text( self::label( $icon_key, $text ) );
+	}
+
 	public static function success( $message, $extra = array() ) {
 		return wp_parse_args(
 			$extra,
@@ -112,9 +116,15 @@ class Telepilot_Telegram_Response_Builder {
 					continue;
 				}
 
+				$text = self::normalize_button_text( (string) $button['text'] );
+
+				if ( '' === $text ) {
+					continue;
+				}
+
 				if ( ! empty( $button['url'] ) ) {
 					$buttons[] = array(
-						'text' => (string) $button['text'],
+						'text' => $text,
 						'url'  => esc_url_raw( (string) $button['url'] ),
 					);
 					continue;
@@ -125,7 +135,7 @@ class Telepilot_Telegram_Response_Builder {
 				}
 
 				$buttons[] = array(
-					'text'          => (string) $button['text'],
+					'text'          => $text,
 					'callback_data' => (string) $button['callback_data'],
 				);
 			}
@@ -171,11 +181,11 @@ class Telepilot_Telegram_Response_Builder {
 			array(
 				array(
 					array(
-						'text'          => self::label( 'confirm', $confirm_text ),
+						'text'          => self::button_label( 'confirm', $confirm_text ),
 						'callback_data' => (string) $confirm_callback,
 					),
 					array(
-						'text'          => self::label( 'cancel', $cancel_text ),
+						'text'          => self::button_label( 'cancel', $cancel_text ),
 						'callback_data' => (string) $cancel_callback,
 					),
 				),
@@ -214,5 +224,24 @@ class Telepilot_Telegram_Response_Builder {
 
 	public static function link( $text, $url ) {
 		return '<a href="' . esc_url( (string) $url ) . '">' . self::escape( $text ) . '</a>';
+	}
+
+	private static function normalize_button_text( $text ) {
+		$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $text ) ) );
+
+		if ( '' === $text ) {
+			return '';
+		}
+
+		$text = preg_replace( '/\s*\[\d+\]\s*$/u', '', $text );
+		$text = preg_replace( '/\bOpen Editor\b/u', 'Edit', $text );
+		$text = preg_replace( '/\bOpen wp-admin\b/u', 'Admin', $text );
+		$text = preg_replace( '/\bSite Overview\b/u', 'Overview', $text );
+		$text = preg_replace( '/\bTelepilot Settings\b/u', 'Telepilot', $text );
+		$text = preg_replace( '/\bEmail Reset Password\b/u', 'Email Reset', $text );
+		$text = preg_replace( '/\bReset Password\b/u', 'Reset', $text );
+		$text = preg_replace( '/^(✅)\s+Confirm\s+/u', '$1 ', $text );
+
+		return trim( $text );
 	}
 }

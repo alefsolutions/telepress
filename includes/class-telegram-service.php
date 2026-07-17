@@ -11,6 +11,8 @@ class Telepilot_Telegram_Service {
 	const DEFAULT_STALE_WINDOW       = 180;
 	const POLL_LOCK_TRANSIENT        = 'telepilot_poll_lock';
 	const QUEUE_FALLBACK_DELAY       = 15;
+	const JOB_LOCK_TIMEOUT           = 180;
+	const RESPONSE_CACHE_TTL         = 30;
 	private $client;
 	private $user_resolver;
 	private $permission_service;
@@ -51,33 +53,67 @@ class Telepilot_Telegram_Service {
 	}
 
 	public function handle_update( $update, $transport = 'webhook' ) {
-		return $this->process_update( $update, $transport );
+		return $this->queue_or_process_update( $update, $transport );
 	}
 
 	public function handle_webhook_update( $update ) {
+		return $this->queue_or_process_update( $update, 'webhook' );
+	}
+
+	private function queue_or_process_update( $update, $transport ) {
 		$command = $this->command_router->parse_command( $update );
 
-		if ( ! $this->should_defer_command( $command, $update ) ) {
-			return $this->process_update( $update, 'webhook' );
+		if ( ! $this->should_queue_update( $command, $update, $transport ) ) {
+			return $this->process_update( $update, $transport );
 		}
 
-		$placeholder = $this->send_processing_placeholder( $update, $command );
+		$placeholder  = $this->send_processing_placeholder( $update, $command );
+		$is_callback  = ! empty( $update['callback_query'] );
+		$is_replaceable = $this->is_replaceable_command( $command, $update );
+		$job_group    = $this->build_job_group( $command, $placeholder, $is_replaceable );
 		$queue_result = Telepilot_Jobs_Repository::enqueue(
 			isset( $update['update_id'] ) ? (int) $update['update_id'] : 0,
-			'webhook',
+			$transport,
 			$update,
 			! empty( $command['name'] ) ? $command['name'] : '',
-			$placeholder
+			$placeholder,
+			array(
+				'priority'       => $this->get_job_priority( $command, $update ),
+				'stale_after'    => $this->get_job_stale_after( $command, $update ),
+				'job_group'      => $job_group,
+				'is_replaceable' => $is_replaceable,
+			)
 		);
 
 		if ( is_wp_error( $queue_result ) ) {
-			return $this->process_update( $update, 'webhook' );
+			return $this->process_update(
+				$update,
+				$transport,
+				array(
+					'callback_already_answered' => $is_callback,
+					'edit_message_id'           => ! empty( $placeholder['message_id'] ) ? (int) $placeholder['message_id'] : 0,
+					'forced_chat_id'            => ! empty( $placeholder['chat_id'] ) ? (string) $placeholder['chat_id'] : '',
+				)
+			);
+		}
+
+		if ( $is_replaceable && is_int( $queue_result ) ) {
+			$this->maybe_cleanup_superseded_jobs(
+				Telepilot_Jobs_Repository::supersede_replaceable_jobs(
+					$queue_result,
+					! empty( $placeholder['chat_id'] ) ? (string) $placeholder['chat_id'] : '',
+					$job_group,
+					! empty( $placeholder['message_id'] ) ? (int) $placeholder['message_id'] : 0
+				),
+				$placeholder
+			);
 		}
 
 		$this->update_diagnostics(
 			array(
-				'last_queued_at'      => time(),
-				'last_queued_command' => ! empty( $command['name'] ) ? $command['name'] : '',
+				'last_queued_at'       => time(),
+				'last_queued_command'  => ! empty( $command['name'] ) ? $command['name'] : '',
+				'last_queue_transport' => (string) $transport,
 			)
 		);
 		$this->refresh_queue_diagnostics();
@@ -96,65 +132,16 @@ class Telepilot_Telegram_Service {
 		);
 	}
 
-	private function should_defer_command( $command, $update ) {
+	private function should_queue_update( $command, $update, $transport ) {
 		if ( empty( $command['name'] ) || ! is_array( $command ) ) {
 			return false;
 		}
 
-		if ( ! empty( $update['callback_query'] ) ) {
+		if ( ! empty( $transport ) && 'worker' === $transport ) {
 			return false;
 		}
 
-		$destructive_actions = array(
-			'approve',
-			'spam',
-			'trash',
-			'delete',
-			'publish',
-			'activate',
-			'deactivate',
-			'create',
-			'update',
-			'edit',
-			'reset-password',
-			'send-reset',
-			'promote',
-			'demote',
-			'unlink',
-			'link',
-			'upload',
-		);
-
-		$args      = ! empty( $command['args'] ) && is_array( $command['args'] ) ? $command['args'] : array();
-		$first_arg = ! empty( $args[0] ) ? strtolower( (string) $args[0] ) : '';
-
-		if ( in_array( $first_arg, $destructive_actions, true ) ) {
-			return false;
-		}
-
-		return $this->should_defer_read_command(
-			! empty( $command['name'] ) ? (string) $command['name'] : '',
-			$first_arg
-		);
-	}
-
-	private function should_defer_read_command( $command_name, $first_arg ) {
-		$subcommand = '' !== $first_arg ? $first_arg : 'default';
-		$deferred   = array(
-			'/site'      => array( 'default' ),
-			'/dashboard' => array( 'default' ),
-			'/comments'  => array( 'default', 'pending' ),
-			'/posts'     => array( 'default', 'list', 'latest', 'drafts', 'search', 'stats' ),
-			'/pages'     => array( 'default', 'list', 'latest', 'drafts', 'search', 'trashed' ),
-			'/media'     => array( 'default', 'list', 'recent', 'search' ),
-			'/users'     => array( 'default', 'list', 'search' ),
-			'/plugins'   => array( 'default', 'list', 'search', 'updates' ),
-			'/notifications' => array( 'default', 'list' ),
-			'/categories' => array( 'default', 'list', 'search' ),
-			'/tags'      => array( 'default', 'list', 'search' ),
-		);
-
-		return ! empty( $deferred[ $command_name ] ) && in_array( $subcommand, $deferred[ $command_name ], true );
+		return ! empty( $update['callback_query'] ) || ! empty( $update['message']['text'] );
 	}
 
 	private function send_processing_placeholder( $update, $command ) {
@@ -165,18 +152,47 @@ class Telepilot_Telegram_Service {
 			return array();
 		}
 
-		$this->client->send_chat_action( $chat_id, 'typing' );
-
 		$message = $this->get_processing_message( $command );
-		$args    = array(
-			'parse_mode' => 'HTML',
-		);
+		$args    = array( 'parse_mode' => 'HTML' );
+
+		if ( ! empty( $update['callback_query'] ) ) {
+			if ( ! empty( $update['callback_query']['id'] ) ) {
+				$this->client->answer_callback_query( (string) $update['callback_query']['id'], __( 'Processing…', 'wp-telepilot' ) );
+			}
+
+			if ( ! empty( $update['callback_query']['message']['message_id'] ) ) {
+				$message_id = (int) $update['callback_query']['message']['message_id'];
+				$result     = $this->client->edit_message_text( $chat_id, $message_id, $message, $args );
+
+				if ( ! is_wp_error( $result ) ) {
+					return array(
+						'chat_id'    => $chat_id,
+						'message_id' => $message_id,
+					);
+				}
+			}
+
+			$result = $this->client->send_message( $chat_id, $message, $args );
+
+			if ( is_wp_error( $result ) || empty( $result['result']['message_id'] ) ) {
+				return array(
+					'chat_id' => $chat_id,
+				);
+			}
+
+			return array(
+				'chat_id'    => $chat_id,
+				'message_id' => (int) $result['result']['message_id'],
+			);
+		}
+
+		$this->client->send_chat_action( $chat_id, 'typing' );
 
 		if ( ! empty( $update['message']['message_id'] ) ) {
 			$args['reply_to_message_id'] = (int) $update['message']['message_id'];
 		}
 
-		$result  = $this->client->send_message( $chat_id, $message, $args );
+		$result = $this->client->send_message( $chat_id, $message, $args );
 
 		if ( is_wp_error( $result ) || empty( $result['result']['message_id'] ) ) {
 			return array(
@@ -246,7 +262,7 @@ class Telepilot_Telegram_Service {
 	}
 
 	public function process_jobs( $limit = 5 ) {
-		$jobs = Telepilot_Jobs_Repository::claim_pending_jobs( $limit );
+		$jobs = Telepilot_Jobs_Repository::claim_pending_jobs( $limit, self::JOB_LOCK_TIMEOUT );
 
 		if ( empty( $jobs ) ) {
 			$this->refresh_queue_diagnostics();
@@ -270,16 +286,16 @@ class Telepilot_Telegram_Service {
 			$chat_id = ! empty( $job['placeholder_chat_id'] ) ? (string) $job['placeholder_chat_id'] : '';
 			if ( '' !== $chat_id ) {
 				$this->client->send_chat_action( $chat_id, 'typing' );
-				usleep( 750000 );
 			}
 
 			$result = $this->process_update(
 				$payload,
 				! empty( $job['transport'] ) ? (string) $job['transport'] : 'webhook',
 				array(
-					'skip_duplicate_check' => true,
-					'edit_message_id'      => ! empty( $job['placeholder_message_id'] ) ? (int) $job['placeholder_message_id'] : 0,
-					'forced_chat_id'       => $chat_id,
+					'skip_duplicate_check'      => true,
+					'edit_message_id'           => ! empty( $job['placeholder_message_id'] ) ? (int) $job['placeholder_message_id'] : 0,
+					'forced_chat_id'            => $chat_id,
+					'callback_already_answered' => ! empty( $payload['callback_query']['id'] ),
 				)
 			);
 
@@ -306,6 +322,10 @@ class Telepilot_Telegram_Service {
 		}
 
 		$this->refresh_queue_diagnostics();
+
+		if ( Telepilot_Jobs_Repository::pending_count() > 0 ) {
+			$this->schedule_job_processing();
+		}
 
 		return $jobs;
 	}
@@ -476,10 +496,16 @@ class Telepilot_Telegram_Service {
 		}
 
 		try {
-			$result = $this->handle_media_upload( $update, $identity, $command );
+			$result = $this->get_cached_command_response( $identity, $command, $update );
 
 			if ( null === $result ) {
-				$result = $this->command_router->route( $update, $identity );
+				$result = $this->handle_media_upload( $update, $identity, $command );
+
+				if ( null === $result ) {
+					$result = $this->command_router->route( $update, $identity );
+				}
+
+				$this->maybe_cache_command_response( $identity, $command, $update, $result );
 			}
 		} catch ( Throwable $throwable ) {
 			$result = Telepilot_Telegram_Response_Builder::error(
@@ -712,7 +738,7 @@ class Telepilot_Telegram_Service {
 			return '';
 		}
 
-		if ( ! empty( $update['callback_query']['id'] ) ) {
+		if ( ! empty( $update['callback_query']['id'] ) && empty( $options['callback_already_answered'] ) ) {
 			$this->client->answer_callback_query( (string) $update['callback_query']['id'] );
 		}
 
@@ -807,7 +833,7 @@ class Telepilot_Telegram_Service {
 			return;
 		}
 
-		if ( ! $this->should_defer_command( $command, $update ) ) {
+		if ( empty( $command['name'] ) ) {
 			return;
 		}
 
@@ -948,6 +974,171 @@ class Telepilot_Telegram_Service {
 		return $raw;
 	}
 
+	private function get_job_priority( $command, $update ) {
+		$name       = ! empty( $command['name'] ) ? (string) $command['name'] : '';
+		$is_read    = $this->is_read_only_command( $command, $update );
+		$is_callback = ! empty( $update['callback_query'] );
+
+		if ( $is_callback && $is_read ) {
+			return 5;
+		}
+
+		if ( $is_callback ) {
+			return 10;
+		}
+
+		if ( in_array( $name, array( '/start', '/help', '/menu', '/chatid', '/link', '/unlink' ), true ) ) {
+			return 15;
+		}
+
+		if ( $is_read ) {
+			return 35;
+		}
+
+		return 25;
+	}
+
+	private function get_job_stale_after( $command, $update ) {
+		$ttl = $this->is_read_only_command( $command, $update ) ? 120 : 300;
+
+		if ( ! empty( $update['callback_query'] ) ) {
+			$ttl = min( $ttl, 120 );
+		}
+
+		return gmdate( 'Y-m-d H:i:s', time() + $ttl );
+	}
+
+	private function build_job_group( $command, $placeholder, $is_replaceable ) {
+		if ( empty( $placeholder['chat_id'] ) ) {
+			return '';
+		}
+
+		if ( $is_replaceable ) {
+			return 'replaceable:' . md5( (string) $placeholder['chat_id'] );
+		}
+
+		return 'command:' . md5( (string) $placeholder['chat_id'] . ':' . ( ! empty( $command['name'] ) ? (string) $command['name'] : 'unknown' ) );
+	}
+
+	private function maybe_cleanup_superseded_jobs( $jobs, $current_placeholder ) {
+		if ( empty( $jobs ) || ! is_array( $jobs ) ) {
+			return;
+		}
+
+		foreach ( $jobs as $job ) {
+			if ( empty( $job['placeholder_chat_id'] ) || empty( $job['placeholder_message_id'] ) ) {
+				continue;
+			}
+
+			if (
+				! empty( $current_placeholder['chat_id'] ) &&
+				! empty( $current_placeholder['message_id'] ) &&
+				(string) $job['placeholder_chat_id'] === (string) $current_placeholder['chat_id'] &&
+				(int) $job['placeholder_message_id'] === (int) $current_placeholder['message_id']
+			) {
+				continue;
+			}
+
+			$this->client->edit_message_text(
+				(string) $job['placeholder_chat_id'],
+				(int) $job['placeholder_message_id'],
+				Telepilot_Telegram_Response_Builder::italic( __( 'Replaced by a newer request.', 'wp-telepilot' ) ),
+				array(
+					'parse_mode' => 'HTML',
+				)
+			);
+		}
+	}
+
+	private function is_replaceable_command( $command, $update ) {
+		return $this->is_read_only_command( $command, $update );
+	}
+
+	private function is_read_only_command( $command, $update ) {
+		$name       = ! empty( $command['name'] ) ? (string) $command['name'] : '';
+		$subcommand = $this->get_command_subcommand( $command );
+
+		if ( in_array( $name, array( '/start', '/help', '/menu', '/chatid', '/site', '/dashboard' ), true ) ) {
+			return true;
+		}
+
+		switch ( $name ) {
+			case '/settings':
+				return in_array( $subcommand, array( '', 'summary', 'list', 'help' ), true );
+			case '/notifications':
+				return in_array( $subcommand, array( '', 'default', 'list', 'status', 'help' ), true );
+			case '/comments':
+				return in_array( $subcommand, array( '', 'default', 'pending', 'approved', 'spam', 'trash', 'help', 'details' ), true );
+			case '/posts':
+				return in_array( $subcommand, array( '', 'default', 'list', 'latest', 'drafts', 'search', 'stats', 'trashed', 'help' ), true );
+			case '/pages':
+				return in_array( $subcommand, array( '', 'default', 'list', 'latest', 'drafts', 'search', 'trashed', 'help' ), true );
+			case '/media':
+				return in_array( $subcommand, array( '', 'default', 'list', 'recent', 'search', 'details', 'help' ), true );
+			case '/users':
+				return in_array( $subcommand, array( '', 'default', 'list', 'search', 'details', 'help' ), true );
+			case '/plugins':
+				return in_array( $subcommand, array( '', 'default', 'list', 'search', 'updates', 'details', 'help' ), true );
+			case '/categories':
+			case '/tags':
+				return in_array( $subcommand, array( '', 'default', 'list', 'search', 'details', 'help' ), true );
+			default:
+				return false;
+		}
+	}
+
+	private function get_command_subcommand( $command ) {
+		$args = ! empty( $command['args'] ) && is_array( $command['args'] ) ? $command['args'] : array();
+
+		return ! empty( $args[0] ) ? strtolower( (string) $args[0] ) : '';
+	}
+
+	private function get_cached_command_response( $identity, $command, $update ) {
+		if ( ! $this->should_cache_command( $command, $update ) ) {
+			return null;
+		}
+
+		$cached = get_transient( $this->build_response_cache_key( $identity, $command ) );
+
+		return is_array( $cached ) ? $cached : null;
+	}
+
+	private function maybe_cache_command_response( $identity, $command, $update, $result ) {
+		if ( ! $this->should_cache_command( $command, $update ) ) {
+			return;
+		}
+
+		if ( empty( $result['ok'] ) || empty( $result['message'] ) || ! is_array( $result ) ) {
+			return;
+		}
+
+		set_transient(
+			$this->build_response_cache_key( $identity, $command ),
+			$result,
+			self::RESPONSE_CACHE_TTL
+		);
+	}
+
+	private function should_cache_command( $command, $update ) {
+		return $this->is_read_only_command( $command, $update );
+	}
+
+	private function build_response_cache_key( $identity, $command ) {
+		$subject = ! empty( $identity['wp_user'] ) && $identity['wp_user'] instanceof WP_User
+			? 'user:' . $identity['wp_user']->ID
+			: 'chat:' . ( ! empty( $identity['chat_id'] ) ? (string) $identity['chat_id'] : 'unknown' );
+
+		return 'telepilot_resp_' . md5(
+			wp_json_encode(
+				array(
+					$subject,
+					! empty( $command['raw'] ) ? (string) $command['raw'] : '',
+					get_locale(),
+				)
+			)
+		);
+	}
+
 	private function get_stale_update_window() {
 		$settings = get_option( 'telepilot_settings', array() );
 		$window   = isset( $settings[ self::STALE_UPDATE_WINDOW_OPTION ] ) ? (int) $settings[ self::STALE_UPDATE_WINDOW_OPTION ] : self::DEFAULT_STALE_WINDOW;
@@ -970,8 +1161,8 @@ class Telepilot_Telegram_Service {
 			return (int) $update['message']['date'];
 		}
 
-		if ( ! empty( $update['callback_query']['message']['date'] ) ) {
-			return (int) $update['callback_query']['message']['date'];
+		if ( ! empty( $update['callback_query']['id'] ) ) {
+			return current_time( 'timestamp', true );
 		}
 
 		return 0;
@@ -1044,6 +1235,7 @@ class Telepilot_Telegram_Service {
 				'queued_updates'  => (int) $counts['pending'] + (int) $counts['processing'],
 				'failed_jobs'     => (int) $counts['failed'],
 				'processing_jobs' => (int) $counts['processing'],
+				'stale_jobs'      => ! empty( $counts['stale'] ) ? (int) $counts['stale'] : 0,
 			)
 		);
 	}
