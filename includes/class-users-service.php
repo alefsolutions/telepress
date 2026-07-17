@@ -80,27 +80,45 @@ class Telepilot_Users_Service {
 
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'users', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d | %3$d items', 'wp-telepilot' ), $result['page'], $result['total_pages'], isset( $result['total_items'] ) ? (int) $result['total_items'] : count( $result['items'] ) )
 		);
 
 		foreach ( $result['items'] as $user ) {
-			$roles       = implode( ', ', array_map( 'sanitize_text_field', $user->roles ) );
-			$is_disabled = $this->is_disabled( $user->ID ) ? __( 'disabled', 'wp-telepilot' ) : __( 'active', 'wp-telepilot' );
-			$blocks[]    = Telepilot_Telegram_Response_Builder::label(
-				'users',
-				sprintf(
-					__( '[%1$d] %2$s [%3$s] (%4$s)', 'wp-telepilot' ),
-					$user->ID,
-					Telepilot_Telegram_Response_Builder::escape( $user->user_login ),
-					Telepilot_Telegram_Response_Builder::escape( $roles ? $roles : __( 'no role', 'wp-telepilot' ) ),
-					Telepilot_Telegram_Response_Builder::escape( $is_disabled )
-				)
-			);
+			$blocks[] = $this->format_user_summary_block( $user );
 		}
 
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use /users help for examples and /users search keyword to jump to a person quickly.', 'wp-telepilot' ) );
 
 		return Telepilot_Telegram_Response_Builder::join_blocks( $blocks );
+	}
+
+	private function format_user_summary_block( $user ) {
+		if ( ! $user instanceof WP_User ) {
+			return '';
+		}
+
+		$roles       = implode( ', ', array_map( 'sanitize_text_field', (array) $user->roles ) );
+		$is_disabled = $this->is_disabled( $user->ID ) ? __( 'Disabled', 'wp-telepilot' ) : __( 'Active', 'wp-telepilot' );
+		$title       = $user->display_name ? $user->display_name : $user->user_login;
+
+		return implode(
+			"\n",
+			array(
+				Telepilot_Telegram_Response_Builder::label(
+					'users',
+					sprintf(
+						__( '[%1$d] %2$s', 'wp-telepilot' ),
+						$user->ID,
+						Telepilot_Telegram_Response_Builder::escape( $title )
+					)
+				),
+				sprintf( __( 'Login: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $user->user_login ) ),
+				sprintf( __( 'Status: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $is_disabled ) ),
+				sprintf( __( 'Roles: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $roles ? $roles : __( 'No role', 'wp-telepilot' ) ) ),
+				sprintf( __( 'Email: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $user->user_email ) ),
+				sprintf( __( 'Registered: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( mysql2date( 'Y-m-d H:i:s', $user->user_registered ) ) ),
+			)
+		);
 	}
 
 	public function render_help_message() {

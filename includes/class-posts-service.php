@@ -141,19 +141,11 @@ class Telepilot_Posts_Service {
 
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d | %3$d items', 'wp-telepilot' ), $result['page'], $result['total_pages'], isset( $result['total_items'] ) ? (int) $result['total_items'] : count( $result['items'] ) )
 		);
 
 		foreach ( $result['items'] as $post ) {
-			$blocks[] = Telepilot_Telegram_Response_Builder::label(
-				'posts',
-				sprintf(
-					__( '[%1$d] %2$s [%3$s]', 'wp-telepilot' ),
-					$post->ID,
-					Telepilot_Telegram_Response_Builder::escape( get_the_title( $post ) ),
-					Telepilot_Telegram_Response_Builder::escape( $post->post_status )
-				)
-			);
+			$blocks[] = $this->format_post_summary_block( $post );
 		}
 
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use Open Editor for long-form body changes, or run /posts search keyword for a targeted lookup.', 'wp-telepilot' ) );
@@ -301,6 +293,43 @@ class Telepilot_Posts_Service {
 		}
 
 		return '/posts ' . $subcommand . ' page:' . $page;
+	}
+
+	private function format_post_summary_block( $post ) {
+		if ( ! $post instanceof WP_Post ) {
+			return '';
+		}
+
+		$title   = get_the_title( $post );
+		$title   = '' !== (string) $title ? $title : __( 'Untitled post', 'wp-telepilot' );
+		$author  = get_the_author_meta( 'display_name', (int) $post->post_author );
+		$author  = '' !== (string) $author ? $author : get_the_author_meta( 'user_login', (int) $post->post_author );
+		$author  = '' !== (string) $author ? $author : __( 'Unknown author', 'wp-telepilot' );
+		$excerpt = trim( wp_strip_all_tags( (string) $post->post_excerpt ) );
+
+		if ( '' === $excerpt ) {
+			$excerpt = wp_html_excerpt( wp_strip_all_tags( (string) $post->post_content ), 120, '...' );
+		}
+
+		$lines = array(
+			Telepilot_Telegram_Response_Builder::label(
+				'posts',
+				sprintf(
+					__( '[%1$d] %2$s', 'wp-telepilot' ),
+					$post->ID,
+					Telepilot_Telegram_Response_Builder::escape( $title )
+				)
+			),
+			sprintf( __( 'Status: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $this->humanize_status( $post->post_status ) ) ),
+			sprintf( __( 'Author: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $author ) ),
+			sprintf( __( 'Updated: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( get_post_modified_time( 'Y-m-d H:i:s', false, $post, true ) ) ),
+		);
+
+		if ( '' !== $excerpt ) {
+			$lines[] = sprintf( __( 'Excerpt: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $excerpt ) );
+		}
+
+		return implode( "\n", $lines );
 	}
 
 	private function query_posts_page( $args, $page, $limit ) {
@@ -633,6 +662,12 @@ class Telepilot_Posts_Service {
 
 	private function get_cache_version() {
 		return max( 1, (int) get_option( 'telepilot_posts_cache_version', 1 ) );
+	}
+
+	private function humanize_status( $status ) {
+		$status = str_replace( array( '-', '_' ), ' ', sanitize_key( (string) $status ) );
+
+		return '' !== $status ? ucwords( $status ) : __( 'Unknown', 'wp-telepilot' );
 	}
 
 	private function navigation_rows() {

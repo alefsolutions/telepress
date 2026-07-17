@@ -40,7 +40,7 @@ class Telepilot_Comments_Service {
 
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d | %3$d items', 'wp-telepilot' ), $result['page'], $result['total_pages'], isset( $result['total_items'] ) ? (int) $result['total_items'] : count( $result['items'] ) )
 		);
 
 		foreach ( $result['items'] as $comment ) {
@@ -417,15 +417,21 @@ class Telepilot_Comments_Service {
 		$post_title = get_the_title( $comment->comment_post_ID );
 		$status     = $this->status_label( $comment );
 
-		return Telepilot_Telegram_Response_Builder::label(
-			'comments',
-			sprintf(
-				__( '[%1$d] %2$s on %3$s [%4$s]: %5$s', 'wp-telepilot' ),
-				$comment->comment_ID,
-				Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'wp-telepilot' ) ),
-				Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'wp-telepilot' ) ),
-				Telepilot_Telegram_Response_Builder::escape( $status ),
-				Telepilot_Telegram_Response_Builder::escape( $excerpt )
+		return implode(
+			"\n",
+			array(
+				Telepilot_Telegram_Response_Builder::label(
+					'comments',
+					sprintf(
+						__( '[%1$d] %2$s', 'wp-telepilot' ),
+						$comment->comment_ID,
+						Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'wp-telepilot' ) )
+					)
+				),
+				sprintf( __( 'Status: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( ucfirst( $status ) ) ),
+				sprintf( __( 'Post: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'wp-telepilot' ) ) ),
+				sprintf( __( 'Date: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( get_comment_date( 'Y-m-d H:i:s', $comment ) ) ),
+				sprintf( __( 'Excerpt: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $excerpt ? $excerpt : __( 'No visible content.', 'wp-telepilot' ) ) ),
 			)
 		);
 	}

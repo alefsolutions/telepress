@@ -95,28 +95,11 @@ class Telepilot_Pages_Service {
 
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'pages', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d | %3$d items', 'wp-telepilot' ), $result['page'], $result['total_pages'], isset( $result['total_items'] ) ? (int) $result['total_items'] : count( $result['items'] ) )
 		);
 
 		foreach ( $result['items'] as $page ) {
-			$block_lines = array(
-				Telepilot_Telegram_Response_Builder::label(
-					'pages',
-					sprintf(
-						__( '[%1$d] %2$s [%3$s]', 'wp-telepilot' ),
-						$page->ID,
-						Telepilot_Telegram_Response_Builder::escape( get_the_title( $page ) ),
-						Telepilot_Telegram_Response_Builder::escape( $page->post_status )
-					)
-				),
-			);
-
-			$access_link = $this->describe_access_link( $page );
-			if ( '' !== $access_link ) {
-				$block_lines[] = $access_link;
-			}
-
-			$blocks[] = implode( "\n", $block_lines );
+			$blocks[] = $this->format_page_summary_block( $page );
 		}
 
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use the buttons below, or run /pages search keyword to narrow the list.', 'wp-telepilot' ) );
@@ -444,6 +427,38 @@ class Telepilot_Pages_Service {
 		return '/pages list page:' . $page;
 	}
 
+	private function format_page_summary_block( $page ) {
+		if ( ! $page instanceof WP_Post ) {
+			return '';
+		}
+
+		$title  = get_the_title( $page );
+		$title  = '' !== (string) $title ? $title : __( 'Untitled page', 'wp-telepilot' );
+		$author = get_the_author_meta( 'display_name', (int) $page->post_author );
+		$author = '' !== (string) $author ? $author : get_the_author_meta( 'user_login', (int) $page->post_author );
+		$author = '' !== (string) $author ? $author : __( 'Unknown author', 'wp-telepilot' );
+		$lines  = array(
+			Telepilot_Telegram_Response_Builder::label(
+				'pages',
+				sprintf(
+					__( '[%1$d] %2$s', 'wp-telepilot' ),
+					$page->ID,
+					Telepilot_Telegram_Response_Builder::escape( $title )
+				)
+			),
+			sprintf( __( 'Status: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $this->humanize_status( $page->post_status ) ) ),
+			sprintf( __( 'Author: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $author ) ),
+			sprintf( __( 'Updated: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( get_post_modified_time( 'Y-m-d H:i:s', false, $page, true ) ) ),
+		);
+
+		$access_link = $this->describe_access_link( $page );
+		if ( '' !== $access_link ) {
+			$lines[] = $access_link;
+		}
+
+		return implode( "\n", $lines );
+	}
+
 	private function describe_access_link( $page ) {
 		if ( ! $page instanceof WP_Post ) {
 			return '';
@@ -463,6 +478,12 @@ class Telepilot_Pages_Service {
 		$url = get_permalink( $page );
 
 		return $url ? (string) $url : '';
+	}
+
+	private function humanize_status( $status ) {
+		$status = str_replace( array( '-', '_' ), ' ', sanitize_key( (string) $status ) );
+
+		return '' !== $status ? ucwords( $status ) : __( 'Unknown', 'wp-telepilot' );
 	}
 
 	private function get_admin_edit_url( $page_id ) {

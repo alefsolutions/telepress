@@ -89,22 +89,15 @@ class Telepilot_Taxonomies_Service {
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( $icon_key, $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
 			sprintf(
-				__( 'Page %1$d of %2$d', 'wp-telepilot' ),
+				__( 'Page %1$d of %2$d | %3$d items', 'wp-telepilot' ),
 				$result['page'],
-				$result['total_pages']
+				$result['total_pages'],
+				isset( $result['total_items'] ) ? (int) $result['total_items'] : count( $result['items'] )
 			)
 		);
 
 		foreach ( $result['items'] as $term ) {
-			$blocks[] = Telepilot_Telegram_Response_Builder::label(
-				$icon_key,
-				sprintf(
-					__( '[%1$d] %2$s (%3$d)', 'wp-telepilot' ),
-					$term->term_id,
-					Telepilot_Telegram_Response_Builder::escape( $term->name ),
-					$term->count
-				)
-			);
+			$blocks[] = $this->format_term_summary_block( $term, $result['taxonomy'] );
 		}
 
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use search when your category or tag list grows large.', 'wp-telepilot' ) );
@@ -377,8 +370,52 @@ class Telepilot_Taxonomies_Service {
 		return $buttons;
 	}
 
+	private function format_term_summary_block( $term, $taxonomy ) {
+		if ( ! $term instanceof WP_Term ) {
+			return '';
+		}
+
+		$resource = 'post_tag' === $taxonomy ? 'tags' : 'categories';
+		$lines    = array(
+			Telepilot_Telegram_Response_Builder::label(
+				$resource,
+				sprintf(
+					__( '[%1$d] %2$s', 'wp-telepilot' ),
+					$term->term_id,
+					Telepilot_Telegram_Response_Builder::escape( $term->name )
+				)
+			),
+			sprintf( __( 'Slug: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $term->slug ) ),
+			sprintf( __( 'Count: %d', 'wp-telepilot' ), (int) $term->count ),
+		);
+
+		if ( 'category' === $taxonomy ) {
+			$lines[] = sprintf( __( 'Parent: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $this->get_parent_term_label( $term ) ) );
+		}
+
+		if ( '' !== (string) $term->description ) {
+			$lines[] = sprintf( __( 'Description: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( wp_html_excerpt( $term->description, 120, '...' ) ) );
+		}
+
+		return implode( "\n", $lines );
+	}
+
 	private function normalize_resource( $resource ) {
 		return 'tags' === $resource ? 'tags' : 'categories';
+	}
+
+	private function get_parent_term_label( $term ) {
+		if ( ! $term instanceof WP_Term || empty( $term->parent ) ) {
+			return __( 'None', 'wp-telepilot' );
+		}
+
+		$parent = get_term( (int) $term->parent, 'category' );
+
+		if ( ! $parent || is_wp_error( $parent ) ) {
+			return __( 'Unknown', 'wp-telepilot' );
+		}
+
+		return sprintf( '[%1$d] %2$s', $parent->term_id, $parent->name );
 	}
 
 	private function resource_singular( $resource ) {
