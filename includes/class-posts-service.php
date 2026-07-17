@@ -305,11 +305,6 @@ class Telepilot_Posts_Service {
 		$author  = get_the_author_meta( 'display_name', (int) $post->post_author );
 		$author  = '' !== (string) $author ? $author : get_the_author_meta( 'user_login', (int) $post->post_author );
 		$author  = '' !== (string) $author ? $author : __( 'Unknown author', 'wp-telepilot' );
-		$excerpt = trim( wp_strip_all_tags( (string) $post->post_excerpt ) );
-
-		if ( '' === $excerpt ) {
-			$excerpt = wp_html_excerpt( wp_strip_all_tags( (string) $post->post_content ), 120, '...' );
-		}
 
 		$lines = array(
 			Telepilot_Telegram_Response_Builder::label(
@@ -322,12 +317,9 @@ class Telepilot_Posts_Service {
 			),
 			sprintf( __( 'Status: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $this->humanize_status( $post->post_status ) ) ),
 			sprintf( __( 'Author: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $author ) ),
+			sprintf( __( 'Date: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( get_post_time( 'Y-m-d H:i:s', false, $post, true ) ) ),
 			sprintf( __( 'Updated: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( get_post_modified_time( 'Y-m-d H:i:s', false, $post, true ) ) ),
 		);
-
-		if ( '' !== $excerpt ) {
-			$lines[] = sprintf( __( 'Excerpt: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $excerpt ) );
-		}
 
 		return implode( "\n", $lines );
 	}
