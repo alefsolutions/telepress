@@ -233,7 +233,6 @@ class Telepilot_Telegram_Response_Builder {
 			return '';
 		}
 
-		$text = preg_replace( '/\s*\[\d+\]\s*$/u', '', $text );
 		$text = preg_replace( '/\bOpen Editor\b/u', 'Edit', $text );
 		$text = preg_replace( '/\bOpen wp-admin\b/u', 'Admin', $text );
 		$text = preg_replace( '/\bSite Overview\b/u', 'Overview', $text );
