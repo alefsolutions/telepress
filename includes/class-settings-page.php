@@ -66,6 +66,11 @@ class Telepilot_Settings_Page {
 		$output                            = array();
 		$output['bot_token']              = isset( $input['bot_token'] ) ? sanitize_text_field( $input['bot_token'] ) : '';
 		$output['webhook_secret']         = isset( $input['webhook_secret'] ) ? sanitize_text_field( $input['webhook_secret'] ) : '';
+		if ( '' === $output['webhook_secret'] ) {
+			$output['webhook_secret'] = ! empty( $existing['webhook_secret'] )
+				? sanitize_text_field( (string) $existing['webhook_secret'] )
+				: wp_generate_password( 32, false, false );
+		}
 		$output['worker_secret']          = ! empty( $existing['worker_secret'] ) ? sanitize_text_field( (string) $existing['worker_secret'] ) : wp_generate_password( 32, false, false );
 		$output['transport_mode']         = isset( $input['transport_mode'] ) && 'polling' === $input['transport_mode'] ? 'polling' : 'webhook';
 		$output['allowed_chat_ids']       = isset( $input['allowed_chat_ids'] ) ? sanitize_textarea_field( $input['allowed_chat_ids'] ) : '';
@@ -114,6 +119,10 @@ class Telepilot_Settings_Page {
 		$logo_url                 = $this->get_logo_url();
 		$product_name             = __( 'WP Telepilot', 'wp-telepilot' );
 		$product_version          = TELEPILOT_VERSION;
+		$company_url              = 'https://alefdigitalsolutions.com';
+		$product_url              = 'https://alefdigitalsolutions.com/solutions/wp-telepilot';
+		$bugs_url                 = 'https://alefdigitalsolutions.com/solutions/wp-telepilot';
+		$license_url              = 'https://www.gnu.org/licenses/gpl-2.0.html';
 		?>
 		<div class="wrap telepilot-admin">
 			<div class="telepilot-shell">
@@ -126,6 +135,12 @@ class Telepilot_Settings_Page {
 						<h1><?php echo esc_html( $product_name ); ?><?php esc_html_e( ' Control Center', 'wp-telepilot' ); ?></h1>
 						<div class="telepilot-hero-meta">
 							<span class="telepilot-status-pill is-good"><?php echo esc_html( sprintf( __( 'Version %s', 'wp-telepilot' ), $product_version ) ); ?></span>
+							<div class="telepilot-hero-links">
+								<a href="<?php echo esc_url( $company_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Alef Digital Solutions', 'wp-telepilot' ); ?></a>
+								<a href="<?php echo esc_url( $product_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Product Page', 'wp-telepilot' ); ?></a>
+								<a href="<?php echo esc_url( $bugs_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Report Bugs', 'wp-telepilot' ); ?></a>
+								<a href="<?php echo esc_url( $license_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'GPLv2 or later', 'wp-telepilot' ); ?></a>
+							</div>
 						</div>
 						<p class="telepilot-lead">
 							<?php esc_html_e( 'Configure secure Telegram access, monitor transport health, and run WordPress operations from chat with a cleaner command experience.', 'wp-telepilot' ); ?>
@@ -138,7 +153,29 @@ class Telepilot_Settings_Page {
 							<li><strong><?php echo esc_html( PHP_VERSION ); ?></strong><span><?php esc_html_e( 'PHP', 'wp-telepilot' ); ?></span></li>
 							<li><strong><?php echo esc_html( (string) $linking_count ); ?></strong><span><?php esc_html_e( 'Linked users', 'wp-telepilot' ); ?></span></li>
 						</ul>
-						<p class="telepilot-hero-note"><?php esc_html_e( 'Release focus: secure linking, reliable transport, and action-first Telegram workflows.', 'wp-telepilot' ); ?></p>
+						<p class="telepilot-hero-note">
+							<?php
+							printf(
+								/* translators: 1: linked creator name, 2: linked license label. */
+								wp_kses(
+									__( 'Created by <a href="%1$s" target="_blank" rel="noopener noreferrer">Alef Digital Solutions</a>. WP Telepilot is distributed under the <a href="%2$s" target="_blank" rel="noopener noreferrer">GPLv2 or later</a> license used by WordPress.', 'wp-telepilot' ),
+									array(
+										'a' => array(
+											'href'   => array(),
+											'target' => array(),
+											'rel'    => array(),
+										),
+									)
+								),
+								esc_url( $company_url ),
+								esc_url( $license_url )
+							);
+							?>
+						</p>
+						<div class="telepilot-resource-links">
+							<a href="<?php echo esc_url( $product_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View WP Telepilot page', 'wp-telepilot' ); ?></a>
+							<a href="<?php echo esc_url( $bugs_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Report a bug', 'wp-telepilot' ); ?></a>
+						</div>
 					</div>
 				</section>
 
@@ -185,8 +222,19 @@ class Telepilot_Settings_Page {
 								<div class="telepilot-field-grid">
 									<label class="telepilot-field">
 										<span><?php esc_html_e( 'Webhook Secret', 'wp-telepilot' ); ?></span>
-										<input type="text" name="telepilot_settings[webhook_secret]" value="<?php echo esc_attr( $settings['webhook_secret'] ); ?>" class="regular-text code" />
-										<small><?php esc_html_e( 'WP Telepilot validates Telegram using the X-Telegram-Bot-Api-Secret-Token header.', 'wp-telepilot' ); ?></small>
+										<input
+											type="text"
+											name="telepilot_settings[webhook_secret]"
+											value="<?php echo esc_attr( $settings['webhook_secret'] ); ?>"
+											class="regular-text code"
+											autocomplete="off"
+											data-telepilot-webhook-secret
+										/>
+										<div class="telepilot-field-actions">
+											<button type="button" class="button" data-telepilot-generate-secret><?php esc_html_e( 'Generate New Secret', 'wp-telepilot' ); ?></button>
+											<button type="button" class="button" data-telepilot-copy-secret data-copy-label="<?php esc_attr_e( 'Copy Secret', 'wp-telepilot' ); ?>" data-copied-label="<?php esc_attr_e( 'Copied', 'wp-telepilot' ); ?>"><?php esc_html_e( 'Copy Secret', 'wp-telepilot' ); ?></button>
+										</div>
+										<small><?php esc_html_e( 'WP Telepilot validates Telegram using the X-Telegram-Bot-Api-Secret-Token header. Saving this screen in webhook mode re-syncs Telegram with the current secret.', 'wp-telepilot' ); ?></small>
 									</label>
 									<label class="telepilot-field telepilot-field-full">
 										<span><?php esc_html_e( 'Async Worker Endpoint', 'wp-telepilot' ); ?></span>

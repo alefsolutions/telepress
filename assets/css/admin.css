@@ -101,6 +101,10 @@
 
 .telepilot-hero-meta {
   margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 .telepilot-hero-card,
@@ -263,6 +267,68 @@
   line-height: 1.7;
 }
 
+.telepilot-hero-note a,
+.telepilot-hero-links a,
+.telepilot-resource-links a {
+  color: inherit;
+  text-decoration-color: rgba(14, 165, 211, 0.45);
+  text-underline-offset: 3px;
+}
+
+.telepilot-hero-links,
+.telepilot-resource-links,
+.telepilot-field-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.telepilot-hero-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.08);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.telepilot-hero-links a:hover,
+.telepilot-hero-links a:focus {
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.telepilot-resource-links {
+  margin-top: 18px;
+}
+
+.telepilot-resource-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 14px;
+  border: 1px solid rgba(14, 165, 211, 0.18);
+  border-radius: 999px;
+  color: var(--telepilot-accent-strong);
+  text-decoration: none;
+  background: rgba(14, 165, 211, 0.08);
+  font-weight: 700;
+}
+
+.telepilot-resource-links a:hover,
+.telepilot-resource-links a:focus {
+  border-color: rgba(14, 165, 211, 0.34);
+  background: rgba(14, 165, 211, 0.14);
+  color: #075a73;
+  outline: none;
+}
+
 .telepilot-setup-list {
   margin: 0;
   padding-left: 22px;
@@ -292,6 +358,26 @@
   border-color: var(--telepilot-accent);
   outline: none;
   box-shadow: 0 0 0 3px rgba(14, 165, 211, 0.14);
+}
+
+.telepilot-field-actions {
+  margin-top: 2px;
+}
+
+.telepilot-field-actions .button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border-color: rgba(14, 165, 211, 0.22);
+  color: var(--telepilot-accent-strong);
+  box-shadow: none;
+}
+
+.telepilot-field-actions .button:hover,
+.telepilot-field-actions .button:focus {
+  border-color: rgba(14, 165, 211, 0.42);
+  color: #075a73;
+  box-shadow: none;
 }
 
 .telepilot-checkbox-grid {
@@ -445,6 +531,10 @@
 
   .telepilot-panel-heading {
     flex-direction: column;
+  }
+
+  .telepilot-hero-meta {
+    align-items: flex-start;
   }
 
   .telepilot-hero-metrics {
