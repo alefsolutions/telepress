@@ -13,11 +13,11 @@ class Telepilot_Post_Editor_Service {
 		$post = get_post( $post_id );
 
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		if ( ! user_can( $wp_user, 'edit_post', $post_id ) ) {
-			return new WP_Error( 'telepilot_post_edit_denied', __( 'You do not have permission to edit that post.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_edit_denied', __( 'You do not have permission to edit that post.', 'wp-telepilot' ) );
 		}
 
 		$expiration = max( 300, absint( $expiration ) );
@@ -52,8 +52,8 @@ class Telepilot_Post_Editor_Service {
 
 		if ( empty( $token ) || empty( $session ) ) {
 			$this->render_error_page(
-				__( 'Link Expired', 'telepilot' ),
-				__( 'That post editor link is invalid, expired, or has already been used. Generate a fresh link from Telegram and try again.', 'telepilot' ),
+				__( 'Link Expired', 'wp-telepilot' ),
+				__( 'That post editor link is invalid, expired, or has already been used. Generate a fresh link from Telegram and try again.', 'wp-telepilot' ),
 				410
 			);
 		}
@@ -64,8 +64,8 @@ class Telepilot_Post_Editor_Service {
 		if ( ! $post || 'post' !== $post->post_type || ! $user instanceof WP_User || ! user_can( $user, 'edit_post', $post->ID ) ) {
 			$this->delete_session( $token );
 			$this->render_error_page(
-				__( 'Editor Unavailable', 'telepilot' ),
-				__( 'That post can no longer be edited with this link.', 'telepilot' ),
+				__( 'Editor Unavailable', 'wp-telepilot' ),
+				__( 'That post can no longer be edited with this link.', 'wp-telepilot' ),
 				403
 			);
 		}
@@ -149,7 +149,7 @@ class Telepilot_Post_Editor_Service {
 		<head>
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<title><?php echo esc_html( sprintf( __( 'Edit Post: %s', 'telepilot' ), $title ) ); ?></title>
+			<title><?php echo esc_html( sprintf( __( 'Edit Post: %s', 'wp-telepilot' ), $title ) ); ?></title>
 			<style>
 				body{margin:0;background:linear-gradient(180deg,#f8fbfd 0%,#eef4f7 100%);color:#1f2933;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 				.shell{max-width:1040px;margin:0 auto;padding:32px 20px 48px}
@@ -177,13 +177,13 @@ class Telepilot_Post_Editor_Service {
 		<body>
 			<div class="shell">
 				<section class="hero">
-					<p class="kicker"><?php esc_html_e( 'WP Telepilot Long-Form Editor', 'telepilot' ); ?></p>
+					<p class="kicker"><?php esc_html_e( 'WP Telepilot Long-Form Editor', 'wp-telepilot' ); ?></p>
 					<h1><?php echo esc_html( $title ); ?></h1>
 					<div class="meta">
-						<span class="pill"><?php echo esc_html( sprintf( __( 'Post [%d]', 'telepilot' ), $post->ID ) ); ?></span>
+						<span class="pill"><?php echo esc_html( sprintf( __( 'Post [%d]', 'wp-telepilot' ), $post->ID ) ); ?></span>
 						<span class="pill"><?php echo esc_html( $status_label ); ?></span>
 					</div>
-					<p><?php esc_html_e( 'This secure browser editor is designed for longer post changes that are awkward to make in Telegram chat. Save here, then continue your workflow back in Telegram.', 'telepilot' ); ?></p>
+					<p><?php esc_html_e( 'This secure browser editor is designed for longer post changes that are awkward to make in Telegram chat. Save here, then continue your workflow back in Telegram.', 'wp-telepilot' ); ?></p>
 				</section>
 
 				<section class="card">
@@ -196,28 +196,28 @@ class Telepilot_Post_Editor_Service {
 						<input type="hidden" name="telepilot_post_editor_token" value="<?php echo esc_attr( $token ); ?>">
 						<div class="grid">
 							<div>
-								<label for="telepilot-post-title"><?php esc_html_e( 'Title', 'telepilot' ); ?></label>
+								<label for="telepilot-post-title"><?php esc_html_e( 'Title', 'wp-telepilot' ); ?></label>
 								<input id="telepilot-post-title" type="text" name="telepilot_post_title" value="<?php echo esc_attr( $post->post_title ); ?>">
 							</div>
 							<div>
-								<label for="telepilot-post-excerpt"><?php esc_html_e( 'Excerpt', 'telepilot' ); ?></label>
+								<label for="telepilot-post-excerpt"><?php esc_html_e( 'Excerpt', 'wp-telepilot' ); ?></label>
 								<textarea id="telepilot-post-excerpt" class="excerpt" name="telepilot_post_excerpt"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
 							</div>
 							<div>
-								<label for="telepilot-post-content"><?php esc_html_e( 'Content', 'telepilot' ); ?></label>
+								<label for="telepilot-post-content"><?php esc_html_e( 'Content', 'wp-telepilot' ); ?></label>
 								<textarea id="telepilot-post-content" class="content" name="telepilot_post_content"><?php echo esc_textarea( $post->post_content ); ?></textarea>
 							</div>
 						</div>
 
 						<div class="actions">
-							<button class="primary" type="submit"><?php esc_html_e( 'Save Changes', 'telepilot' ); ?></button>
+							<button class="primary" type="submit"><?php esc_html_e( 'Save Changes', 'wp-telepilot' ); ?></button>
 							<?php if ( 'publish' === $post->post_status && $preview_url ) : ?>
-								<a class="button secondary" href="<?php echo esc_url( $preview_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Preview Post', 'telepilot' ); ?></a>
+								<a class="button secondary" href="<?php echo esc_url( $preview_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Preview Post', 'wp-telepilot' ); ?></a>
 							<?php endif; ?>
 						</div>
 					</form>
 
-					<p class="help"><?php esc_html_e( 'This link expires automatically and is intended only for this editing session. After saving, return to Telegram to publish, review, or continue managing the post.', 'telepilot' ); ?></p>
+					<p class="help"><?php esc_html_e( 'This link expires automatically and is intended only for this editing session. After saving, return to Telegram to publish, review, or continue managing the post.', 'wp-telepilot' ); ?></p>
 				</section>
 			</div>
 		</body>
@@ -236,7 +236,7 @@ class Telepilot_Post_Editor_Service {
 		<head>
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<title><?php esc_html_e( 'Post Saved', 'telepilot' ); ?></title>
+			<title><?php esc_html_e( 'Post Saved', 'wp-telepilot' ); ?></title>
 			<style>
 				body{margin:0;background:linear-gradient(180deg,#f8fbfd 0%,#eef4f7 100%);color:#1f2933;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 				.shell{max-width:760px;margin:0 auto;padding:40px 20px}
@@ -253,14 +253,14 @@ class Telepilot_Post_Editor_Service {
 		<body>
 			<div class="shell">
 				<div class="card">
-					<span class="badge"><?php esc_html_e( 'Saved', 'telepilot' ); ?></span>
-					<h1><?php esc_html_e( 'Post updated successfully', 'telepilot' ); ?></h1>
-					<p><?php esc_html_e( 'Your long-form changes were saved. You can now return to Telegram to keep working with WP Telepilot.', 'telepilot' ); ?></p>
+					<span class="badge"><?php esc_html_e( 'Saved', 'wp-telepilot' ); ?></span>
+					<h1><?php esc_html_e( 'Post updated successfully', 'wp-telepilot' ); ?></h1>
+					<p><?php esc_html_e( 'Your long-form changes were saved. You can now return to Telegram to keep working with WP Telepilot.', 'wp-telepilot' ); ?></p>
 					<div class="actions">
 						<?php if ( 'publish' === $post->post_status && $preview_url ) : ?>
-							<a class="button primary" href="<?php echo esc_url( $preview_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Preview Post', 'telepilot' ); ?></a>
+							<a class="button primary" href="<?php echo esc_url( $preview_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Preview Post', 'wp-telepilot' ); ?></a>
 						<?php endif; ?>
-						<a class="button secondary" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open Site', 'telepilot' ); ?></a>
+						<a class="button secondary" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open Site', 'wp-telepilot' ); ?></a>
 					</div>
 				</div>
 			</div>

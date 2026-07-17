@@ -27,21 +27,21 @@ class Telepilot_Plugins_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', $heading ) ) . "\n\n" . __( 'No plugins matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', $heading ) ) . "\n\n" . __( 'No plugins matched that request.', 'wp-telepilot' );
 		}
 
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
 		);
 
 		foreach ( $result['items'] as $plugin ) {
-			$status = $plugin['is_active'] ? __( 'active', 'telepilot' ) : __( 'inactive', 'telepilot' );
+			$status = $plugin['is_active'] ? __( 'active', 'wp-telepilot' ) : __( 'inactive', 'wp-telepilot' );
 			$line   = array(
 				Telepilot_Telegram_Response_Builder::label(
 					'plugins',
 					sprintf(
-						__( '[%1$d] %2$s [%3$s] v%4$s', 'telepilot' ),
+						__( '[%1$d] %2$s [%3$s] v%4$s', 'wp-telepilot' ),
 						isset( $plugin['list_number'] ) ? (int) $plugin['list_number'] : 0,
 						Telepilot_Telegram_Response_Builder::escape( $plugin['name'] ),
 						Telepilot_Telegram_Response_Builder::escape( $status ),
@@ -49,14 +49,14 @@ class Telepilot_Plugins_Service {
 					)
 				),
 				sprintf(
-					__( 'Identifier: [%s]', 'telepilot' ),
+					__( 'Identifier: [%s]', 'wp-telepilot' ),
 					Telepilot_Telegram_Response_Builder::escape( $plugin['identifier'] )
 				),
 			);
 
 			if ( ! empty( $plugin['update_version'] ) ) {
 				$line[] = sprintf(
-					__( '(update %s available)', 'telepilot' ),
+					__( '(update %s available)', 'wp-telepilot' ),
 					Telepilot_Telegram_Response_Builder::escape( $plugin['update_version'] )
 				);
 			}
@@ -64,37 +64,37 @@ class Telepilot_Plugins_Service {
 			$blocks[] = implode( "\n", $line );
 		}
 
-		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use /plugins details slug for a deeper look before activating, updating, or deleting.', 'telepilot' ) );
+		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use /plugins details slug for a deeper look before activating, updating, or deleting.', 'wp-telepilot' ) );
 
 		return Telepilot_Telegram_Response_Builder::join_blocks( $blocks );
 	}
 
 	public function render_details_message( $plugin ) {
 		if ( empty( $plugin ) || ! is_array( $plugin ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugin Details', 'telepilot' ) ) ) . "\n\n" . __( 'Plugin not found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugin Details', 'wp-telepilot' ) ) ) . "\n\n" . __( 'Plugin not found.', 'wp-telepilot' );
 		}
 
-		$status = $plugin['is_active'] ? __( 'Active', 'telepilot' ) : __( 'Inactive', 'telepilot' );
+		$status = $plugin['is_active'] ? __( 'Active', 'wp-telepilot' ) : __( 'Inactive', 'wp-telepilot' );
 		$lines  = array(
-			Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugin Details', 'telepilot' ) ) ),
+			Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugin Details', 'wp-telepilot' ) ) ),
 			'',
-			sprintf( __( 'Name: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['name'] ) ),
-			sprintf( __( 'Identifier: [%s]', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['identifier'] ) ),
-			sprintf( __( 'Status: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $status ) ),
-			sprintf( __( 'Version: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['version'] ) ),
-			sprintf( __( 'File: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['file'] ) ),
+			sprintf( __( 'Name: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['name'] ) ),
+			sprintf( __( 'Identifier: [%s]', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['identifier'] ) ),
+			sprintf( __( 'Status: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $status ) ),
+			sprintf( __( 'Version: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['version'] ) ),
+			sprintf( __( 'File: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['file'] ) ),
 		);
 
 		if ( ! empty( $plugin['author'] ) ) {
-			$lines[] = sprintf( __( 'Author: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( wp_strip_all_tags( $plugin['author'] ) ) );
+			$lines[] = sprintf( __( 'Author: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( wp_strip_all_tags( $plugin['author'] ) ) );
 		}
 
 		if ( ! empty( $plugin['update_version'] ) ) {
-			$lines[] = sprintf( __( 'Update available: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['update_version'] ) );
+			$lines[] = sprintf( __( 'Update available: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $plugin['update_version'] ) );
 		}
 
 		if ( ! empty( $plugin['is_self'] ) ) {
-			$lines[] = __( 'Protected: WP Telepilot does not manage itself through Telegram.', 'telepilot' );
+			$lines[] = __( 'Protected: WP Telepilot does not manage itself through Telegram.', 'wp-telepilot' );
 		}
 
 		return implode( "\n", $lines );
@@ -103,17 +103,17 @@ class Telepilot_Plugins_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugins Commands', 'telepilot' ) ) ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins list' ) . ' ' . __( 'Show installed plugins', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins search seo' ) . ' ' . __( 'Search installed plugins', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins updates' ) . ' ' . __( 'Show plugins with available updates', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins refresh' ) . ' ' . __( 'Refresh plugin update information', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins details akismet' ) . ' ' . __( 'Show plugin details', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins activate akismet' ) . ' ' . __( 'Activate a plugin after confirmation', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins deactivate akismet' ) . ' ' . __( 'Deactivate a plugin after confirmation', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins update akismet' ) . ' ' . __( 'Update a plugin after confirmation', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/plugins delete akismet' ) . ' ' . __( 'Delete a plugin after confirmation', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use the plugin identifier shown in brackets, such as [akismet], when running plugin commands.', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'plugins', __( 'Plugins Commands', 'wp-telepilot' ) ) ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins list' ) . ' ' . __( 'Show installed plugins', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins search seo' ) . ' ' . __( 'Search installed plugins', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins updates' ) . ' ' . __( 'Show plugins with available updates', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins refresh' ) . ' ' . __( 'Refresh plugin update information', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins details akismet' ) . ' ' . __( 'Show plugin details', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins activate akismet' ) . ' ' . __( 'Activate a plugin after confirmation', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins deactivate akismet' ) . ' ' . __( 'Deactivate a plugin after confirmation', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins update akismet' ) . ' ' . __( 'Update a plugin after confirmation', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/plugins delete akismet' ) . ' ' . __( 'Delete a plugin after confirmation', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use the plugin identifier shown in brackets, such as [akismet], when running plugin commands.', 'wp-telepilot' ) ),
 			)
 		);
 	}
@@ -128,7 +128,7 @@ class Telepilot_Plugins_Service {
 		$this->bump_cache_version();
 
 		return array(
-			'label'       => __( 'plugin metadata refreshed', 'telepilot' ),
+			'label'       => __( 'plugin metadata refreshed', 'wp-telepilot' ),
 			'after_state' => array(
 				'refreshed_at' => time(),
 			),
@@ -143,7 +143,7 @@ class Telepilot_Plugins_Service {
 			$list_number = isset( $plugin['list_number'] ) ? (int) $plugin['list_number'] : 0;
 			$row         = array(
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'telepilot' ), $list_number ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'wp-telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins details ' . $identifier,
 				),
 			);
@@ -155,23 +155,23 @@ class Telepilot_Plugins_Service {
 
 			if ( ! empty( $plugin['update_version'] ) ) {
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'update', sprintf( __( 'Update [%d]', 'telepilot' ), $list_number ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'update', sprintf( __( 'Update [%d]', 'wp-telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins update ' . $identifier,
 				);
 			} elseif ( $plugin['is_active'] ) {
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'disable', sprintf( __( 'Deactivate [%d]', 'telepilot' ), $list_number ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'disable', sprintf( __( 'Deactivate [%d]', 'wp-telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins deactivate ' . $identifier,
 				);
 			} else {
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'enable', sprintf( __( 'Activate [%d]', 'telepilot' ), $list_number ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'enable', sprintf( __( 'Activate [%d]', 'wp-telepilot' ), $list_number ) ),
 					'callback_data' => '/plugins activate ' . $identifier,
 				);
 			}
 
 			$row[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $list_number ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'wp-telepilot' ), $list_number ) ),
 				'callback_data' => '/plugins delete ' . $identifier,
 			);
 
@@ -204,7 +204,7 @@ class Telepilot_Plugins_Service {
 
 		return Telepilot_Telegram_Response_Builder::append_rows(
 			Telepilot_Telegram_Response_Builder::confirmation_keyboard(
-				sprintf( __( 'Confirm %1$s [%2$s]', 'telepilot' ), ucfirst( $action ), $label ),
+				sprintf( __( 'Confirm %1$s [%2$s]', 'wp-telepilot' ), ucfirst( $action ), $label ),
 				'tp:plugin:confirm:' . $token,
 				'/plugins list'
 			),
@@ -216,7 +216,7 @@ class Telepilot_Plugins_Service {
 		$plugin_file = $this->resolve_plugin_file( $identifier );
 
 		if ( ! $plugin_file ) {
-			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'wp-telepilot' ) );
 		}
 
 		return $this->get_plugin_record( $plugin_file );
@@ -225,7 +225,7 @@ class Telepilot_Plugins_Service {
 	public function activate( $identifier ) {
 		$plugin_file = $this->resolve_plugin_file( $identifier );
 		if ( ! $plugin_file ) {
-			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'wp-telepilot' ) );
 		}
 
 		$self_action = $this->guard_self_action( $plugin_file, 'activate' );
@@ -236,7 +236,7 @@ class Telepilot_Plugins_Service {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		if ( is_plugin_active( $plugin_file ) ) {
-			return new WP_Error( 'telepilot_plugin_already_active', __( 'That plugin is already active.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_already_active', __( 'That plugin is already active.', 'wp-telepilot' ) );
 		}
 
 		$result = activate_plugin( $plugin_file, '', false, false );
@@ -246,13 +246,13 @@ class Telepilot_Plugins_Service {
 
 		$this->bump_cache_version();
 
-		return $this->build_action_result( $plugin_file, __( 'activated', 'telepilot' ) );
+		return $this->build_action_result( $plugin_file, __( 'activated', 'wp-telepilot' ) );
 	}
 
 	public function deactivate( $identifier ) {
 		$plugin_file = $this->resolve_plugin_file( $identifier );
 		if ( ! $plugin_file ) {
-			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'wp-telepilot' ) );
 		}
 
 		$self_action = $this->guard_self_action( $plugin_file, 'deactivate' );
@@ -263,7 +263,7 @@ class Telepilot_Plugins_Service {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		if ( ! is_plugin_active( $plugin_file ) ) {
-			return new WP_Error( 'telepilot_plugin_already_inactive', __( 'That plugin is already inactive.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_already_inactive', __( 'That plugin is already inactive.', 'wp-telepilot' ) );
 		}
 
 		$before = $this->get_plugin_record( $plugin_file );
@@ -274,14 +274,14 @@ class Telepilot_Plugins_Service {
 			'plugin'       => $this->get_plugin_record( $plugin_file ),
 			'before_state' => $before,
 			'after_state'  => $this->get_plugin_record( $plugin_file ),
-			'label'        => __( 'deactivated', 'telepilot' ),
+			'label'        => __( 'deactivated', 'wp-telepilot' ),
 		);
 	}
 
 	public function delete( $identifier ) {
 		$plugin_file = $this->resolve_plugin_file( $identifier );
 		if ( ! $plugin_file ) {
-			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'wp-telepilot' ) );
 		}
 
 		$self_action = $this->guard_self_action( $plugin_file, 'delete' );
@@ -293,7 +293,7 @@ class Telepilot_Plugins_Service {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
 		if ( is_plugin_active( $plugin_file ) ) {
-			return new WP_Error( 'telepilot_plugin_active_delete_blocked', __( 'Deactivate the plugin before deleting it.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_active_delete_blocked', __( 'Deactivate the plugin before deleting it.', 'wp-telepilot' ) );
 		}
 
 		$before = $this->get_plugin_record( $plugin_file );
@@ -304,7 +304,7 @@ class Telepilot_Plugins_Service {
 		}
 
 		if ( true !== $result ) {
-			return new WP_Error( 'telepilot_plugin_delete_failed', __( 'WordPress could not delete that plugin.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_delete_failed', __( 'WordPress could not delete that plugin.', 'wp-telepilot' ) );
 		}
 
 		$this->bump_cache_version();
@@ -313,14 +313,14 @@ class Telepilot_Plugins_Service {
 			'plugin'       => $before,
 			'before_state' => $before,
 			'after_state'  => array( 'deleted' => true ),
-			'label'        => __( 'deleted', 'telepilot' ),
+			'label'        => __( 'deleted', 'wp-telepilot' ),
 		);
 	}
 
 	public function update( $identifier ) {
 		$plugin_file = $this->resolve_plugin_file( $identifier );
 		if ( ! $plugin_file ) {
-			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_not_found', __( 'Plugin not found.', 'wp-telepilot' ) );
 		}
 
 		$self_action = $this->guard_self_action( $plugin_file, 'update' );
@@ -337,7 +337,7 @@ class Telepilot_Plugins_Service {
 
 		$before = $this->get_plugin_record( $plugin_file );
 		if ( empty( $before['update_version'] ) ) {
-			return new WP_Error( 'telepilot_plugin_no_update', __( 'That plugin does not currently have an available update.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_no_update', __( 'That plugin does not currently have an available update.', 'wp-telepilot' ) );
 		}
 
 		$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
@@ -348,7 +348,7 @@ class Telepilot_Plugins_Service {
 		}
 
 		if ( false === $result ) {
-			return new WP_Error( 'telepilot_plugin_update_failed', __( 'WordPress could not update that plugin.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_plugin_update_failed', __( 'WordPress could not update that plugin.', 'wp-telepilot' ) );
 		}
 
 		wp_clean_plugins_cache( false );
@@ -359,7 +359,7 @@ class Telepilot_Plugins_Service {
 			'plugin'       => $this->get_plugin_record( $plugin_file ),
 			'before_state' => $before,
 			'after_state'  => $this->get_plugin_record( $plugin_file ),
-			'label'        => __( 'updated', 'telepilot' ),
+			'label'        => __( 'updated', 'wp-telepilot' ),
 		);
 	}
 
@@ -560,14 +560,14 @@ class Telepilot_Plugins_Service {
 			return true;
 		}
 
-		$message = __( 'WP Telepilot cannot manage its own plugin file through Telegram for safety.', 'telepilot' );
+		$message = __( 'WP Telepilot cannot manage its own plugin file through Telegram for safety.', 'wp-telepilot' );
 
 		if ( 'update' === $action ) {
-			$message = __( 'WP Telepilot cannot update itself through Telegram for safety.', 'telepilot' );
+			$message = __( 'WP Telepilot cannot update itself through Telegram for safety.', 'wp-telepilot' );
 		} elseif ( 'delete' === $action ) {
-			$message = __( 'WP Telepilot cannot delete itself through Telegram for safety.', 'telepilot' );
+			$message = __( 'WP Telepilot cannot delete itself through Telegram for safety.', 'wp-telepilot' );
 		} elseif ( 'deactivate' === $action ) {
-			$message = __( 'WP Telepilot cannot deactivate itself through Telegram for safety.', 'telepilot' );
+			$message = __( 'WP Telepilot cannot deactivate itself through Telegram for safety.', 'wp-telepilot' );
 		}
 
 		return new WP_Error( 'telepilot_plugin_self_action_blocked', $message );
@@ -582,14 +582,14 @@ class Telepilot_Plugins_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'wp-telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'wp-telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -613,11 +613,11 @@ class Telepilot_Plugins_Service {
 		return array(
 			array(
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'wp-telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'wp-telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

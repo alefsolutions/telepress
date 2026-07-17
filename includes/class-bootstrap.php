@@ -10,6 +10,7 @@ class Telepilot_Bootstrap {
 	private $settings_page;
 	private $rest_controller;
 	private $notification_service;
+	private $privacy_service;
 	private $users_service;
 	private $post_editor_service;
 
@@ -17,15 +18,17 @@ class Telepilot_Bootstrap {
 		$this->settings_page        = new Telepilot_Settings_Page();
 		$this->rest_controller      = new Telepilot_REST_Webhook_Controller();
 		$this->notification_service = new Telepilot_Notification_Service();
+		$this->privacy_service      = new Telepilot_Privacy_Service();
 		$this->users_service        = new Telepilot_Users_Service( new Telepilot_Confirmation_Service() );
 		$this->post_editor_service  = new Telepilot_Post_Editor_Service();
 	}
 
 	public function boot() {
-		load_plugin_textdomain( 'telepilot', false, dirname( plugin_basename( TELEPILOT_FILE ) ) . '/languages' );
+		load_plugin_textdomain( 'wp-telepilot', false, dirname( plugin_basename( TELEPILOT_FILE ) ) . '/languages' );
 		$this->maybe_upgrade_schema();
 		$this->ensure_settings_defaults();
 		$this->settings_page->register();
+		$this->privacy_service->register();
 
 		add_filter( 'cron_schedules', array( $this, 'register_cron_schedules' ) );
 		add_action( 'rest_api_init', array( $this->rest_controller, 'register_routes' ) );
@@ -86,7 +89,7 @@ class Telepilot_Bootstrap {
 	public function register_cron_schedules( $schedules ) {
 		$schedules['telepilot_every_minute'] = array(
 			'interval' => MINUTE_IN_SECONDS,
-			'display'  => __( 'Every Minute (Telepilot)', 'telepilot' ),
+			'display'  => __( 'Every Minute (Telepilot)', 'wp-telepilot' ),
 		);
 
 		return $schedules;

@@ -38,12 +38,12 @@ class Telepilot_Notifications_Command_Service {
 
 	public function render_page_message( $result ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'telepilot' ) ) ) . "\n\n" . __( 'No notification options were found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'wp-telepilot' ) ) ) . "\n\n" . __( 'No notification options were found.', 'wp-telepilot' );
 		}
 
-		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'telepilot' ) ) ) );
+		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notifications', 'wp-telepilot' ) ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
 		);
 
 		foreach ( $result['items'] as $item ) {
@@ -53,37 +53,37 @@ class Telepilot_Notifications_Command_Service {
 					Telepilot_Telegram_Response_Builder::label(
 						'notifications',
 						sprintf(
-							__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
+							__( '[%1$d] %2$s [%3$s]', 'wp-telepilot' ),
 							isset( $item['list_number'] ) ? (int) $item['list_number'] : 0,
 							Telepilot_Telegram_Response_Builder::escape( $item['label'] ),
-							Telepilot_Telegram_Response_Builder::escape( $item['enabled'] ? __( 'enabled', 'telepilot' ) : __( 'disabled', 'telepilot' ) )
+							Telepilot_Telegram_Response_Builder::escape( $item['enabled'] ? __( 'enabled', 'wp-telepilot' ) : __( 'disabled', 'wp-telepilot' ) )
 						)
 					),
 					sprintf(
-						__( 'Key: [%s]', 'telepilot' ),
+						__( 'Key: [%s]', 'wp-telepilot' ),
 						Telepilot_Telegram_Response_Builder::escape( $item['key'] )
 					),
 				)
 			);
 		}
 
-		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: toggle only the alerts you actually want sent to Telegram.', 'telepilot' ) );
+		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: toggle only the alerts you actually want sent to Telegram.', 'wp-telepilot' ) );
 
 		return Telepilot_Telegram_Response_Builder::join_blocks( $blocks );
 	}
 
 	public function render_help_message() {
 		$entries = array(
-			Telepilot_Telegram_Response_Builder::code( '/notifications list' ) . ' ' . __( 'Show notification options', 'telepilot' ),
-			Telepilot_Telegram_Response_Builder::code( '/notifications enable new_comment' ) . ' ' . __( 'Enable a notification type', 'telepilot' ),
-			Telepilot_Telegram_Response_Builder::code( '/notifications disable plugin_updates' ) . ' ' . __( 'Disable a notification type', 'telepilot' ),
-			Telepilot_Telegram_Response_Builder::code( '/notifications toggle failed_login' ) . ' ' . __( 'Toggle a notification type', 'telepilot' ),
+			Telepilot_Telegram_Response_Builder::code( '/notifications list' ) . ' ' . __( 'Show notification options', 'wp-telepilot' ),
+			Telepilot_Telegram_Response_Builder::code( '/notifications enable new_comment' ) . ' ' . __( 'Enable a notification type', 'wp-telepilot' ),
+			Telepilot_Telegram_Response_Builder::code( '/notifications disable plugin_updates' ) . ' ' . __( 'Disable a notification type', 'wp-telepilot' ),
+			Telepilot_Telegram_Response_Builder::code( '/notifications toggle failed_login' ) . ' ' . __( 'Toggle a notification type', 'wp-telepilot' ),
 		);
 
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array_merge(
 				array(
-					Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notification Commands', 'telepilot' ) ) ),
+					Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'notifications', __( 'Notification Commands', 'wp-telepilot' ) ) ),
 				),
 				$entries
 			)
@@ -95,7 +95,7 @@ class Telepilot_Notifications_Command_Service {
 		$labels = Telepilot_Notification_Service::option_labels();
 
 		if ( '' === $key || ! isset( $labels[ $key ] ) ) {
-			return new WP_Error( 'telepilot_notification_invalid', __( 'That notification key is not supported.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_notification_invalid', __( 'That notification key is not supported.', 'wp-telepilot' ) );
 		}
 
 		$settings = get_option( 'telepilot_settings', array() );
@@ -124,7 +124,7 @@ class Telepilot_Notifications_Command_Service {
 			'after_state'  => array(
 				'enabled' => in_array( $key, $settings['default_notifications'], true ),
 			),
-			'label_text'   => $enabled ? __( 'enabled', 'telepilot' ) : __( 'disabled', 'telepilot' ),
+			'label_text'   => $enabled ? __( 'enabled', 'wp-telepilot' ) : __( 'disabled', 'wp-telepilot' ),
 		);
 	}
 
@@ -138,7 +138,7 @@ class Telepilot_Notifications_Command_Service {
 					'text'          => sprintf(
 						Telepilot_Telegram_Response_Builder::label(
 							$item['enabled'] ? 'disable' : 'enable',
-							sprintf( $item['enabled'] ? __( 'Disable [%d]', 'telepilot' ) : __( 'Enable [%d]', 'telepilot' ), $list_number )
+							sprintf( $item['enabled'] ? __( 'Disable [%d]', 'wp-telepilot' ) : __( 'Enable [%d]', 'wp-telepilot' ), $list_number )
 						)
 					),
 					'callback_data' => '/notifications ' . ( $item['enabled'] ? 'disable ' : 'enable ' ) . $item['key'],
@@ -179,14 +179,14 @@ class Telepilot_Notifications_Command_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'wp-telepilot' ) ),
 				'callback_data' => '/notifications list page:' . ( $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'wp-telepilot' ) ),
 				'callback_data' => '/notifications list page:' . ( $page + 1 ),
 			);
 		}
@@ -198,11 +198,11 @@ class Telepilot_Notifications_Command_Service {
 		return array(
 			array(
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Settings', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'settings', __( 'Settings', 'wp-telepilot' ) ),
 					'callback_data' => '/settings',
 				),
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'wp-telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 			),

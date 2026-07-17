@@ -13,24 +13,24 @@ class Telepilot_Notification_Service {
 
 	public static function option_labels() {
 		return array(
-			'new_post_published'       => __( 'Content: new post published', 'telepilot' ),
-			'new_page_published'       => __( 'Content: new page published', 'telepilot' ),
-			'new_comment'              => __( 'Comments: new comment received', 'telepilot' ),
-			'comment_status_changed'   => __( 'Comments: moderation status changed', 'telepilot' ),
-			'user_registered'          => __( 'Users: new user registered', 'telepilot' ),
-			'user_profile_updated'     => __( 'Users: profile updated', 'telepilot' ),
-			'user_deleted'             => __( 'Users: user deleted', 'telepilot' ),
-			'user_role_changed'        => __( 'Users: role changed', 'telepilot' ),
-			'failed_login'             => __( 'Security: failed login', 'telepilot' ),
-			'password_reset_requested' => __( 'Security: password reset requested', 'telepilot' ),
-			'password_reset_completed' => __( 'Security: password reset completed', 'telepilot' ),
-			'plugin_activated'         => __( 'System: plugin activated', 'telepilot' ),
-			'plugin_deactivated'       => __( 'System: plugin deactivated', 'telepilot' ),
-			'theme_switched'           => __( 'System: theme switched', 'telepilot' ),
-			'plugin_updates'           => __( 'Updates: plugin updates available', 'telepilot' ),
-			'theme_updates'            => __( 'Updates: theme updates available', 'telepilot' ),
-			'core_updates'             => __( 'Updates: core updates available', 'telepilot' ),
-			'update_completed'         => __( 'Updates: upgrade completed', 'telepilot' ),
+			'new_post_published'       => __( 'Content: new post published', 'wp-telepilot' ),
+			'new_page_published'       => __( 'Content: new page published', 'wp-telepilot' ),
+			'new_comment'              => __( 'Comments: new comment received', 'wp-telepilot' ),
+			'comment_status_changed'   => __( 'Comments: moderation status changed', 'wp-telepilot' ),
+			'user_registered'          => __( 'Users: new user registered', 'wp-telepilot' ),
+			'user_profile_updated'     => __( 'Users: profile updated', 'wp-telepilot' ),
+			'user_deleted'             => __( 'Users: user deleted', 'wp-telepilot' ),
+			'user_role_changed'        => __( 'Users: role changed', 'wp-telepilot' ),
+			'failed_login'             => __( 'Security: failed login', 'wp-telepilot' ),
+			'password_reset_requested' => __( 'Security: password reset requested', 'wp-telepilot' ),
+			'password_reset_completed' => __( 'Security: password reset completed', 'wp-telepilot' ),
+			'plugin_activated'         => __( 'System: plugin activated', 'wp-telepilot' ),
+			'plugin_deactivated'       => __( 'System: plugin deactivated', 'wp-telepilot' ),
+			'theme_switched'           => __( 'System: theme switched', 'wp-telepilot' ),
+			'plugin_updates'           => __( 'Updates: plugin updates available', 'wp-telepilot' ),
+			'theme_updates'            => __( 'Updates: theme updates available', 'wp-telepilot' ),
+			'core_updates'             => __( 'Updates: core updates available', 'wp-telepilot' ),
+			'update_completed'         => __( 'Updates: upgrade completed', 'wp-telepilot' ),
 		);
 	}
 
@@ -50,12 +50,12 @@ class Telepilot_Notification_Service {
 			'new_comment',
 			'new_comment_notification',
 			'moderate_comments',
-			__( 'New Comment', 'telepilot' ),
+			__( 'New Comment', 'wp-telepilot' ),
 			array(
-				__( 'Author', 'telepilot' )  => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ),
-				__( 'Post', 'telepilot' )    => $post ? get_the_title( $post ) : __( 'Unknown Post', 'telepilot' ),
-				__( 'Status', 'telepilot' )  => $this->humanize_comment_status( $comment_approved ),
-				__( 'Preview', 'telepilot' ) => wp_html_excerpt( wp_strip_all_tags( $comment->comment_content ), 120, '...' ),
+				__( 'Author', 'wp-telepilot' )  => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'wp-telepilot' ),
+				__( 'Post', 'wp-telepilot' )    => $post ? get_the_title( $post ) : __( 'Unknown Post', 'wp-telepilot' ),
+				__( 'Status', 'wp-telepilot' )  => $this->humanize_comment_status( $comment_approved ),
+				__( 'Preview', 'wp-telepilot' ) => wp_html_excerpt( wp_strip_all_tags( $comment->comment_content ), 120, '...' ),
 			),
 			$this->build_comment_links( $comment, $post ),
 			array(
@@ -79,11 +79,11 @@ class Telepilot_Notification_Service {
 			'comment_status_changed',
 			'comment_status_changed_notification',
 			'moderate_comments',
-			__( 'Comment Status Changed', 'telepilot' ),
+			__( 'Comment Status Changed', 'wp-telepilot' ),
 			array(
-				__( 'Author', 'telepilot' ) => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ),
-				__( 'Post', 'telepilot' )   => $post ? get_the_title( $post ) : __( 'Unknown Post', 'telepilot' ),
-				__( 'Status', 'telepilot' ) => $this->humanize_comment_status( $comment_status ),
+				__( 'Author', 'wp-telepilot' ) => $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'wp-telepilot' ),
+				__( 'Post', 'wp-telepilot' )   => $post ? get_the_title( $post ) : __( 'Unknown Post', 'wp-telepilot' ),
+				__( 'Status', 'wp-telepilot' ) => $this->humanize_comment_status( $comment_status ),
 			),
 			$this->build_comment_links( $comment, $post ),
 			array(
@@ -113,7 +113,7 @@ class Telepilot_Notification_Service {
 		}
 
 		$setting_key = 'page' === $post->post_type ? 'new_page_published' : 'new_post_published';
-		$title       = 'page' === $post->post_type ? __( 'Page Published', 'telepilot' ) : __( 'Post Published', 'telepilot' );
+		$title       = 'page' === $post->post_type ? __( 'Page Published', 'wp-telepilot' ) : __( 'Post Published', 'wp-telepilot' );
 		$capability  = 'page' === $post->post_type ? 'edit_pages' : 'edit_posts';
 
 		$this->send_standard_notification(
@@ -122,10 +122,10 @@ class Telepilot_Notification_Service {
 			$capability,
 			$title,
 			array(
-				__( 'Title', 'telepilot' )  => get_the_title( $post ),
-				__( 'Author', 'telepilot' ) => $this->get_post_author_label( $post ),
-				__( 'Type', 'telepilot' )   => ucfirst( (string) $post->post_type ),
-				__( 'Status', 'telepilot' ) => ucfirst( (string) $new_status ),
+				__( 'Title', 'wp-telepilot' )  => get_the_title( $post ),
+				__( 'Author', 'wp-telepilot' ) => $this->get_post_author_label( $post ),
+				__( 'Type', 'wp-telepilot' )   => ucfirst( (string) $post->post_type ),
+				__( 'Status', 'wp-telepilot' ) => ucfirst( (string) $new_status ),
 			),
 			$this->build_post_links( $post ),
 			array(
@@ -149,11 +149,11 @@ class Telepilot_Notification_Service {
 			'user_registered',
 			'user_registered_notification',
 			'manage_options',
-			__( 'User Registered', 'telepilot' ),
+			__( 'User Registered', 'wp-telepilot' ),
 			array(
-				__( 'Username', 'telepilot' ) => $user->user_login,
-				__( 'Email', 'telepilot' )    => $user->user_email,
-				__( 'Role', 'telepilot' )     => $this->implode_roles( $user->roles ),
+				__( 'Username', 'wp-telepilot' ) => $user->user_login,
+				__( 'Email', 'wp-telepilot' )    => $user->user_email,
+				__( 'Role', 'wp-telepilot' )     => $this->implode_roles( $user->roles ),
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -180,11 +180,11 @@ class Telepilot_Notification_Service {
 			'user_profile_updated',
 			'user_profile_updated_notification',
 			'manage_options',
-			__( 'User Profile Updated', 'telepilot' ),
+			__( 'User Profile Updated', 'wp-telepilot' ),
 			array(
-				__( 'Username', 'telepilot' ) => $user->user_login,
-				__( 'Email', 'telepilot' )    => $user->user_email,
-				__( 'Changed', 'telepilot' )  => $changes,
+				__( 'Username', 'wp-telepilot' ) => $user->user_login,
+				__( 'Email', 'wp-telepilot' )    => $user->user_email,
+				__( 'Changed', 'wp-telepilot' )  => $changes,
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -201,18 +201,18 @@ class Telepilot_Notification_Service {
 			$user = get_userdata( $user_id );
 		}
 
-		$username = $user instanceof WP_User ? $user->user_login : sprintf( __( 'User #%d', 'telepilot' ), (int) $user_id );
+		$username = $user instanceof WP_User ? $user->user_login : sprintf( __( 'User #%d', 'wp-telepilot' ), (int) $user_id );
 		$email    = $user instanceof WP_User ? $user->user_email : '';
 
 		$this->send_standard_notification(
 			'user_deleted',
 			'user_deleted_notification',
 			'manage_options',
-			__( 'User Deleted', 'telepilot' ),
+			__( 'User Deleted', 'wp-telepilot' ),
 			array(
-				__( 'Username', 'telepilot' )     => $username,
-				__( 'Email', 'telepilot' )        => $email ? $email : __( 'Unknown', 'telepilot' ),
-				__( 'Reassigned To', 'telepilot' ) => $reassign ? sprintf( __( 'User #%d', 'telepilot' ), (int) $reassign ) : __( 'No reassignment', 'telepilot' ),
+				__( 'Username', 'wp-telepilot' )     => $username,
+				__( 'Email', 'wp-telepilot' )        => $email ? $email : __( 'Unknown', 'wp-telepilot' ),
+				__( 'Reassigned To', 'wp-telepilot' ) => $reassign ? sprintf( __( 'User #%d', 'wp-telepilot' ), (int) $reassign ) : __( 'No reassignment', 'wp-telepilot' ),
 			),
 			array(),
 			array(
@@ -234,11 +234,11 @@ class Telepilot_Notification_Service {
 			'user_role_changed',
 			'user_role_changed_notification',
 			'manage_options',
-			__( 'User Role Changed', 'telepilot' ),
+			__( 'User Role Changed', 'wp-telepilot' ),
 			array(
-				__( 'Username', 'telepilot' ) => $user->user_login,
-				__( 'Old Roles', 'telepilot' ) => $this->implode_roles( (array) $old_roles ),
-				__( 'New Role', 'telepilot' )  => $this->normalize_role( $role ),
+				__( 'Username', 'wp-telepilot' ) => $user->user_login,
+				__( 'Old Roles', 'wp-telepilot' ) => $this->implode_roles( (array) $old_roles ),
+				__( 'New Role', 'wp-telepilot' )  => $this->normalize_role( $role ),
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -256,10 +256,10 @@ class Telepilot_Notification_Service {
 			'failed_login',
 			'failed_login_notification',
 			'manage_options',
-			__( 'Failed Login', 'telepilot' ),
+			__( 'Failed Login', 'wp-telepilot' ),
 			array(
-				__( 'Username', 'telepilot' ) => $username,
-				__( 'Site', 'telepilot' )     => get_bloginfo( 'name' ),
+				__( 'Username', 'wp-telepilot' ) => $username,
+				__( 'Site', 'wp-telepilot' )     => get_bloginfo( 'name' ),
 			),
 			array(),
 			array(
@@ -277,11 +277,11 @@ class Telepilot_Notification_Service {
 			'password_reset_requested',
 			'password_reset_requested_notification',
 			'manage_options',
-			__( 'Password Reset Requested', 'telepilot' ),
+			__( 'Password Reset Requested', 'wp-telepilot' ),
 			array(
-				__( 'Username', 'telepilot' ) => $user_login,
-				__( 'Email', 'telepilot' )    => $user instanceof WP_User ? $user->user_email : __( 'Unknown', 'telepilot' ),
-				__( 'Note', 'telepilot' )     => __( 'A reset key was generated, but WP Telepilot does not include secrets in Telegram alerts.', 'telepilot' ),
+				__( 'Username', 'wp-telepilot' ) => $user_login,
+				__( 'Email', 'wp-telepilot' )    => $user instanceof WP_User ? $user->user_email : __( 'Unknown', 'wp-telepilot' ),
+				__( 'Note', 'wp-telepilot' )     => __( 'A reset key was generated, but WP Telepilot does not include secrets in Telegram alerts.', 'wp-telepilot' ),
 			),
 			$user instanceof WP_User ? $this->build_user_links( $user->ID ) : array(),
 			array(
@@ -302,11 +302,11 @@ class Telepilot_Notification_Service {
 			'password_reset_completed',
 			'password_reset_completed_notification',
 			'manage_options',
-			__( 'Password Reset Completed', 'telepilot' ),
+			__( 'Password Reset Completed', 'wp-telepilot' ),
 			array(
-				__( 'Username', 'telepilot' ) => $user->user_login,
-				__( 'Email', 'telepilot' )    => $user->user_email,
-				__( 'Status', 'telepilot' )   => __( 'Password updated successfully', 'telepilot' ),
+				__( 'Username', 'wp-telepilot' ) => $user->user_login,
+				__( 'Email', 'wp-telepilot' )    => $user->user_email,
+				__( 'Status', 'wp-telepilot' )   => __( 'Password updated successfully', 'wp-telepilot' ),
 			),
 			$this->build_user_links( $user->ID ),
 			array(
@@ -322,14 +322,14 @@ class Telepilot_Notification_Service {
 			'plugin_activated',
 			'plugin_activated_notification',
 			'activate_plugins',
-			__( 'Plugin Activated', 'telepilot' ),
+			__( 'Plugin Activated', 'wp-telepilot' ),
 			array(
-				__( 'Plugin', 'telepilot' )  => $this->plugin_label_from_path( $plugin ),
-				__( 'Scope', 'telepilot' )   => $network_wide ? __( 'Network-wide', 'telepilot' ) : __( 'Single site', 'telepilot' ),
+				__( 'Plugin', 'wp-telepilot' )  => $this->plugin_label_from_path( $plugin ),
+				__( 'Scope', 'wp-telepilot' )   => $network_wide ? __( 'Network-wide', 'wp-telepilot' ) : __( 'Single site', 'wp-telepilot' ),
 			),
 			array(
 				array(
-					'label' => __( 'Plugins', 'telepilot' ),
+					'label' => __( 'Plugins', 'wp-telepilot' ),
 					'url'   => admin_url( 'plugins.php' ),
 				),
 			),
@@ -347,14 +347,14 @@ class Telepilot_Notification_Service {
 			'plugin_deactivated',
 			'plugin_deactivated_notification',
 			'activate_plugins',
-			__( 'Plugin Deactivated', 'telepilot' ),
+			__( 'Plugin Deactivated', 'wp-telepilot' ),
 			array(
-				__( 'Plugin', 'telepilot' ) => $this->plugin_label_from_path( $plugin ),
-				__( 'Scope', 'telepilot' )  => $network_deactivating ? __( 'Network-wide', 'telepilot' ) : __( 'Single site', 'telepilot' ),
+				__( 'Plugin', 'wp-telepilot' ) => $this->plugin_label_from_path( $plugin ),
+				__( 'Scope', 'wp-telepilot' )  => $network_deactivating ? __( 'Network-wide', 'wp-telepilot' ) : __( 'Single site', 'wp-telepilot' ),
 			),
 			array(
 				array(
-					'label' => __( 'Plugins', 'telepilot' ),
+					'label' => __( 'Plugins', 'wp-telepilot' ),
 					'url'   => admin_url( 'plugins.php' ),
 				),
 			),
@@ -368,20 +368,20 @@ class Telepilot_Notification_Service {
 	}
 
 	public function handle_theme_switched( $new_name, $new_theme, $old_theme ) {
-		$old_name_label = $old_theme instanceof WP_Theme ? $old_theme->get( 'Name' ) : __( 'Unknown', 'telepilot' );
+		$old_name_label = $old_theme instanceof WP_Theme ? $old_theme->get( 'Name' ) : __( 'Unknown', 'wp-telepilot' );
 
 		$this->send_standard_notification(
 			'theme_switched',
 			'theme_switched_notification',
 			'switch_themes',
-			__( 'Theme Switched', 'telepilot' ),
+			__( 'Theme Switched', 'wp-telepilot' ),
 			array(
-				__( 'Old Theme', 'telepilot' ) => $old_name_label,
-				__( 'New Theme', 'telepilot' ) => $new_name,
+				__( 'Old Theme', 'wp-telepilot' ) => $old_name_label,
+				__( 'New Theme', 'wp-telepilot' ) => $new_name,
 			),
 			array(
 				array(
-					'label' => __( 'Themes', 'telepilot' ),
+					'label' => __( 'Themes', 'wp-telepilot' ),
 					'url'   => admin_url( 'themes.php' ),
 				),
 			),
@@ -423,15 +423,15 @@ class Telepilot_Notification_Service {
 			'update_completed',
 			'update_completed_notification',
 			$capability,
-			__( 'Upgrade Completed', 'telepilot' ),
+			__( 'Upgrade Completed', 'wp-telepilot' ),
 			array(
-				__( 'Type', 'telepilot' )  => ucfirst( $type ),
-				__( 'Action', 'telepilot' ) => ucfirst( $action ),
-				__( 'Items', 'telepilot' )  => ! empty( $items ) ? implode( ', ', $items ) : __( 'Not provided by WordPress', 'telepilot' ),
+				__( 'Type', 'wp-telepilot' )  => ucfirst( $type ),
+				__( 'Action', 'wp-telepilot' ) => ucfirst( $action ),
+				__( 'Items', 'wp-telepilot' )  => ! empty( $items ) ? implode( ', ', $items ) : __( 'Not provided by WordPress', 'wp-telepilot' ),
 			),
 			array(
 				array(
-					'label' => __( 'Updates', 'telepilot' ),
+					'label' => __( 'Updates', 'wp-telepilot' ),
 					'url'   => admin_url( 'update-core.php' ),
 				),
 			),
@@ -462,15 +462,15 @@ class Telepilot_Notification_Service {
 			'update_completed',
 			'automatic_updates_completed_notification',
 			'update_core',
-			__( 'Automatic Updates Completed', 'telepilot' ),
+			__( 'Automatic Updates Completed', 'wp-telepilot' ),
 			array(
-				__( 'Successful Updates', 'telepilot' ) => (string) $summary['count'],
-				__( 'Types', 'telepilot' )              => implode( ', ', $summary['types'] ),
-				__( 'Items', 'telepilot' )              => implode( ', ', $summary['items'] ),
+				__( 'Successful Updates', 'wp-telepilot' ) => (string) $summary['count'],
+				__( 'Types', 'wp-telepilot' )              => implode( ', ', $summary['types'] ),
+				__( 'Items', 'wp-telepilot' )              => implode( ', ', $summary['items'] ),
 			),
 			array(
 				array(
-					'label' => __( 'Updates', 'telepilot' ),
+					'label' => __( 'Updates', 'wp-telepilot' ),
 					'url'   => admin_url( 'update-core.php' ),
 				),
 			),
@@ -487,24 +487,24 @@ class Telepilot_Notification_Service {
 			'plugin_updates',
 			'update_plugins',
 			'update_plugins',
-			__( 'Plugin Updates Available', 'telepilot' ),
-			__( 'Plugins awaiting update', 'telepilot' ),
+			__( 'Plugin Updates Available', 'wp-telepilot' ),
+			__( 'Plugins awaiting update', 'wp-telepilot' ),
 			admin_url( 'update-core.php' )
 		);
 		$this->maybe_send_single_update_notification(
 			'theme_updates',
 			'update_themes',
 			'update_themes',
-			__( 'Theme Updates Available', 'telepilot' ),
-			__( 'Themes awaiting update', 'telepilot' ),
+			__( 'Theme Updates Available', 'wp-telepilot' ),
+			__( 'Themes awaiting update', 'wp-telepilot' ),
 			admin_url( 'update-core.php' )
 		);
 		$this->maybe_send_single_update_notification(
 			'core_updates',
 			'update_core',
 			'update_core',
-			__( 'WordPress Core Updates Available', 'telepilot' ),
-			__( 'Core updates available', 'telepilot' ),
+			__( 'WordPress Core Updates Available', 'wp-telepilot' ),
+			__( 'Core updates available', 'wp-telepilot' ),
 			admin_url( 'update-core.php' )
 		);
 	}
@@ -546,12 +546,12 @@ class Telepilot_Notification_Service {
 			$capability,
 			$title,
 			array(
-				__( 'Site', 'telepilot' ) => get_bloginfo( 'name' ),
+				__( 'Site', 'wp-telepilot' ) => get_bloginfo( 'name' ),
 				$count_label              => (string) $count,
 			),
 			array(
 				array(
-					'label' => __( 'Open updates screen', 'telepilot' ),
+					'label' => __( 'Open updates screen', 'wp-telepilot' ),
 					'url'   => $url,
 				),
 			),
@@ -647,12 +647,12 @@ class Telepilot_Notification_Service {
 		$lines[] = Telepilot_Telegram_Response_Builder::bold( $title );
 		$lines[] = sprintf(
 			/* translators: %s: site name. */
-			__( 'Site: %s', 'telepilot' ),
+			__( 'Site: %s', 'wp-telepilot' ),
 			Telepilot_Telegram_Response_Builder::escape( get_bloginfo( 'name' ) )
 		);
 		$lines[] = sprintf(
 			/* translators: %s: current local time. */
-			__( 'Time: %s', 'telepilot' ),
+			__( 'Time: %s', 'wp-telepilot' ),
 			Telepilot_Telegram_Response_Builder::escape( wp_date( 'Y-m-d H:i:s T' ) )
 		);
 		$lines[] = '';
@@ -681,7 +681,7 @@ class Telepilot_Notification_Service {
 
 		if ( ! empty( $link_parts ) ) {
 			$lines[] = '';
-			$lines[] = __( 'Open:', 'telepilot' ) . ' ' . implode( ' | ', $link_parts );
+			$lines[] = __( 'Open:', 'wp-telepilot' ) . ' ' . implode( ' | ', $link_parts );
 		}
 
 		return implode( "\n", $lines );
@@ -695,14 +695,14 @@ class Telepilot_Notification_Service {
 			$permalink = get_permalink( $post );
 			if ( $permalink ) {
 				$links[] = array(
-					'label' => __( 'View', 'telepilot' ),
+					'label' => __( 'View', 'wp-telepilot' ),
 					'url'   => $permalink,
 				);
 			}
 		}
 
 		$links[] = array(
-			'label' => __( 'Edit', 'telepilot' ),
+			'label' => __( 'Edit', 'wp-telepilot' ),
 			'url'   => $edit,
 		);
 
@@ -712,7 +712,7 @@ class Telepilot_Notification_Service {
 	private function build_comment_links( $comment, $post ) {
 		$links = array(
 			array(
-				'label' => __( 'Moderate', 'telepilot' ),
+				'label' => __( 'Moderate', 'wp-telepilot' ),
 				'url'   => admin_url( 'comment.php?action=editcomment&c=' . (int) $comment->comment_ID ),
 			),
 		);
@@ -721,7 +721,7 @@ class Telepilot_Notification_Service {
 			$permalink = get_comment_link( $comment );
 			if ( $permalink ) {
 				$links[] = array(
-					'label' => __( 'View Comment', 'telepilot' ),
+					'label' => __( 'View Comment', 'wp-telepilot' ),
 					'url'   => $permalink,
 				);
 			}
@@ -733,11 +733,11 @@ class Telepilot_Notification_Service {
 	private function build_user_links( $user_id ) {
 		return array(
 			array(
-				'label' => __( 'Edit User', 'telepilot' ),
+				'label' => __( 'Edit User', 'wp-telepilot' ),
 				'url'   => admin_url( 'user-edit.php?user_id=' . (int) $user_id ),
 			),
 			array(
-				'label' => __( 'Users', 'telepilot' ),
+				'label' => __( 'Users', 'wp-telepilot' ),
 				'url'   => admin_url( 'users.php' ),
 			),
 		);
@@ -750,35 +750,35 @@ class Telepilot_Notification_Service {
 			return $author->display_name ? $author->display_name : $author->user_login;
 		}
 
-		return __( 'Unknown', 'telepilot' );
+		return __( 'Unknown', 'wp-telepilot' );
 	}
 
 	private function summarize_user_changes( $old_user_data, $user, $userdata ) {
 		$changes = array();
 
 		if ( $old_user_data->user_email !== $user->user_email ) {
-			$changes[] = __( 'email', 'telepilot' );
+			$changes[] = __( 'email', 'wp-telepilot' );
 		}
 
 		if ( $old_user_data->display_name !== $user->display_name ) {
-			$changes[] = __( 'display name', 'telepilot' );
+			$changes[] = __( 'display name', 'wp-telepilot' );
 		}
 
 		if ( $old_user_data->user_url !== $user->user_url ) {
-			$changes[] = __( 'website', 'telepilot' );
+			$changes[] = __( 'website', 'wp-telepilot' );
 		}
 
 		if ( is_array( $userdata ) ) {
 			if ( array_key_exists( 'first_name', $userdata ) ) {
-				$changes[] = __( 'first name', 'telepilot' );
+				$changes[] = __( 'first name', 'wp-telepilot' );
 			}
 
 			if ( array_key_exists( 'last_name', $userdata ) ) {
-				$changes[] = __( 'last name', 'telepilot' );
+				$changes[] = __( 'last name', 'wp-telepilot' );
 			}
 
 			if ( array_key_exists( 'description', $userdata ) ) {
-				$changes[] = __( 'bio', 'telepilot' );
+				$changes[] = __( 'bio', 'wp-telepilot' );
 			}
 		}
 
@@ -825,7 +825,7 @@ class Telepilot_Notification_Service {
 		$summary['items'] = array_values( array_unique( array_filter( $summary['items'] ) ) );
 
 		if ( empty( $summary['items'] ) ) {
-			$summary['items'][] = __( 'Updated items reported by WordPress', 'telepilot' );
+			$summary['items'][] = __( 'Updated items reported by WordPress', 'wp-telepilot' );
 		}
 
 		return $summary;
@@ -856,7 +856,7 @@ class Telepilot_Notification_Service {
 		}
 
 		if ( 'core' === $type ) {
-			return array( __( 'WordPress core', 'telepilot' ) );
+			return array( __( 'WordPress core', 'wp-telepilot' ) );
 		}
 
 		return array();
@@ -878,19 +878,19 @@ class Telepilot_Notification_Service {
 		$status = (string) $status;
 
 		if ( '1' === $status || 'approve' === $status ) {
-			return __( 'Approved', 'telepilot' );
+			return __( 'Approved', 'wp-telepilot' );
 		}
 
 		if ( '0' === $status || 'hold' === $status ) {
-			return __( 'Pending', 'telepilot' );
+			return __( 'Pending', 'wp-telepilot' );
 		}
 
 		if ( 'spam' === $status ) {
-			return __( 'Spam', 'telepilot' );
+			return __( 'Spam', 'wp-telepilot' );
 		}
 
 		if ( 'trash' === $status ) {
-			return __( 'Trashed', 'telepilot' );
+			return __( 'Trashed', 'wp-telepilot' );
 		}
 
 		return ucfirst( $status );
@@ -898,7 +898,7 @@ class Telepilot_Notification_Service {
 
 	private function normalize_role( $role ) {
 		if ( '' === (string) $role ) {
-			return __( 'None', 'telepilot' );
+			return __( 'None', 'wp-telepilot' );
 		}
 
 		return ucwords( str_replace( array( '-', '_' ), ' ', (string) $role ) );
@@ -907,7 +907,7 @@ class Telepilot_Notification_Service {
 	private function implode_roles( $roles ) {
 		$roles = array_map( array( $this, 'normalize_role' ), array_filter( (array) $roles ) );
 
-		return ! empty( $roles ) ? implode( ', ', $roles ) : __( 'No role', 'telepilot' );
+		return ! empty( $roles ) ? implode( ', ', $roles ) : __( 'No role', 'wp-telepilot' );
 	}
 
 	private function get_recipient_chat_ids( $capability ) {

@@ -46,9 +46,9 @@ class Telepilot_User_Linking_Service {
 			return Telepilot_Telegram_Response_Builder::error_html(
 				Telepilot_Telegram_Response_Builder::join_blocks(
 					array(
-						Telepilot_Telegram_Response_Builder::bold( __( 'Link Code Invalid', 'telepilot' ) ),
-						__( 'That link code is invalid or has already expired.', 'telepilot' ),
-						Telepilot_Telegram_Response_Builder::italic( __( 'Generate a fresh code from your WordPress profile, then try /link CODE again within the hour.', 'telepilot' ) ),
+						Telepilot_Telegram_Response_Builder::bold( __( 'Link Code Invalid', 'wp-telepilot' ) ),
+						__( 'That link code is invalid or has already expired.', 'wp-telepilot' ),
+						Telepilot_Telegram_Response_Builder::italic( __( 'Generate a fresh code from your WordPress profile, then try /link CODE again within the hour.', 'wp-telepilot' ) ),
 					)
 				),
 				array(
@@ -84,27 +84,27 @@ class Telepilot_User_Linking_Service {
 		);
 
 		$display_name = $user->display_name ? $user->display_name : $user->user_login;
-		$roles        = ! empty( $user->roles ) ? implode( ', ', array_map( 'sanitize_text_field', (array) $user->roles ) ) : __( 'no role', 'telepilot' );
+		$roles        = ! empty( $user->roles ) ? implode( ', ', array_map( 'sanitize_text_field', (array) $user->roles ) ) : __( 'no role', 'wp-telepilot' );
 		$lines        = array(
-			Telepilot_Telegram_Response_Builder::bold( __( 'Telegram Linked', 'telepilot' ) ),
+			Telepilot_Telegram_Response_Builder::bold( __( 'Telegram Linked', 'wp-telepilot' ) ),
 			sprintf(
-				__( 'WordPress user: %s', 'telepilot' ),
+				__( 'WordPress user: %s', 'wp-telepilot' ),
 				Telepilot_Telegram_Response_Builder::escape( $display_name )
 			),
 			sprintf(
-				__( 'Role: %s', 'telepilot' ),
+				__( 'Role: %s', 'wp-telepilot' ),
 				Telepilot_Telegram_Response_Builder::escape( $roles )
 			),
 		);
 
 		if ( '' !== $username ) {
 			$lines[] = sprintf(
-				__( 'Telegram: @%s', 'telepilot' ),
+				__( 'Telegram: @%s', 'wp-telepilot' ),
 				Telepilot_Telegram_Response_Builder::escape( $username )
 			);
 		}
 
-		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Next: use /menu to open your command hub or /help to review available commands.', 'telepilot' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::italic( __( 'Next: use /menu to open your command hub or /help to review available commands.', 'wp-telepilot' ) );
 
 		return Telepilot_Telegram_Response_Builder::success_html(
 			Telepilot_Telegram_Response_Builder::join_blocks( $lines ),
@@ -118,7 +118,7 @@ class Telepilot_User_Linking_Service {
 		$user_id = absint( $user_id );
 
 		if ( ! $user_id || ! get_user_by( 'id', $user_id ) ) {
-			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_user_not_found', __( 'User not found.', 'wp-telepilot' ) );
 		}
 
 		delete_user_meta( $user_id, self::META_TELEGRAM_ID );

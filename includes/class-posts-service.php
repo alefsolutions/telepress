@@ -118,13 +118,13 @@ class Telepilot_Posts_Service {
 
 	public function render_list_message( $posts, $heading ) {
 		if ( empty( $posts ) ) {
-			return $heading . "\n" . __( 'No posts matched that request.', 'telepilot' );
+			return $heading . "\n" . __( 'No posts matched that request.', 'wp-telepilot' );
 		}
 
 		$lines   = array( $heading );
 		foreach ( $posts as $post ) {
 			$lines[] = sprintf(
-				__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
+				__( '[%1$d] %2$s [%3$s]', 'wp-telepilot' ),
 				$post->ID,
 				html_entity_decode( get_the_title( $post ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 				$post->post_status
@@ -136,19 +136,19 @@ class Telepilot_Posts_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', $heading ) ) . "\n\n" . __( 'No posts matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', $heading ) ) . "\n\n" . __( 'No posts matched that request.', 'wp-telepilot' );
 		}
 
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
 		);
 
 		foreach ( $result['items'] as $post ) {
 			$blocks[] = Telepilot_Telegram_Response_Builder::label(
 				'posts',
 				sprintf(
-					__( '[%1$d] %2$s [%3$s]', 'telepilot' ),
+					__( '[%1$d] %2$s [%3$s]', 'wp-telepilot' ),
 					$post->ID,
 					Telepilot_Telegram_Response_Builder::escape( get_the_title( $post ) ),
 					Telepilot_Telegram_Response_Builder::escape( $post->post_status )
@@ -156,7 +156,7 @@ class Telepilot_Posts_Service {
 			);
 		}
 
-		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use Open Editor for long-form body changes, or run /posts search keyword for a targeted lookup.', 'telepilot' ) );
+		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use Open Editor for long-form body changes, or run /posts search keyword for a targeted lookup.', 'wp-telepilot' ) );
 
 		return Telepilot_Telegram_Response_Builder::join_blocks( $blocks );
 	}
@@ -165,12 +165,12 @@ class Telepilot_Posts_Service {
 		return implode(
 			"\n",
 			array(
-				__( 'Post Stats', 'telepilot' ),
-				sprintf( __( 'Published: %d', 'telepilot' ), $stats['publish'] ),
-				sprintf( __( 'Drafts: %d', 'telepilot' ), $stats['draft'] ),
-				sprintf( __( 'Pending: %d', 'telepilot' ), $stats['pending'] ),
-				sprintf( __( 'Scheduled: %d', 'telepilot' ), $stats['future'] ),
-				sprintf( __( 'Trash: %d', 'telepilot' ), $stats['trash'] ),
+				__( 'Post Stats', 'wp-telepilot' ),
+				sprintf( __( 'Published: %d', 'wp-telepilot' ), $stats['publish'] ),
+				sprintf( __( 'Drafts: %d', 'wp-telepilot' ), $stats['draft'] ),
+				sprintf( __( 'Pending: %d', 'wp-telepilot' ), $stats['pending'] ),
+				sprintf( __( 'Scheduled: %d', 'wp-telepilot' ), $stats['future'] ),
+				sprintf( __( 'Trash: %d', 'wp-telepilot' ), $stats['trash'] ),
 			)
 		);
 	}
@@ -178,24 +178,24 @@ class Telepilot_Posts_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', __( 'Posts Commands', 'telepilot' ) ) ),
-				Telepilot_Telegram_Response_Builder::code( '/posts list' ) . ' ' . __( 'Show recent posts', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts drafts' ) . ' ' . __( 'Show draft posts', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts search keyword' ) . ' ' . __( 'Search posts', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts stats' ) . ' ' . __( 'Show post counts', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts create My draft title' ) . ' ' . __( 'Create a new draft post', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts title 123 New title' ) . ' ' . __( 'Update a post title', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts excerpt 123 New excerpt' ) . ' ' . __( 'Update a post excerpt', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts categories 123 4,8' ) . ' ' . __( 'Assign category IDs to a post', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts tags 123 5,9' ) . ' ' . __( 'Assign tag IDs to a post', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts schedule 123 2026-07-20 14:30' ) . ' ' . __( 'Schedule a post in site local time', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts open 123' ) . ' ' . __( 'Generate a secure browser editor link for long-form changes', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts publish 123' ) . ' ' . __( 'Publish a post', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts draft 123' ) . ' ' . __( 'Move a published post back to draft', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts trashed' ) . ' ' . __( 'List trashed posts', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts restore 123' ) . ' ' . __( 'Restore a trashed post', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts trash 123' ) . ' ' . __( 'Move a post to trash', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/posts delete 123' ) . ' ' . __( 'Permanently delete a post after confirmation', 'telepilot' ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'posts', __( 'Posts Commands', 'wp-telepilot' ) ) ),
+				Telepilot_Telegram_Response_Builder::code( '/posts list' ) . ' ' . __( 'Show recent posts', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts drafts' ) . ' ' . __( 'Show draft posts', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts search keyword' ) . ' ' . __( 'Search posts', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts stats' ) . ' ' . __( 'Show post counts', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts create My draft title' ) . ' ' . __( 'Create a new draft post', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts title 123 New title' ) . ' ' . __( 'Update a post title', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts excerpt 123 New excerpt' ) . ' ' . __( 'Update a post excerpt', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts categories 123 4,8' ) . ' ' . __( 'Assign category IDs to a post', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts tags 123 5,9' ) . ' ' . __( 'Assign tag IDs to a post', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts schedule 123 2026-07-20 14:30' ) . ' ' . __( 'Schedule a post in site local time', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts open 123' ) . ' ' . __( 'Generate a secure browser editor link for long-form changes', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts publish 123' ) . ' ' . __( 'Publish a post', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts draft 123' ) . ' ' . __( 'Move a published post back to draft', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts trashed' ) . ' ' . __( 'List trashed posts', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts restore 123' ) . ' ' . __( 'Restore a trashed post', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts trash 123' ) . ' ' . __( 'Move a post to trash', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/posts delete 123' ) . ' ' . __( 'Permanently delete a post after confirmation', 'wp-telepilot' ),
 			)
 		);
 	}
@@ -211,11 +211,11 @@ class Telepilot_Posts_Service {
 			if ( 'trash' === $post->post_status || 'trashed' === $subcommand ) {
 				$rows[] = array(
 					array(
-						'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Restore [%d]', 'telepilot' ), $post->ID ) ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Restore [%d]', 'wp-telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts restore ' . (int) $post->ID,
 					),
 					array(
-						'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $post->ID ) ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'wp-telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts delete ' . (int) $post->ID,
 					),
 				);
@@ -225,15 +225,15 @@ class Telepilot_Posts_Service {
 			if ( 'publish' === $post->post_status ) {
 				$rows[] = array(
 					array(
-						'text'          => Telepilot_Telegram_Response_Builder::label( 'edit', sprintf( __( 'Open Editor [%d]', 'telepilot' ), $post->ID ) ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'edit', sprintf( __( 'Open Editor [%d]', 'wp-telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts open ' . (int) $post->ID,
 					),
 					array(
-						'text'          => Telepilot_Telegram_Response_Builder::label( 'draft', sprintf( __( 'Draft [%d]', 'telepilot' ), $post->ID ) ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'draft', sprintf( __( 'Draft [%d]', 'wp-telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts draft ' . (int) $post->ID,
 					),
 					array(
-						'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'telepilot' ), $post->ID ) ),
+						'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'wp-telepilot' ), $post->ID ) ),
 						'callback_data' => '/posts trash ' . (int) $post->ID,
 					),
 				);
@@ -242,15 +242,15 @@ class Telepilot_Posts_Service {
 
 			$rows[] = array(
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'edit', sprintf( __( 'Open Editor [%d]', 'telepilot' ), $post->ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'edit', sprintf( __( 'Open Editor [%d]', 'wp-telepilot' ), $post->ID ) ),
 					'callback_data' => '/posts open ' . (int) $post->ID,
 				),
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'publish', sprintf( __( 'Publish [%d]', 'telepilot' ), $post->ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'publish', sprintf( __( 'Publish [%d]', 'wp-telepilot' ), $post->ID ) ),
 					'callback_data' => '/posts publish ' . (int) $post->ID,
 				),
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'telepilot' ), $post->ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'wp-telepilot' ), $post->ID ) ),
 					'callback_data' => '/posts trash ' . (int) $post->ID,
 				),
 			);
@@ -276,14 +276,14 @@ class Telepilot_Posts_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'wp-telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'wp-telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -342,13 +342,13 @@ class Telepilot_Posts_Service {
 	}
 
 	public function publish( $post_id ) {
-		return $this->update_status( $post_id, 'publish', __( 'published', 'telepilot' ) );
+		return $this->update_status( $post_id, 'publish', __( 'published', 'wp-telepilot' ) );
 	}
 
 	public function unpublish( $post_id ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$before_status = $post->post_status;
@@ -370,7 +370,7 @@ class Telepilot_Posts_Service {
 			'post'          => get_post( $post_id ),
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $post_id ),
-			'label'         => __( 'moved back to draft', 'telepilot' ),
+			'label'         => __( 'moved back to draft', 'wp-telepilot' ),
 		);
 	}
 
@@ -393,7 +393,7 @@ class Telepilot_Posts_Service {
 
 		return array(
 			'post'  => get_post( $post_id ),
-			'label' => __( 'created as draft', 'telepilot' ),
+			'label' => __( 'created as draft', 'wp-telepilot' ),
 		);
 	}
 
@@ -401,7 +401,7 @@ class Telepilot_Posts_Service {
 		return $this->update_fields(
 			$post_id,
 			array( 'post_title' => sanitize_text_field( $title ) ),
-			__( 'title updated', 'telepilot' )
+			__( 'title updated', 'wp-telepilot' )
 		);
 	}
 
@@ -409,14 +409,14 @@ class Telepilot_Posts_Service {
 		return $this->update_fields(
 			$post_id,
 			array( 'post_excerpt' => sanitize_textarea_field( $excerpt ) ),
-			__( 'excerpt updated', 'telepilot' )
+			__( 'excerpt updated', 'wp-telepilot' )
 		);
 	}
 
 	public function assign_terms( $post_id, $taxonomy, $term_ids ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$taxonomy  = 'post_tag' === $taxonomy ? 'post_tag' : 'category';
@@ -434,14 +434,14 @@ class Telepilot_Posts_Service {
 			'post'         => get_post( $post_id ),
 			'before_state' => array( $taxonomy => array_map( 'absint', (array) $before_ids ) ),
 			'after_state'  => array( $taxonomy => array_map( 'absint', (array) $result ) ),
-			'label'        => 'category' === $taxonomy ? __( 'categories updated', 'telepilot' ) : __( 'tags updated', 'telepilot' ),
+			'label'        => 'category' === $taxonomy ? __( 'categories updated', 'wp-telepilot' ) : __( 'tags updated', 'wp-telepilot' ),
 		);
 	}
 
 	public function schedule( $post_id, DateTimeImmutable $scheduled_at ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$gmt = $scheduled_at->setTimezone( new DateTimeZone( 'UTC' ) );
@@ -465,7 +465,7 @@ class Telepilot_Posts_Service {
 			'post'          => get_post( $post_id ),
 			'before_status' => $post->post_status,
 			'after_status'  => get_post_status( $post_id ),
-			'label'         => __( 'scheduled', 'telepilot' ),
+			'label'         => __( 'scheduled', 'wp-telepilot' ),
 			'scheduled_at'  => $scheduled_at->format( 'Y-m-d H:i:s' ),
 		);
 	}
@@ -473,13 +473,13 @@ class Telepilot_Posts_Service {
 	public function trash( $post_id ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$before_status = $post->post_status;
 		$result        = wp_trash_post( $post_id );
 		if ( false === $result || null === $result ) {
-			return new WP_Error( 'telepilot_post_trash_failed', __( 'WordPress could not trash that post.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_trash_failed', __( 'WordPress could not trash that post.', 'wp-telepilot' ) );
 		}
 
 		$this->bump_cache_version();
@@ -488,20 +488,20 @@ class Telepilot_Posts_Service {
 			'post'          => get_post( $post_id ),
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $post_id ),
-			'label'         => __( 'trashed', 'telepilot' ),
+			'label'         => __( 'trashed', 'wp-telepilot' ),
 		);
 	}
 
 	public function restore( $post_id ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$before_status = $post->post_status;
 		$result        = wp_untrash_post( $post_id );
 		if ( false === $result || null === $result ) {
-			return new WP_Error( 'telepilot_post_restore_failed', __( 'WordPress could not restore that post.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_restore_failed', __( 'WordPress could not restore that post.', 'wp-telepilot' ) );
 		}
 
 		$this->bump_cache_version();
@@ -510,14 +510,14 @@ class Telepilot_Posts_Service {
 			'post'          => get_post( $post_id ),
 			'before_status' => $before_status,
 			'after_status'  => get_post_status( $post_id ),
-			'label'         => __( 'restored', 'telepilot' ),
+			'label'         => __( 'restored', 'wp-telepilot' ),
 		);
 	}
 
 	public function delete( $post_id ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$before_state = array(
@@ -527,14 +527,14 @@ class Telepilot_Posts_Service {
 
 		$result = wp_delete_post( $post_id, true );
 		if ( ! $result ) {
-			return new WP_Error( 'telepilot_post_delete_failed', __( 'WordPress could not delete that post.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_delete_failed', __( 'WordPress could not delete that post.', 'wp-telepilot' ) );
 		}
 
 		$this->bump_cache_version();
 
 		return array(
 			'before_state' => $before_state,
-			'label'        => __( 'deleted', 'telepilot' ),
+			'label'        => __( 'deleted', 'wp-telepilot' ),
 		);
 	}
 
@@ -547,11 +547,11 @@ class Telepilot_Posts_Service {
 			)
 		);
 
-		$action_label = 'unpublish' === $action ? __( 'Draft', 'telepilot' ) : ucfirst( $action );
+		$action_label = 'unpublish' === $action ? __( 'Draft', 'wp-telepilot' ) : ucfirst( $action );
 
 		return Telepilot_Telegram_Response_Builder::append_rows(
 			Telepilot_Telegram_Response_Builder::confirmation_keyboard(
-				sprintf( __( 'Confirm %1$s [%2$d]', 'telepilot' ), $action_label, $post_id ),
+				sprintf( __( 'Confirm %1$s [%2$d]', 'wp-telepilot' ), $action_label, $post_id ),
 				'tp:post:' . $action . ':' . (int) $post_id . ':' . $token,
 				'/posts list'
 			),
@@ -562,7 +562,7 @@ class Telepilot_Posts_Service {
 	private function update_status( $post_id, $status, $label ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$before_status = $post->post_status;
@@ -591,7 +591,7 @@ class Telepilot_Posts_Service {
 	private function update_fields( $post_id, $fields, $label ) {
 		$post = get_post( $post_id );
 		if ( ! $post || 'post' !== $post->post_type ) {
-			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_post_not_found', __( 'Post not found.', 'wp-telepilot' ) );
 		}
 
 		$before_state = array(
@@ -639,11 +639,11 @@ class Telepilot_Posts_Service {
 		return array(
 			array(
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'wp-telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'wp-telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

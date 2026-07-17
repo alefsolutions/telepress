@@ -17,7 +17,7 @@ class Telepilot_Rate_Limiter {
 
 		if ( $current >= $limit_per_minute ) {
 			return Telepilot_Telegram_Response_Builder::error(
-				__( 'You are sending commands too quickly. Please wait a moment and try again.', 'telepilot' ),
+				__( 'You are sending commands too quickly. Please wait a moment and try again.', 'wp-telepilot' ),
 				array(
 					'code'  => 'telepilot_rate_limited',
 					'limit' => $limit_per_minute,

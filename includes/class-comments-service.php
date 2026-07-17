@@ -35,19 +35,19 @@ class Telepilot_Comments_Service {
 
 	public function render_page_message( $result, $heading ) {
 		if ( empty( $result['items'] ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', $heading ) ) . "\n\n" . __( 'No comments matched that request.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', $heading ) ) . "\n\n" . __( 'No comments matched that request.', 'wp-telepilot' );
 		}
 
 		$blocks   = array( Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', $heading ) ) );
 		$blocks[] = Telepilot_Telegram_Response_Builder::italic(
-			sprintf( __( 'Page %1$d of %2$d', 'telepilot' ), $result['page'], $result['total_pages'] )
+			sprintf( __( 'Page %1$d of %2$d', 'wp-telepilot' ), $result['page'], $result['total_pages'] )
 		);
 
 		foreach ( $result['items'] as $comment ) {
 			$blocks[] = $this->format_comment_summary_line( $comment );
 		}
 
-		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use details for the full context, and keep destructive moderation actions in private chat.', 'telepilot' ) );
+		$blocks[] = Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use details for the full context, and keep destructive moderation actions in private chat.', 'wp-telepilot' ) );
 
 		return Telepilot_Telegram_Response_Builder::join_blocks( $blocks );
 	}
@@ -55,29 +55,29 @@ class Telepilot_Comments_Service {
 	public function render_help_message() {
 		return Telepilot_Telegram_Response_Builder::join_blocks(
 			array(
-				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comments Commands', 'telepilot' ) ) ),
-				Telepilot_Telegram_Response_Builder::code( '/comments pending' ) . ' ' . __( 'Show pending comments', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments approved' ) . ' ' . __( 'Show approved comments', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments spam' ) . ' ' . __( 'Show spam comments', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments trash' ) . ' ' . __( 'Show trashed comments', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments search keyword' ) . ' ' . __( 'Search comments by author, email, URL, or content', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments details 123' ) . ' ' . __( 'Show comment details', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments approve 123' ) . ' ' . __( 'Approve a comment', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments reject 123' ) . ' ' . __( 'Move a comment back to moderation hold', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments spam 123' ) . ' ' . __( 'Mark a comment as spam', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments trash 123' ) . ' ' . __( 'Move a comment to trash', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments restore 123' ) . ' ' . __( 'Restore a trashed comment', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments unspam 123' ) . ' ' . __( 'Remove a comment from spam', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments delete 123' ) . ' ' . __( 'Permanently delete a comment after confirmation', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::code( '/comments reply 123 Thank you for your comment' ) . ' ' . __( 'Post an approved reply to a comment', 'telepilot' ),
-				Telepilot_Telegram_Response_Builder::italic( __( 'Tip: pagination uses the same `page:N` suffix as other WP Telepilot list commands.', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comments Commands', 'wp-telepilot' ) ) ),
+				Telepilot_Telegram_Response_Builder::code( '/comments pending' ) . ' ' . __( 'Show pending comments', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments approved' ) . ' ' . __( 'Show approved comments', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments spam' ) . ' ' . __( 'Show spam comments', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments trash' ) . ' ' . __( 'Show trashed comments', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments search keyword' ) . ' ' . __( 'Search comments by author, email, URL, or content', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments details 123' ) . ' ' . __( 'Show comment details', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments approve 123' ) . ' ' . __( 'Approve a comment', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments reject 123' ) . ' ' . __( 'Move a comment back to moderation hold', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments spam 123' ) . ' ' . __( 'Mark a comment as spam', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments trash 123' ) . ' ' . __( 'Move a comment to trash', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments restore 123' ) . ' ' . __( 'Restore a trashed comment', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments unspam 123' ) . ' ' . __( 'Remove a comment from spam', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments delete 123' ) . ' ' . __( 'Permanently delete a comment after confirmation', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::code( '/comments reply 123 Thank you for your comment' ) . ' ' . __( 'Post an approved reply to a comment', 'wp-telepilot' ),
+				Telepilot_Telegram_Response_Builder::italic( __( 'Tip: pagination uses the same `page:N` suffix as other WP Telepilot list commands.', 'wp-telepilot' ) ),
 			)
 		);
 	}
 
 	public function render_comment_details_message( $comment ) {
 		if ( ! ( $comment instanceof WP_Comment ) ) {
-			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comment Details', 'telepilot' ) ) ) . "\n\n" . __( 'Comment not found.', 'telepilot' );
+			return Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comment Details', 'wp-telepilot' ) ) ) . "\n\n" . __( 'Comment not found.', 'wp-telepilot' );
 		}
 
 		$post_title = get_the_title( $comment->comment_post_ID );
@@ -88,27 +88,27 @@ class Telepilot_Comments_Service {
 		$content    = wp_html_excerpt( $content, 900, '...' );
 
 		$lines   = array();
-		$lines[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comment Details', 'telepilot' ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'comments', __( 'Comment Details', 'wp-telepilot' ) ) );
 		$lines[] = '';
-		$lines[] = sprintf( __( 'Comment: [%d]', 'telepilot' ), $comment->comment_ID );
-		$lines[] = sprintf( __( 'Status: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $status ) );
-		$lines[] = sprintf( __( 'Author: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ) ) );
+		$lines[] = sprintf( __( 'Comment: [%d]', 'wp-telepilot' ), $comment->comment_ID );
+		$lines[] = sprintf( __( 'Status: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $status ) );
+		$lines[] = sprintf( __( 'Author: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'wp-telepilot' ) ) );
 
 		if ( '' !== (string) $comment->comment_author_email ) {
-			$lines[] = sprintf( __( 'Email: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $comment->comment_author_email ) );
+			$lines[] = sprintf( __( 'Email: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $comment->comment_author_email ) );
 		}
 
-		$lines[] = sprintf( __( 'Post: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'telepilot' ) ) );
-		$lines[] = sprintf( __( 'Date: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::escape( get_comment_date( 'Y-m-d H:i:s', $comment ) ) );
-		$lines[] = sprintf( __( 'Admin: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::link( __( 'Open comment in wp-admin', 'telepilot' ), $admin_url ) );
+		$lines[] = sprintf( __( 'Post: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'wp-telepilot' ) ) );
+		$lines[] = sprintf( __( 'Date: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::escape( get_comment_date( 'Y-m-d H:i:s', $comment ) ) );
+		$lines[] = sprintf( __( 'Admin: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::link( __( 'Open comment in wp-admin', 'wp-telepilot' ), $admin_url ) );
 
 		if ( $post_url ) {
-			$lines[] = sprintf( __( 'Post: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::link( __( 'Open post', 'telepilot' ), $post_url ) );
+			$lines[] = sprintf( __( 'Post: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::link( __( 'Open post', 'wp-telepilot' ), $post_url ) );
 		}
 
 		$lines[] = '';
-		$lines[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'details', __( 'Content', 'telepilot' ) ) );
-		$lines[] = Telepilot_Telegram_Response_Builder::escape( $content ? $content : __( 'No visible content.', 'telepilot' ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::bold( Telepilot_Telegram_Response_Builder::label( 'details', __( 'Content', 'wp-telepilot' ) ) );
+		$lines[] = Telepilot_Telegram_Response_Builder::escape( $content ? $content : __( 'No visible content.', 'wp-telepilot' ) );
 
 		return implode( "\n", $lines );
 	}
@@ -117,7 +117,7 @@ class Telepilot_Comments_Service {
 		$comment = get_comment( $comment_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'telepilot_comment_not_found', __( 'Comment not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_comment_not_found', __( 'Comment not found.', 'wp-telepilot' ) );
 		}
 
 		return $comment;
@@ -127,7 +127,7 @@ class Telepilot_Comments_Service {
 		$comment = get_comment( $comment_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'telepilot_comment_not_found', __( 'Comment not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_comment_not_found', __( 'Comment not found.', 'wp-telepilot' ) );
 		}
 
 		$before_status = wp_get_comment_status( $comment );
@@ -135,45 +135,45 @@ class Telepilot_Comments_Service {
 		switch ( $action ) {
 			case 'approve':
 				$result = wp_set_comment_status( $comment_id, 'approve' );
-				$label  = __( 'approved', 'telepilot' );
+				$label  = __( 'approved', 'wp-telepilot' );
 				break;
 
 			case 'reject':
 				$result = wp_set_comment_status( $comment_id, 'hold' );
-				$label  = __( 'moved to moderation hold', 'telepilot' );
+				$label  = __( 'moved to moderation hold', 'wp-telepilot' );
 				break;
 
 			case 'trash':
 				$result = wp_trash_comment( $comment_id );
-				$label  = __( 'trashed', 'telepilot' );
+				$label  = __( 'trashed', 'wp-telepilot' );
 				break;
 
 			case 'spam':
 				$result = wp_spam_comment( $comment_id );
-				$label  = __( 'marked as spam', 'telepilot' );
+				$label  = __( 'marked as spam', 'wp-telepilot' );
 				break;
 
 			case 'restore':
 				$result = wp_untrash_comment( $comment_id );
-				$label  = __( 'restored', 'telepilot' );
+				$label  = __( 'restored', 'wp-telepilot' );
 				break;
 
 			case 'unspam':
 				$result = wp_unspam_comment( $comment_id );
-				$label  = __( 'removed from spam', 'telepilot' );
+				$label  = __( 'removed from spam', 'wp-telepilot' );
 				break;
 
 			case 'delete':
 				$result = wp_delete_comment( $comment_id, true );
-				$label  = __( 'deleted', 'telepilot' );
+				$label  = __( 'deleted', 'wp-telepilot' );
 				break;
 
 			default:
-				return new WP_Error( 'telepilot_invalid_comment_action', __( 'Unsupported comment action.', 'telepilot' ) );
+				return new WP_Error( 'telepilot_invalid_comment_action', __( 'Unsupported comment action.', 'wp-telepilot' ) );
 		}
 
 		if ( false === $result || null === $result ) {
-			return new WP_Error( 'telepilot_comment_update_failed', __( 'WordPress could not update that comment.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_comment_update_failed', __( 'WordPress could not update that comment.', 'wp-telepilot' ) );
 		}
 
 		$this->bump_cache_version();
@@ -190,16 +190,16 @@ class Telepilot_Comments_Service {
 		$comment = get_comment( $comment_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'telepilot_comment_not_found', __( 'Comment not found.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_comment_not_found', __( 'Comment not found.', 'wp-telepilot' ) );
 		}
 
 		if ( ! ( $wp_user instanceof WP_User ) ) {
-			return new WP_Error( 'telepilot_reply_user_invalid', __( 'A valid WordPress user is required to reply.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_reply_user_invalid', __( 'A valid WordPress user is required to reply.', 'wp-telepilot' ) );
 		}
 
 		$content = trim( (string) wp_unslash( $content ) );
 		if ( '' === $content ) {
-			return new WP_Error( 'telepilot_reply_content_required', __( 'Reply content is required.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_reply_content_required', __( 'Reply content is required.', 'wp-telepilot' ) );
 		}
 
 		$reply_id = wp_insert_comment(
@@ -217,7 +217,7 @@ class Telepilot_Comments_Service {
 		);
 
 		if ( ! $reply_id ) {
-			return new WP_Error( 'telepilot_reply_insert_failed', __( 'WordPress could not create that reply.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_reply_insert_failed', __( 'WordPress could not create that reply.', 'wp-telepilot' ) );
 		}
 
 		$this->bump_cache_version();
@@ -227,7 +227,7 @@ class Telepilot_Comments_Service {
 			'reply'         => get_comment( $reply_id ),
 			'before_status' => wp_get_comment_status( $comment ),
 			'after_status'  => wp_get_comment_status( $comment ),
-			'label'         => __( 'reply posted', 'telepilot' ),
+			'label'         => __( 'reply posted', 'wp-telepilot' ),
 		);
 	}
 
@@ -242,53 +242,53 @@ class Telepilot_Comments_Service {
 			$status = wp_get_comment_status( $comment );
 			$row    = array(
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'details', sprintf( __( 'Details [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments details ' . (int) $comment->comment_ID,
 				),
 			);
 
 			if ( in_array( $status, array( 'hold', 'unapproved' ), true ) ) {
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'enable', sprintf( __( 'Approve [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'enable', sprintf( __( 'Approve [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments approve ' . (int) $comment->comment_ID,
 				);
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'comments', sprintf( __( 'Spam [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'comments', sprintf( __( 'Spam [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments spam ' . (int) $comment->comment_ID,
 				);
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments trash ' . (int) $comment->comment_ID,
 				);
 			} elseif ( 'approved' === $status ) {
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'disable', sprintf( __( 'Reject [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'disable', sprintf( __( 'Reject [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments reject ' . (int) $comment->comment_ID,
 				);
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'comments', sprintf( __( 'Spam [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'comments', sprintf( __( 'Spam [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments spam ' . (int) $comment->comment_ID,
 				);
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'trash', sprintf( __( 'Trash [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments trash ' . (int) $comment->comment_ID,
 				);
 			} elseif ( 'spam' === $status ) {
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Unspam [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Unspam [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments unspam ' . (int) $comment->comment_ID,
 				);
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments delete ' . (int) $comment->comment_ID,
 				);
 			} elseif ( 'trash' === $status ) {
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Restore [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'restore', sprintf( __( 'Restore [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments restore ' . (int) $comment->comment_ID,
 				);
 				$row[] = array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'telepilot' ), $comment->comment_ID ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'delete', sprintf( __( 'Delete [%d]', 'wp-telepilot' ), $comment->comment_ID ) ),
 					'callback_data' => '/comments delete ' . (int) $comment->comment_ID,
 				);
 			}
@@ -318,7 +318,7 @@ class Telepilot_Comments_Service {
 
 		return Telepilot_Telegram_Response_Builder::append_rows(
 			Telepilot_Telegram_Response_Builder::confirmation_keyboard(
-				sprintf( __( 'Confirm %1$s [%2$d]', 'telepilot' ), ucfirst( $action ), $comment_id ),
+				sprintf( __( 'Confirm %1$s [%2$d]', 'wp-telepilot' ), ucfirst( $action ), $comment_id ),
 				'tp:comment:' . $action . ':' . (int) $comment_id . ':' . $token,
 				'/comments pending'
 			),
@@ -389,14 +389,14 @@ class Telepilot_Comments_Service {
 
 		if ( $page > 1 ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'prev', __( 'Prev', 'wp-telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page - 1 ),
 			);
 		}
 
 		if ( $page < $total_pages ) {
 			$buttons[] = array(
-				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'telepilot' ) ),
+				'text'          => Telepilot_Telegram_Response_Builder::label( 'next', __( 'Next', 'wp-telepilot' ) ),
 				'callback_data' => $this->build_command( $subcommand, $search_term, $page + 1 ),
 			);
 		}
@@ -420,10 +420,10 @@ class Telepilot_Comments_Service {
 		return Telepilot_Telegram_Response_Builder::label(
 			'comments',
 			sprintf(
-				__( '[%1$d] %2$s on %3$s [%4$s]: %5$s', 'telepilot' ),
+				__( '[%1$d] %2$s on %3$s [%4$s]: %5$s', 'wp-telepilot' ),
 				$comment->comment_ID,
-				Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'telepilot' ) ),
-				Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::escape( $comment->comment_author ? $comment->comment_author : __( 'Anonymous', 'wp-telepilot' ) ),
+				Telepilot_Telegram_Response_Builder::escape( $post_title ? $post_title : __( 'Unknown Post', 'wp-telepilot' ) ),
 				Telepilot_Telegram_Response_Builder::escape( $status ),
 				Telepilot_Telegram_Response_Builder::escape( $excerpt )
 			)
@@ -435,14 +435,14 @@ class Telepilot_Comments_Service {
 
 		switch ( $status ) {
 			case 'approved':
-				return __( 'approved', 'telepilot' );
+				return __( 'approved', 'wp-telepilot' );
 			case 'hold':
 			case 'unapproved':
-				return __( 'pending', 'telepilot' );
+				return __( 'pending', 'wp-telepilot' );
 			case 'spam':
-				return __( 'spam', 'telepilot' );
+				return __( 'spam', 'wp-telepilot' );
 			case 'trash':
-				return __( 'trash', 'telepilot' );
+				return __( 'trash', 'wp-telepilot' );
 			default:
 				return sanitize_text_field( (string) $status );
 		}
@@ -477,11 +477,11 @@ class Telepilot_Comments_Service {
 		return array(
 			array(
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'menu', __( 'Menu', 'wp-telepilot' ) ),
 					'callback_data' => '/menu',
 				),
 				array(
-					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'telepilot' ) ),
+					'text'          => Telepilot_Telegram_Response_Builder::label( 'site', __( 'Site', 'wp-telepilot' ) ),
 					'callback_data' => '/site',
 				),
 			),

@@ -104,6 +104,14 @@ From `WordPress Admin -> WP Telepilot`, you can:
 - WordPress 6.6 or newer
 - PHP 8.0 or newer
 - HTTPS for webhook mode
+- Current beta line tested against WordPress 7.0.x as of July 16, 2026
+
+## Privacy And External Services
+
+- WP Telepilot connects to the Telegram Bot API only after an administrator configures a bot token.
+- The integration stores Telegram linkage metadata such as Telegram user IDs, chat IDs, usernames, link timestamps, and audit-log records tied to bot activity.
+- The plugin now registers WordPress privacy-policy helper text plus personal-data exporter and eraser callbacks for linked Telegram data.
+- Telegram is a third-party service. Review its privacy policy at `https://telegram.org/privacy` and terms at `https://telegram.org/tos`.
 
 ## Local planning docs
 

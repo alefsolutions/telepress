@@ -50,7 +50,7 @@ class Telepilot_REST_Webhook_Controller {
 			return new WP_REST_Response(
 				array(
 					'ok'      => true,
-					'message' => __( 'Webhook ignored because Telepilot is currently using polling mode.', 'telepilot' ),
+					'message' => __( 'Webhook ignored because Telepilot is currently using polling mode.', 'wp-telepilot' ),
 				),
 				202
 			);
@@ -77,7 +77,7 @@ class Telepilot_REST_Webhook_Controller {
 			return new WP_REST_Response(
 				array(
 					'ok'      => false,
-					'message' => __( 'Invalid webhook secret.', 'telepilot' ),
+					'message' => __( 'Invalid webhook secret.', 'wp-telepilot' ),
 				),
 				403
 			);
@@ -140,7 +140,7 @@ class Telepilot_REST_Webhook_Controller {
 			return new WP_REST_Response(
 				array(
 					'ok'      => false,
-					'message' => __( 'Invalid worker secret.', 'telepilot' ),
+					'message' => __( 'Invalid worker secret.', 'wp-telepilot' ),
 				),
 				403
 			);

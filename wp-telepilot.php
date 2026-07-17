@@ -9,7 +9,8 @@
  * Requires PHP: 8.0
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: telepilot
+ * Text Domain: wp-telepilot
+ * Domain Path: /languages
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,6 +45,7 @@ require_once TELEPILOT_PATH . 'includes/class-plugins-service.php';
 require_once TELEPILOT_PATH . 'includes/class-taxonomies-service.php';
 require_once TELEPILOT_PATH . 'includes/class-notification-service.php';
 require_once TELEPILOT_PATH . 'includes/class-notifications-command-service.php';
+require_once TELEPILOT_PATH . 'includes/class-privacy-service.php';
 require_once TELEPILOT_PATH . 'includes/class-site-settings-command-service.php';
 require_once TELEPILOT_PATH . 'includes/class-command-router.php';
 require_once TELEPILOT_PATH . 'includes/class-telegram-service.php';

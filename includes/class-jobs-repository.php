@@ -70,7 +70,7 @@ class Telepilot_Jobs_Repository {
 				return 'duplicate';
 			}
 
-			return new WP_Error( 'telepilot_job_enqueue_failed', $wpdb->last_error ? $wpdb->last_error : __( 'Unable to enqueue Telegram job.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_job_enqueue_failed', $wpdb->last_error ? $wpdb->last_error : __( 'Unable to enqueue Telegram job.', 'wp-telepilot' ) );
 		}
 
 		return (int) $wpdb->insert_id;

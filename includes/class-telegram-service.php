@@ -87,7 +87,7 @@ class Telepilot_Telegram_Service {
 		}
 
 		return Telepilot_Telegram_Response_Builder::success(
-			__( 'Update queued for background processing.', 'telepilot' ),
+			__( 'Update queued for background processing.', 'wp-telepilot' ),
 			array(
 				'command'       => ! empty( $command['name'] ) ? $command['name'] : '',
 				'skip_dispatch' => true,
@@ -194,24 +194,24 @@ class Telepilot_Telegram_Service {
 		$command_name = ! empty( $command['name'] ) ? (string) $command['name'] : '';
 
 		$messages = array(
-			'/site'       => __( '<b>Working on it...</b>' . "\n" . 'Building your site overview now.', 'telepilot' ),
-			'/dashboard'  => __( '<b>Working on it...</b>' . "\n" . 'Gathering dashboard data now.', 'telepilot' ),
-			'/comments'   => __( '<b>Working on it...</b>' . "\n" . 'Fetching comment moderation data now.', 'telepilot' ),
-			'/posts'      => __( '<b>Working on it...</b>' . "\n" . 'Loading posts now.', 'telepilot' ),
-			'/pages'      => __( '<b>Working on it...</b>' . "\n" . 'Loading pages now.', 'telepilot' ),
-			'/media'      => __( '<b>Working on it...</b>' . "\n" . 'Fetching media items now.', 'telepilot' ),
-			'/users'      => __( '<b>Working on it...</b>' . "\n" . 'Loading users now.', 'telepilot' ),
-			'/plugins'    => __( '<b>Working on it...</b>' . "\n" . 'Checking installed plugins now.', 'telepilot' ),
-			'/notifications' => __( '<b>Working on it...</b>' . "\n" . 'Loading notification controls now.', 'telepilot' ),
-			'/categories' => __( '<b>Working on it...</b>' . "\n" . 'Loading categories now.', 'telepilot' ),
-			'/tags'       => __( '<b>Working on it...</b>' . "\n" . 'Loading tags now.', 'telepilot' ),
+			'/site'       => __( '<b>Working on it...</b>' . "\n" . 'Building your site overview now.', 'wp-telepilot' ),
+			'/dashboard'  => __( '<b>Working on it...</b>' . "\n" . 'Gathering dashboard data now.', 'wp-telepilot' ),
+			'/comments'   => __( '<b>Working on it...</b>' . "\n" . 'Fetching comment moderation data now.', 'wp-telepilot' ),
+			'/posts'      => __( '<b>Working on it...</b>' . "\n" . 'Loading posts now.', 'wp-telepilot' ),
+			'/pages'      => __( '<b>Working on it...</b>' . "\n" . 'Loading pages now.', 'wp-telepilot' ),
+			'/media'      => __( '<b>Working on it...</b>' . "\n" . 'Fetching media items now.', 'wp-telepilot' ),
+			'/users'      => __( '<b>Working on it...</b>' . "\n" . 'Loading users now.', 'wp-telepilot' ),
+			'/plugins'    => __( '<b>Working on it...</b>' . "\n" . 'Checking installed plugins now.', 'wp-telepilot' ),
+			'/notifications' => __( '<b>Working on it...</b>' . "\n" . 'Loading notification controls now.', 'wp-telepilot' ),
+			'/categories' => __( '<b>Working on it...</b>' . "\n" . 'Loading categories now.', 'wp-telepilot' ),
+			'/tags'       => __( '<b>Working on it...</b>' . "\n" . 'Loading tags now.', 'wp-telepilot' ),
 		);
 
 		if ( isset( $messages[ $command_name ] ) ) {
 			return $messages[ $command_name ];
 		}
 
-		return __( '<b>Working on it...</b>' . "\n" . 'Processing your request now.', 'telepilot' );
+		return __( '<b>Working on it...</b>' . "\n" . 'Processing your request now.', 'wp-telepilot' );
 	}
 
 	private function schedule_job_processing() {
@@ -257,7 +257,7 @@ class Telepilot_Telegram_Service {
 			$payload = ! empty( $job['payload'] ) ? json_decode( $job['payload'], true ) : array();
 
 			if ( empty( $payload ) || ! is_array( $payload ) ) {
-				Telepilot_Jobs_Repository::mark_failed( (int) $job['id'], __( 'Queued payload could not be decoded.', 'telepilot' ) );
+				Telepilot_Jobs_Repository::mark_failed( (int) $job['id'], __( 'Queued payload could not be decoded.', 'wp-telepilot' ) );
 				$this->update_diagnostics(
 					array(
 						'last_background_job_at'     => time(),
@@ -335,7 +335,7 @@ class Telepilot_Telegram_Service {
 				'ok'          => false,
 				'status_code' => 0,
 				'duration_ms' => 0,
-				'message'     => __( 'Worker secret is missing.', 'telepilot' ),
+				'message'     => __( 'Worker secret is missing.', 'wp-telepilot' ),
 			)
 			: $this->perform_route_self_test(
 				$worker_url,
@@ -390,7 +390,7 @@ class Telepilot_Telegram_Service {
 			);
 
 			return Telepilot_Telegram_Response_Builder::success(
-				__( 'Duplicate Telegram update ignored.', 'telepilot' ),
+				__( 'Duplicate Telegram update ignored.', 'wp-telepilot' ),
 				array(
 					'command'       => '',
 					'skip_dispatch' => true,
@@ -405,7 +405,7 @@ class Telepilot_Telegram_Service {
 			$this->record_stale_update( $transport, $update );
 			$this->mark_update_processed( $update, $transport, 'stale' );
 			return Telepilot_Telegram_Response_Builder::error(
-				__( 'Skipped a stale Telegram update.', 'telepilot' ),
+				__( 'Skipped a stale Telegram update.', 'wp-telepilot' ),
 				array(
 					'code' => 'telepilot_stale_update',
 				)
@@ -419,9 +419,9 @@ class Telepilot_Telegram_Service {
 			$result = Telepilot_Telegram_Response_Builder::error_html(
 				Telepilot_Telegram_Response_Builder::join_blocks(
 					array(
-						Telepilot_Telegram_Response_Builder::bold( __( 'Chat Not Authorized', 'telepilot' ) ),
-						sprintf( __( 'Current chat ID: %s', 'telepilot' ), Telepilot_Telegram_Response_Builder::code( $chat_id ) ),
-						__( 'Add this chat ID to Allowed Chat IDs in WP Telepilot settings, then send /start again.', 'telepilot' ),
+						Telepilot_Telegram_Response_Builder::bold( __( 'Chat Not Authorized', 'wp-telepilot' ) ),
+						sprintf( __( 'Current chat ID: %s', 'wp-telepilot' ), Telepilot_Telegram_Response_Builder::code( $chat_id ) ),
+						__( 'Add this chat ID to Allowed Chat IDs in WP Telepilot settings, then send /start again.', 'wp-telepilot' ),
 					)
 				),
 				array(
@@ -483,7 +483,7 @@ class Telepilot_Telegram_Service {
 			}
 		} catch ( Throwable $throwable ) {
 			$result = Telepilot_Telegram_Response_Builder::error(
-				__( 'WP Telepilot hit an internal error while processing that command.', 'telepilot' ),
+				__( 'WP Telepilot hit an internal error while processing that command.', 'wp-telepilot' ),
 				array(
 					'command' => ! empty( $command['name'] ) ? $command['name'] : '',
 					'code'    => 'telepilot_command_exception',
@@ -540,11 +540,11 @@ class Telepilot_Telegram_Service {
 				array(
 					'last_poll_at'     => time(),
 					'last_poll_status' => 'locked',
-					'last_poll_error'  => __( 'A previous polling worker is still active.', 'telepilot' ),
+					'last_poll_error'  => __( 'A previous polling worker is still active.', 'wp-telepilot' ),
 				)
 			);
 
-			return new WP_Error( 'telepilot_poll_locked', __( 'WP Telepilot polling is already running.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_poll_locked', __( 'WP Telepilot polling is already running.', 'wp-telepilot' ) );
 		}
 
 		$this->acquire_poll_lock();
@@ -819,7 +819,7 @@ class Telepilot_Telegram_Service {
 		$secret   = isset( $settings['worker_secret'] ) ? (string) $settings['worker_secret'] : '';
 
 		if ( '' === $secret ) {
-			return new WP_Error( 'telepilot_missing_worker_secret', __( 'WP Telepilot worker secret is not configured.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_missing_worker_secret', __( 'WP Telepilot worker secret is not configured.', 'wp-telepilot' ) );
 		}
 
 		$response = wp_remote_post(
@@ -898,9 +898,9 @@ class Telepilot_Telegram_Service {
 		return Telepilot_Telegram_Response_Builder::error_html(
 			Telepilot_Telegram_Response_Builder::join_blocks(
 				array(
-					Telepilot_Telegram_Response_Builder::bold( __( 'Direct Uploads Disabled', 'telepilot' ) ),
-					__( 'Media is read-only in this release, so files sent to the bot are not imported into WordPress.', 'telepilot' ),
-					Telepilot_Telegram_Response_Builder::italic( __( 'Use wp-admin for uploads, then return to Telegram for list, search, details, and open actions.', 'telepilot' ) ),
+					Telepilot_Telegram_Response_Builder::bold( __( 'Direct Uploads Disabled', 'wp-telepilot' ) ),
+					__( 'Media is read-only in this release, so files sent to the bot are not imported into WordPress.', 'wp-telepilot' ),
+					Telepilot_Telegram_Response_Builder::italic( __( 'Use wp-admin for uploads, then return to Telegram for list, search, details, and open actions.', 'wp-telepilot' ) ),
 				)
 			),
 			array(
@@ -1076,7 +1076,7 @@ class Telepilot_Telegram_Service {
 		$body        = json_decode( wp_remote_retrieve_body( $response ), true );
 		$message     = is_array( $body ) && ! empty( $body['message'] )
 			? (string) $body['message']
-			: sprintf( __( 'HTTP %d response received.', 'telepilot' ), $status_code );
+			: sprintf( __( 'HTTP %d response received.', 'wp-telepilot' ), $status_code );
 
 		return array(
 			'ok'          => in_array( $status_code, $success_codes, true ),

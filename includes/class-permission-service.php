@@ -25,13 +25,13 @@ class Telepilot_Permission_Service {
 		return Telepilot_Telegram_Response_Builder::error_html(
 			Telepilot_Telegram_Response_Builder::join_blocks(
 				array(
-					Telepilot_Telegram_Response_Builder::bold( __( 'Link Required', 'telepilot' ) ),
-					__( 'This Telegram account is not linked to a WordPress user yet.', 'telepilot' ),
+					Telepilot_Telegram_Response_Builder::bold( __( 'Link Required', 'wp-telepilot' ) ),
+					__( 'This Telegram account is not linked to a WordPress user yet.', 'wp-telepilot' ),
 					sprintf(
-						__( 'Generate a one-time code from your WordPress profile, then send %s in this private chat.', 'telepilot' ),
+						__( 'Generate a one-time code from your WordPress profile, then send %s in this private chat.', 'wp-telepilot' ),
 						Telepilot_Telegram_Response_Builder::code( '/link CODE' )
 					),
-					Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use /chatid if you need to confirm which Telegram chat you are in.', 'telepilot' ) ),
+					Telepilot_Telegram_Response_Builder::italic( __( 'Tip: use /chatid if you need to confirm which Telegram chat you are in.', 'wp-telepilot' ) ),
 				)
 			),
 			array(
@@ -54,9 +54,9 @@ class Telepilot_Permission_Service {
 		return Telepilot_Telegram_Response_Builder::error_html(
 			Telepilot_Telegram_Response_Builder::join_blocks(
 				array(
-					Telepilot_Telegram_Response_Builder::bold( __( 'Permission Denied', 'telepilot' ) ),
-					__( 'Your linked WordPress account does not have permission to perform that action.', 'telepilot' ),
-					Telepilot_Telegram_Response_Builder::italic( __( 'Use /menu to see what is available to your account.', 'telepilot' ) ),
+					Telepilot_Telegram_Response_Builder::bold( __( 'Permission Denied', 'wp-telepilot' ) ),
+					__( 'Your linked WordPress account does not have permission to perform that action.', 'wp-telepilot' ),
+					Telepilot_Telegram_Response_Builder::italic( __( 'Use /menu to see what is available to your account.', 'wp-telepilot' ) ),
 				)
 			),
 			array(
@@ -74,9 +74,9 @@ class Telepilot_Permission_Service {
 		return Telepilot_Telegram_Response_Builder::error_html(
 			Telepilot_Telegram_Response_Builder::join_blocks(
 				array(
-					Telepilot_Telegram_Response_Builder::bold( __( 'Private Chat Required', 'telepilot' ) ),
-					__( 'This action is only available in a private chat with your WP Telepilot bot.', 'telepilot' ),
-					Telepilot_Telegram_Response_Builder::italic( __( 'Open the bot directly, then try the command again.', 'telepilot' ) ),
+					Telepilot_Telegram_Response_Builder::bold( __( 'Private Chat Required', 'wp-telepilot' ) ),
+					__( 'This action is only available in a private chat with your WP Telepilot bot.', 'wp-telepilot' ),
+					Telepilot_Telegram_Response_Builder::italic( __( 'Open the bot directly, then try the command again.', 'wp-telepilot' ) ),
 				)
 			),
 			array(

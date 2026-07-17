@@ -142,7 +142,7 @@ class Telepilot_Telegram_Client {
 
 	public function request( $method, $payload = array() ) {
 		if ( '' === $this->bot_token ) {
-			return new WP_Error( 'telepilot_missing_bot_token', __( 'Telepilot bot token is not configured.', 'telepilot' ) );
+			return new WP_Error( 'telepilot_missing_bot_token', __( 'Telepilot bot token is not configured.', 'wp-telepilot' ) );
 		}
 
 		$url      = sprintf( 'https://api.telegram.org/bot%s/%s', rawurlencode( $this->bot_token ), rawurlencode( $method ) );
@@ -162,7 +162,7 @@ class Telepilot_Telegram_Client {
 		$body   = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( $status < 200 || $status >= 300 || empty( $body['ok'] ) ) {
-			$message = isset( $body['description'] ) ? (string) $body['description'] : __( 'Telegram API request failed.', 'telepilot' );
+			$message = isset( $body['description'] ) ? (string) $body['description'] : __( 'Telegram API request failed.', 'wp-telepilot' );
 
 			return new WP_Error(
 				'telepilot_telegram_api_error',

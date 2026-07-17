@@ -125,6 +125,84 @@ class Telepilot_Audit_Log_Repository {
 		);
 	}
 
+	public static function find_personal_logs( $wp_user_id, $telegram_user_id = '', $chat_id = '', $page = 1, $limit = 50 ) {
+		global $wpdb;
+
+		$page       = max( 1, absint( $page ) );
+		$limit      = max( 1, absint( $limit ) );
+		$offset     = ( $page - 1 ) * $limit;
+		$conditions = array();
+		$args       = array();
+
+		if ( $wp_user_id ) {
+			$conditions[] = 'wp_user_id = %d';
+			$args[]       = absint( $wp_user_id );
+		}
+
+		if ( '' !== (string) $telegram_user_id ) {
+			$conditions[] = 'telegram_user_id = %s';
+			$args[]       = (string) $telegram_user_id;
+		}
+
+		if ( '' !== (string) $chat_id ) {
+			$conditions[] = 'chat_id = %s';
+			$args[]       = (string) $chat_id;
+		}
+
+		if ( empty( $conditions ) ) {
+			return array();
+		}
+
+		$args[] = $limit;
+		$args[] = $offset;
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM ' . self::table_name() . ' WHERE ' . implode( ' OR ', $conditions ) . ' ORDER BY created_at DESC LIMIT %d OFFSET %d',
+				$args
+			),
+			ARRAY_A
+		);
+	}
+
+	public static function anonymize_personal_logs( $wp_user_id, $telegram_user_id = '', $chat_id = '' ) {
+		global $wpdb;
+
+		$logs = self::find_personal_logs( $wp_user_id, $telegram_user_id, $chat_id, 1, 5000 );
+
+		if ( empty( $logs ) ) {
+			return 0;
+		}
+
+		$anonymized = 0;
+
+		foreach ( $logs as $log ) {
+			$updated = $wpdb->update(
+				self::table_name(),
+				array(
+					'wp_user_id'       => null,
+					'telegram_user_id' => null,
+					'chat_id'          => null,
+					'before_state'     => null,
+					'after_state'      => null,
+					'ip_address'       => null,
+					'context'          => null,
+				),
+				array(
+					'id' => (int) $log['id'],
+				),
+				array( '%d', '%s', '%s', '%s', '%s', '%s', '%s' ),
+				array( '%d' )
+			);
+
+			if ( false !== $updated ) {
+				++$anonymized;
+			}
+		}
+
+		return $anonymized;
+	}
+
 	private static function maybe_encode_json( $value ) {
 		if ( is_array( $value ) || is_object( $value ) ) {
 			return wp_json_encode( $value );
