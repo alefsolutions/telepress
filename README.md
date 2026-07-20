@@ -8,122 +8,140 @@
 
 ![WP Telepilot Header](assets/images/readme-header.png)
 
-WP Telepilot is a Telegram-first WordPress operations plugin. It lets authorized WordPress users link their Telegram account, inspect site state, and carry out short, structured operational tasks from chat without recreating all of `wp-admin` inside Telegram.
+WP Telepilot is a Telegram-first WordPress operations plugin for site owners, editors, and administrators who want a secure way to review site activity and perform structured actions from chat.
 
-## What WP Telepilot does
+It links an approved Telegram account to a WordPress user, shows capability-aware menus, and gives teams a practical command surface for day-to-day operations without trying to turn Telegram into a full replacement for `wp-admin`.
 
-- Securely links a Telegram user to a WordPress user with a short-lived one-time code.
-- Supports both Telegram webhook mode and polling fallback mode.
-- Provides transport diagnostics for webhook health, polling health, stale updates, send failures, and link attempts.
-- Gives a Telegram control surface for:
-  - site overview
-  - posts
-  - pages
-  - comments
-  - media
-  - users
-  - plugins
-  - categories
-  - tags
-- Shows context-aware Telegram menus and shortcut keyboards based on the linked WordPress user's actual capabilities.
-- Supports search and pagination for the main content and user modules.
-- Adds a secure browser editing bridge for long-form post content when Telegram chat is not the right editing surface.
-- Supports structured post, page, and user management actions including browser-based long-form post editing, role changes, password reset flows, and controlled deletes.
-- Keeps media management read-only in Telegram for this release, with list, search, details, and open-in-browser flows.
-- Supports richer taxonomy and plugin operations including term detail/edit flows and plugin update refresh from Telegram.
-- Supports Telegram-side notification controls and safe site-setting updates for core fields like title, tagline, admin email, timezone, and date/time format.
-- Supports Phase 7 hardening controls for log retention, stale-update handling, inbound rate limits, linking toggles, and uninstall cleanup behavior.
-- Supports fuller comment workflows including status queues, search, detail views, reply posting, and safer destructive moderation flows.
-- Formats Telegram responses for readability with clearer headings, semantic emojis, spacing, inline tips, and code-style command examples.
-- Uses confirmations for destructive actions and writes activity to the WP Telepilot audit log.
+## Links
 
-## Core commands
+- Product page: [alefdigitalsolutions.com/solutions/wp-telepilot](https://alefdigitalsolutions.com/solutions/wp-telepilot)
+- Releases: [GitHub Releases](https://github.com/alefsolutions/wp-telepilot/releases)
+- Command reference: [COMMANDS.md](COMMANDS.md)
+- Report bugs: [alefdigitalsolutions.com/solutions/wp-telepilot](https://alefdigitalsolutions.com/solutions/wp-telepilot)
 
-- `/start` starts onboarding.
-- `/menu` opens the WP Telepilot command hub.
-- `/site` shows the site overview and module shortcuts.
-- `/help` shows the available command surface.
-- `/users help` shows concrete user-management examples and syntax.
-- `/chatid` reveals the current Telegram chat ID.
-- `/link CODE` links Telegram to the current WordPress user.
-- `/unlink` removes the Telegram link.
+## Highlights
 
-## Command reference
+- Secure Telegram-to-WordPress account linking with short-lived one-time codes
+- Webhook mode with polling fallback for environments where direct Telegram delivery is unreliable
+- Role-aware menus and actions based on the linked WordPress user's actual capabilities
+- Command groups for posts, pages, comments, media, users, plugins, categories, tags, notifications, and site settings
+- Search, pagination, confirmations, and audit logging across the main management flows
+- Guided post creation with in-chat follow-up actions
+- Inline post category selection so users do not have to memorize category IDs
+- Category-driven post creation, including creating a new draft directly from a chosen category
+- Secure browser handoff for long-form post editing when chat is not the right editing surface
+- Transport diagnostics for webhook health, polling health, queue activity, stale updates, and delivery failures
+- Privacy integrations for WordPress personal-data export and erasure workflows
 
-- Full command documentation is available in [COMMANDS.md](COMMANDS.md).
-- A release-prep regression checklist is available in [QA-CHECKLIST.md](QA-CHECKLIST.md).
-- The reference is grouped by scope such as Core, Comments, Posts, Pages, Media, Users, Plugins, Categories, and Tags.
-- Each command entry includes syntax, an example, and expected behavior.
+## What You Can Do
 
-## Admin settings
+- Link a Telegram user to a WordPress user and restrict access with an allowed chat list
+- Open `/menu` for a capability-aware Telegram command hub
+- Review site status with `/site`
+- Create, review, update, publish, draft, trash, restore, and browser-edit posts
+- Review and manage pages, comments, users, plugins, categories, and tags
+- Manage Telegram notification preferences from chat
+- Update selected site settings from Telegram with controlled validation
+- Inspect transport health and operational diagnostics from the WordPress admin panel
 
-From `WordPress Admin -> WP Telepilot`, you can:
+## Installation
 
-- paste the Telegram bot token
+1. Install and activate WP Telepilot in WordPress.
+2. Create a Telegram bot with BotFather.
+3. Open `WordPress Admin -> WP Telepilot`.
+4. Paste the Telegram bot token into the settings page.
+5. Choose `Webhook` or `Polling Fallback`.
+6. Save the settings so WP Telepilot can sync transport details.
+7. Generate a one-time link code from the user's WordPress profile.
+8. In a private chat with the bot, send `/link CODE`.
+9. Use `/menu`, `/site`, or `/help` to begin.
+
+## Core Telegram Flows
+
+- `/start` shows onboarding and current chat details
+- `/menu` opens the command hub
+- `/help` shows the available command surface
+- `/chatid` shows the current Telegram chat ID
+- `/posts new` starts a guided draft-creation flow
+- `/posts categories POST_ID` opens the inline category picker for an existing post
+- `/categories post TERM_ID` starts a new post with that category preselected
+- `/notifications list` reviews Telegram alert preferences
+
+For the full command surface, syntax, and examples, see [COMMANDS.md](COMMANDS.md).
+
+## Transport Modes
+
+### Webhook
+
+Webhook mode is the preferred option for near-real-time Telegram replies. In this mode, Telegram sends updates directly to the WP Telepilot REST endpoint, and WP Telepilot validates the configured webhook secret before processing the request.
+
+### Polling Fallback
+
+Polling fallback is available for sites where webhooks are blocked, delayed, challenged by infrastructure, or otherwise unreliable. In this mode, WP Telepilot checks Telegram for updates through scheduled jobs instead of waiting for inbound webhook delivery.
+
+## Security And Reliability
+
+- Link codes are short-lived and stored server-side
+- Sensitive actions are restricted to private chats
+- Webhook requests validate the Telegram secret header
+- Duplicate Telegram updates are ignored
+- Stale Telegram updates are dropped
+- Background queue processing is used for slower operations
+- Polling uses a lock to prevent overlapping workers
+- Destructive actions require confirmation
+- Audit records are written for linking, moderation, content actions, and delivery events
+
+## Admin Panel
+
+From the WP Telepilot settings page, administrators can:
+
+- configure the bot token
 - choose webhook or polling transport
-- define the webhook secret
+- manage the webhook secret
 - restrict allowed chat IDs
 - enable or disable user linking
-- choose whether plugin data is preserved or deleted on uninstall
-- inspect transport diagnostics
-- inspect cron, queue, schema, and database readiness diagnostics
-- manually poll Telegram
+- review webhook and worker diagnostics
+- inspect queue, cron, schema, and database readiness
 - refresh webhook status
-- flush queued Telegram updates
+- poll Telegram manually when polling mode is enabled
+- process queued jobs
+- flush pending Telegram updates
 
-## Linking flow
+## Privacy And External Services
 
-1. Install and activate the plugin.
-2. Create a Telegram bot in BotFather.
-3. Paste the bot token into WP Telepilot settings.
-4. Save settings so WP Telepilot can register webhook details or switch to polling fallback.
-5. Open your WordPress profile and generate a one-time link code.
-6. Open a private chat with the bot and send `/link CODE`.
-7. Use `/menu` or `/site` to begin operating the site.
+WP Telepilot connects to the Telegram Bot API only after an administrator configures a bot token.
 
-## Security and reliability highlights
+When enabled, the plugin may send:
 
-- Link codes are short-lived and stored server-side as hashes.
-- Sensitive actions are restricted to private chats.
-- Webhook requests validate the Telegram secret header.
-- Duplicate Telegram updates are ignored.
-- Stale Telegram updates are dropped.
-- Polling uses a lock to avoid overlapping workers.
-- Uninstall behavior is operator-controlled so site owners can preserve data by default or opt into full cleanup.
-- Audit records are captured for linking, moderation, content actions, and Telegram delivery.
+- the configured bot token as part of authenticated Bot API requests
+- Telegram user and chat identifiers required to route responses
+- webhook registration details in webhook mode
+- response payloads generated from WordPress data that an authorized linked user explicitly requested
 
-## Usability highlights
+WordPress privacy-policy helper text, exporter callbacks, and eraser callbacks are included for linked Telegram data.
 
-- The bot uses richer formatting so site summaries and lists are easier to scan.
-- Menus and inline shortcuts are role-aware, so users only see the modules their linked WordPress account can actually access.
-- Module-specific help is available where syntax is not obvious.
-- Command discovery is guided through `/menu`, `/help`, `/site`, and inline keyboards instead of relying only on memorized commands.
+Telegram is a third-party service:
+
+- Terms of service: [telegram.org/tos](https://telegram.org/tos)
+- Privacy policy: [telegram.org/privacy](https://telegram.org/privacy)
 
 ## Requirements
 
 - WordPress 6.6 or newer
 - PHP 8.0 or newer
 - HTTPS for webhook mode
-- Current beta line tested against WordPress 7.0.x as of July 16, 2026
+- Current plugin line: `0.3.0-beta.4`
 
-## Privacy And External Services
+## Project Status
 
-- WP Telepilot connects to the Telegram Bot API only after an administrator configures a bot token.
-- The integration stores Telegram linkage metadata such as Telegram user IDs, chat IDs, usernames, link timestamps, and audit-log records tied to bot activity.
-- The plugin now registers WordPress privacy-policy helper text plus personal-data exporter and eraser callbacks for linked Telegram data.
-- Telegram is a third-party service. Review its privacy policy at `https://telegram.org/privacy` and terms at `https://telegram.org/tos`.
+WP Telepilot is currently in the `0.3.0-beta.4` release line. The focus of the current cycle is reliability, admin polish, secure transport behavior, and smoother operator workflows ahead of the first stable release.
 
-## Local planning docs
+## Product Direction
 
-- Product and planning notes are kept locally in `docs/`
-- The `docs/` tree is git-ignored on purpose
-
-## Current direction
-
-WP Telepilot is designed around one principle:
+WP Telepilot is designed around a simple principle:
 
 > Telegram is for awareness, decisions, and short actions. WordPress remains the place for long-form editing, visual design, and complex configuration.
 
 ## License
 
-WP Telepilot is licensed under the GNU General Public License, version 2 or later, which is the same license used by WordPress.
+WP Telepilot is licensed under the GNU General Public License, version 2 or later, the same license used by WordPress.
